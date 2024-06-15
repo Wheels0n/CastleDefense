@@ -1,8 +1,0 @@
-{
-	"SourceFiles": [
-		"D:\\Unreal\\CastleDefense\\Source\\CastleDefense\\CastleDefense.Build.cs",
-		"D:\\Unreal\\CastleDefense\\Source\\CastleDefense.Target.cs",
-		"D:\\Unreal\\CastleDefense\\Source\\CastleDefenseEditor.Target.cs"
-	],
-	"EngineVersion": "5.4.2"
-}
