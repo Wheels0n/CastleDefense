@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
+#include "Animation/Animinstance.h"
 #include "Wizard.generated.h"
 
 UCLASS()

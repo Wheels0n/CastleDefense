@@ -17,8 +17,12 @@ AWizard::AWizard()
 		m_pSkeletalMeshComponent->SetSkeletalMesh(wizardAsset.Object);
 		m_pSkeletalMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -95.0f));
 		m_pSkeletalMeshComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
-	}
 
+		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> wizardAnimBP
+		(TEXT("/ Script / Engine.AnimBlueprint'/Game/BattleWizardPolyart/Animations/WizardAnImBP.WizardAnImBP'"));
+		m_pSkeletalMeshComponent->SetAnimInstanceClass(wizardAnimBP.Object->GeneratedClass);
+	}
+	
 
 	m_pCamComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	check(m_pCamComponent != nullptr);
