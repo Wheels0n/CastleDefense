@@ -29,6 +29,8 @@ AWizard::AWizard()
 	m_pCamComponent->SetupAttachment(RootComponent);
 	m_pCamComponent->SetRelativeLocation(FVector(-250.0f, 0.0f, 0.0f));
 	m_pCamComponent->bUsePawnControlRotation = true;
+
+	Tags.Add(FName(TEXT("Wizard")));
 }
 
 
