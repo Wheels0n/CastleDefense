@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Wizard.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AWizard::AWizard()
@@ -30,6 +30,9 @@ AWizard::AWizard()
 	m_pCamComponent->SetRelativeLocation(FVector(-250.0f, 0.0f, 0.0f));
 	m_pCamComponent->bUsePawnControlRotation = true;
 
+	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
+	pCharacterMovement->MaxWalkSpeed = 150.0f;
+
 	Tags.Add(FName(TEXT("Wizard")));
 }
 
@@ -55,6 +58,10 @@ void AWizard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AWizard::StartJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AWizard::StopJump);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AWizard::StartSprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AWizard::StopSprint);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AWizard::StartAttack);
+	PlayerInputComponent->BindAction("Attack", IE_Released, this, &AWizard::StopAttack);
 
 	PlayerInputComponent->BindAxis("Move_Forward", this, &AWizard::MoveForward);
 	PlayerInputComponent->BindAxis("Move_Right", this, &AWizard::MoveRight);
@@ -72,6 +79,28 @@ void AWizard::MoveRight(float value)
 {
 	FVector dir = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
 	AddMovementInput(dir, value);
+}
+
+void AWizard::StartAttack()
+{
+	bAttack = true;
+}
+
+void AWizard::StopAttack()
+{
+	bAttack = false;
+}
+
+void AWizard::StartSprint()
+{
+	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
+	pCharacterMovement->MaxWalkSpeed = 500.0f;
+}
+
+void AWizard::StopSprint()
+{
+	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
+	pCharacterMovement->MaxWalkSpeed = 150.0f;
 }
 
 void AWizard::StartJump()

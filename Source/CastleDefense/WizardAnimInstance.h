@@ -18,6 +18,9 @@ class CASTLEDEFENSE_API UWizardAnimInstance : public UAnimInstance
 public: 
 	UWizardAnimInstance();
 
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* m_pAttackMontage;
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaTimeX) override;
 

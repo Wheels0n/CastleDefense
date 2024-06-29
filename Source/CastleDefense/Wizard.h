@@ -22,6 +22,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	bool IsAttacking() { return bAttack; };
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -35,14 +37,30 @@ private:
 	void MoveRight(float value);
 
 	UFUNCTION()
+	void StartAttack();
+
+	UFUNCTION()
+	void StopAttack();
+
+	UFUNCTION()
+	void StartSprint();
+
+	UFUNCTION()
+	void StopSprint();
+
+	UFUNCTION()
 	void StartJump();
 
 	UFUNCTION()
 	void StopJump();
+
 private: 
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USkeletalMeshComponent* m_pSkeletalMeshComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Camera)
 	UCameraComponent* m_pCamComponent;
+
+	UPROPERTY()
+	bool bAttack;
 };
