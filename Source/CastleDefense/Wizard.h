@@ -55,6 +55,7 @@ private:
 	void StopJump();
 
 private: 
+
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USkeletalMeshComponent* m_pSkeletalMeshComponent;
 

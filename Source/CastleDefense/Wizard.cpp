@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Wizard.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "Weapon.h"
 // Sets default values
 AWizard::AWizard()
 {
@@ -41,7 +42,10 @@ AWizard::AWizard()
 void AWizard::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	UWorld* pWorld = GetWorld();
+	AActor* pWeapon = pWorld->SpawnActor(AWeapon::StaticClass());
+	pWeapon->AttachToComponent(m_pSkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("WeaponSocket")));
 }
 
 // Called every frame
