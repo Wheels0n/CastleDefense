@@ -5,12 +5,20 @@ UWizardAnimInstance::UWizardAnimInstance()
 	:m_speed(0.0f), m_dir(0.0f), m_bInAir(false)
 {
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
-		attackMontageAsset(TEXT("/Script/Engine.AnimMontage'/Game/BattleWizardPolyart/Animations/WizardMontage.WizardMontage'"));
+		attackMontageAsset(TEXT("/Script/Engine.AnimMontage'/Game/BattleWizardPolyart/Animations/WizardAttackMontage.WizardAttackMontage'"));
 	if (attackMontageAsset.Succeeded())
 	{
 		m_pAttackMontage = attackMontageAsset.Object;
 	}
 	check(m_pAttackMontage != nullptr);
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		hitMontageAsset(TEXT("/Script/Engine.AnimMontage'/Game/BattleWizardPolyart/Animations/WizardHitMontage.WizardHitMontage'"));
+	if (hitMontageAsset.Succeeded())
+	{
+		m_pHitMontage = hitMontageAsset.Object;
+	}
+	check(m_pHitMontage != nullptr);
 }
 
 void UWizardAnimInstance::NativeInitializeAnimation()
@@ -35,8 +43,14 @@ void UWizardAnimInstance::NativeUpdateAnimation(float DeltaTimeX)
 			
 			m_dir = CalculateDirection(velocity, rotation);
 			m_speed = velocity.Size();
-
-			if (pCharacter->IsAttacking() && !Montage_IsPlaying(m_pAttackMontage))
+			
+			if (pCharacter->IsHit() && !Montage_IsPlaying(m_pHitMontage))
+			{
+				GEngine->AddOnScreenDebugMessage(-8, 1.0f, FColor::Yellow, TEXT("PlayHitMontage"));
+				Montage_Play(m_pHitMontage);
+				
+			}
+			else if (pCharacter->IsAttacking() && !Montage_IsPlaying(m_pAttackMontage))
 			{
 				Montage_Play(m_pAttackMontage);
 			}

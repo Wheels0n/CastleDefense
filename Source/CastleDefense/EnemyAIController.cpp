@@ -27,6 +27,7 @@ AEnemyAIController::AEnemyAIController()
 	//Set AIPerception
 	m_pSightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("AISightConfig"));
 	check(m_pSightConfig != nullptr);
+
 	m_pSightConfig->SightRadius = 3000.0f;
 	m_pSightConfig->LoseSightRadius = 3500.0f;
 	m_pSightConfig->PeripheralVisionAngleDegrees = 90.0f;
@@ -49,7 +50,7 @@ void AEnemyAIController::OnPossess(APawn* pPawn)
 		Blackboard->InitializeBlackboard(*m_pBB);
 		if (m_pBT)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("OnPossed"));
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("OnPossed"));
 			RunBehaviorTree(m_pBT);
 		}
 		
@@ -63,23 +64,26 @@ void AEnemyAIController::OnTargetInSight(AActor* pActor, FAIStimulus const Stimu
 
 	if (bWizard && bSensed)
 	{
-		GEngine->AddOnScreenDebugMessage(0, 5.0f, FColor::Green, TEXT("TargetFound"));
+		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Green, TEXT("TargetFound"));
 		m_hTimer.Invalidate();
 		Blackboard->SetValueAsBool(FName(TEXT("bInSight")), true);
 		Blackboard->SetValueAsObject(FName(TEXT("Wizard")), pActor);
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Green, TEXT("TargetMissing"));
+		
+		Blackboard->SetValueAsBool(FName(TEXT("bInMeleeRange")), false);
+		GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Green, TEXT("TargetMissing"));
 		UWorld* pWolrd = pActor->GetWorld();
-		FTimerManager& timerManager =  pWolrd->GetTimerManager();
+		FTimerManager& timerManager = pWolrd->GetTimerManager();
 		timerManager.SetTimer(m_hTimer, this, &AEnemyAIController::StartEnemyTimer, 4.0f);
+
 	}
 }
 
 void AEnemyAIController::StartEnemyTimer()
 {
-	GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Green, TEXT("SetTimer"));
+	GEngine->AddOnScreenDebugMessage(2,1.0f, FColor::Green, TEXT("SetTimer"));
 	Blackboard->SetValueAsBool(FName(TEXT("bInSight")), false);
 	Blackboard->SetValueAsObject(FName(TEXT("Wizard")), nullptr);
 }

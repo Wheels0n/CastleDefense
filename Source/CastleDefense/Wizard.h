@@ -23,6 +23,11 @@ protected:
 
 public:	
 	bool IsAttacking() { return bAttack; };
+	
+	bool IsHit() { return bGotHit; };
+	void ResetHit() { bGotHit = false; };
+
+	void DecreaseHp();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -64,4 +69,7 @@ private:
 
 	UPROPERTY()
 	bool bAttack;
+	bool bGotHit;
+	bool bDead;
+	int m_Hp;
 };

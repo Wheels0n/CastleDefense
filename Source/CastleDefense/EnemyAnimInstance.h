@@ -26,6 +26,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	float m_dir;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	bool m_bAttacking;
 private:
 	APawn* m_pOwner;
 };

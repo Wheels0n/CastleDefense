@@ -2,9 +2,9 @@
 
 
 #include "EnemyAnimInstance.h"
-
+#include "SkeletonEnemy.h"
 UEnemyAnimInstance::UEnemyAnimInstance()
-	:m_speed(0.0f), m_dir(0.0f)
+	:m_speed(0.0f), m_dir(0.0f), m_bAttacking(false)
 {
 }
 
@@ -18,16 +18,17 @@ void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaTimeX)
 {
 	UAnimInstance::NativeUpdateAnimation(DeltaTimeX);
 
-	if (m_pOwner && m_pOwner->IsA(ACharacter::StaticClass()))
+	if (m_pOwner && m_pOwner->IsA(ASkeletonEnemy::StaticClass()))
 	{
-		ACharacter* pCharacter = Cast<ACharacter>(m_pOwner);
-		if (pCharacter)
+		ASkeletonEnemy* pEnemy = Cast<ASkeletonEnemy>(m_pOwner);
+		if (pEnemy)
 		{
-			FVector  velocity = pCharacter->GetVelocity();
-			FRotator rotation = pCharacter->GetActorRotation();
+			FVector  velocity = pEnemy->GetVelocity();
+			FRotator rotation = pEnemy->GetActorRotation();
 
 			m_dir = CalculateDirection(velocity, rotation);
 			m_speed = velocity.Size();
+			m_bAttacking = pEnemy->IsAttacking();
 		}
 	}
 }

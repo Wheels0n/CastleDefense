@@ -21,6 +21,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* m_pAttackMontage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* m_pHitMontage;
+
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaTimeX) override;
 
@@ -32,6 +36,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	bool m_bInAir;
+
 private:
 
 private:

@@ -3,9 +3,11 @@
 #include "Wizard.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "SkeletonEnemy.h"
 #include "Weapon.h"
 // Sets default values
 AWizard::AWizard()
+	:m_Hp(100), bDead(false), bAttack(false), bGotHit(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -24,7 +26,6 @@ AWizard::AWizard()
 		m_pSkeletalMeshComponent->SetAnimInstanceClass(wizardAnimBP.Object->GeneratedClass);
 	}
 	
-
 	m_pCamComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	check(m_pCamComponent != nullptr);
 	m_pCamComponent->SetupAttachment(RootComponent);
@@ -46,13 +47,13 @@ void AWizard::BeginPlay()
 	UWorld* pWorld = GetWorld();
 	AActor* pWeapon = pWorld->SpawnActor(AWeapon::StaticClass());
 	pWeapon->AttachToComponent(m_pSkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("WeaponSocket")));
+
 }
 
 // Called every frame
 void AWizard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -87,7 +88,10 @@ void AWizard::MoveRight(float value)
 
 void AWizard::StartAttack()
 {
-	bAttack = true;
+	if (!bGotHit)
+	{
+		bAttack = true;
+	}
 }
 
 void AWizard::StopAttack()
@@ -115,5 +119,22 @@ void AWizard::StartJump()
 void AWizard::StopJump()
 {
 	bPressedJump = false;
+}
+
+void AWizard::DecreaseHp()
+{
+	{
+		FString HPStr = FString::FromInt(m_Hp);
+		GEngine->AddOnScreenDebugMessage(-5, 1.0f, FColor::Yellow, HPStr);
+		m_Hp -= 10;
+		if (m_Hp <= 0)
+		{
+			bDead = true;
+		}
+		else
+		{
+			bGotHit = true;
+		}
+	}
 }
 
