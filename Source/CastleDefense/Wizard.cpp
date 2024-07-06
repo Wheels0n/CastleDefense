@@ -7,7 +7,7 @@
 #include "Weapon.h"
 // Sets default values
 AWizard::AWizard()
-	:m_Hp(100), bDead(false), bAttack(false), bGotHit(false)
+	:m_Hp(100), m_bDead(false), m_bAttacking(false), m_bGotHit(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -88,15 +88,15 @@ void AWizard::MoveRight(float value)
 
 void AWizard::StartAttack()
 {
-	if (!bGotHit)
+	if (!m_bGotHit)
 	{
-		bAttack = true;
+		m_bAttacking = true;
 	}
 }
 
 void AWizard::StopAttack()
 {
-	bAttack = false;
+	m_bAttacking = false;
 }
 
 void AWizard::StartSprint()
@@ -121,6 +121,30 @@ void AWizard::StopJump()
 	bPressedJump = false;
 }
 
+void AWizard::CheckPlayerAttack()
+{
+	UWorld* pWorld = GetWorld();
+	FHitResult hitResult;
+	FVector start = GetActorLocation();
+	FVector end = start + GetActorForwardVector() * 500.f;
+	FCollisionObjectQueryParams queryObjParams;
+	queryObjParams.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
+	FCollisionQueryParams queryParams;
+	queryParams.AddIgnoredActor(this);
+	pWorld->LineTraceSingleByObjectType(hitResult, start, end, queryObjParams, queryParams);
+	DrawDebugLine(pWorld, start, end, FColor::Red, false, 5.0f);
+	if (hitResult.bBlockingHit)
+	{
+		AActor* pOther = hitResult.GetActor();
+		if (pOther->IsA(ASkeletonEnemy::StaticClass()))
+		{
+			GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Red, TEXT("EnemyGotHit"));
+			ASkeletonEnemy* pEnemy = Cast<ASkeletonEnemy>(pOther);
+			pEnemy->DecreaseHp();
+		}
+	}
+}
+
 void AWizard::DecreaseHp()
 {
 	{
@@ -129,11 +153,11 @@ void AWizard::DecreaseHp()
 		m_Hp -= 10;
 		if (m_Hp <= 0)
 		{
-			bDead = true;
+			m_bDead = true;
 		}
 		else
 		{
-			bGotHit = true;
+			m_bGotHit = true;
 		}
 	}
 }

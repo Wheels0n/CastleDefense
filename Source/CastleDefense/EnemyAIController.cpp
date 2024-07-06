@@ -42,6 +42,7 @@ AEnemyAIController::AEnemyAIController()
 	PerceptionComponent->ConfigureSense(*m_pSightConfig);
 }
 
+
 void AEnemyAIController::OnPossess(APawn* pPawn)
 {
 	Super::OnPossess(pPawn);
@@ -79,6 +80,11 @@ void AEnemyAIController::OnTargetInSight(AActor* pActor, FAIStimulus const Stimu
 		timerManager.SetTimer(m_hTimer, this, &AEnemyAIController::StartEnemyTimer, 4.0f);
 
 	}
+}
+
+void AEnemyAIController::SetGotHit(bool bGotHit)
+{
+	Blackboard->SetValueAsBool(FName(TEXT("bGotHit")), bGotHit);
 }
 
 void AEnemyAIController::StartEnemyTimer()

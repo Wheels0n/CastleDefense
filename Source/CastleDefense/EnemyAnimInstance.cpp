@@ -6,6 +6,13 @@
 UEnemyAnimInstance::UEnemyAnimInstance()
 	:m_speed(0.0f), m_dir(0.0f), m_bAttacking(false)
 {
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		hitMontageAsset(TEXT("/Script/Engine.AnimMontage'/Game/UndeadPack/SkeletonEnemy/Animations/EnemyHitMontage.EnemyHitMontage'"));
+	if (hitMontageAsset.Succeeded())
+	{
+		m_pHitMontage = hitMontageAsset.Object;
+	}
+	check(m_pHitMontage != nullptr);
 }
 
 void UEnemyAnimInstance::NativeInitializeAnimation()
@@ -29,6 +36,11 @@ void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaTimeX)
 			m_dir = CalculateDirection(velocity, rotation);
 			m_speed = velocity.Size();
 			m_bAttacking = pEnemy->IsAttacking();
+
+			if (pEnemy->IsHit() && !Montage_IsPlaying(m_pHitMontage))
+			{
+				Montage_Play(m_pHitMontage);
+			}
 		}
 	}
 }

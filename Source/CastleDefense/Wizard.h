@@ -22,12 +22,12 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	bool IsAttacking() { return bAttack; };
-	
-	bool IsHit() { return bGotHit; };
-	void ResetHit() { bGotHit = false; };
+	bool IsAttacking() { return m_bAttacking; };
+	bool IsHit() { return m_bGotHit; };
 
+	void CheckPlayerAttack();
 	void DecreaseHp();
+	void ResetHit() { m_bGotHit = false; };
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -67,9 +67,8 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Camera)
 	UCameraComponent* m_pCamComponent;
 
-	UPROPERTY()
-	bool bAttack;
-	bool bGotHit;
-	bool bDead;
+	bool m_bAttacking;
+	bool m_bGotHit;
+	bool m_bDead;
 	int m_Hp;
 };

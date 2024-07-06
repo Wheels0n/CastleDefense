@@ -7,7 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
 ASkeletonEnemy::ASkeletonEnemy()
-	: m_Hp(0), m_bAttacking(false), m_bHit(false)
+	: m_Hp(100), m_bAttacking(false), m_bAttackSucceded(false), m_bGotHit(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -38,17 +38,20 @@ ASkeletonEnemy::ASkeletonEnemy()
 
 void ASkeletonEnemy::StartAttack()
 {
-	m_bAttacking = true; 
+	if (!m_bGotHit)
+	{
+		m_bAttacking = true;
 
-	UCharacterMovementComponent* pMoveComp = GetCharacterMovement();
-	pMoveComp->MaxWalkSpeed = 0.0f;
-	m_pSphereComponent->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+		UCharacterMovementComponent* pMoveComp = GetCharacterMovement();
+		pMoveComp->MaxWalkSpeed = 0.0f;
+		m_pSphereComponent->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	}
 }
 
 void ASkeletonEnemy::StopAttack()
 {
 	m_bAttacking = false; 
-	m_bHit = false;	
+	m_bAttackSucceded = false;
 	m_pSphereComponent->SetCollisionProfileName(TEXT("NoCollision"));
 };
 
@@ -75,13 +78,13 @@ void ASkeletonEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ASkeletonEnemy::OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (m_bAttacking&& m_bHit==false)
+	if (m_bAttacking&& m_bAttackSucceded ==false)
 	{
 		GEngine->AddOnScreenDebugMessage(-6, 1.0f, FColor::Yellow, TEXT("OnOverlap"));
 		GEngine->AddOnScreenDebugMessage(-7, 1.0f, FColor::Yellow, TEXT("Attacking"));
 		if (OtherActor->IsA(AWizard::StaticClass()))
 		{
-			m_bHit = true;
+			m_bAttackSucceded = true;
 			AWizard* pWizard = Cast<AWizard>(OtherActor);
 			pWizard->DecreaseHp();
 		}
@@ -89,3 +92,37 @@ void ASkeletonEnemy::OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 	
 }
 
+void ASkeletonEnemy::SetHit()
+{
+	AController* pController = GetController();
+	AEnemyAIController* pAIController = Cast<AEnemyAIController>(pController);
+	pAIController->SetGotHit(m_bGotHit);
+}
+
+void ASkeletonEnemy::ResetHit()
+{
+	m_bGotHit = false;
+	SetHit();
+}
+
+void ASkeletonEnemy::DecreaseHp()
+{
+	if (!m_bGotHit)
+	{
+		m_bGotHit = true;
+		SetHit();
+	}
+	{
+		FString HPStr = FString::FromInt(m_Hp);
+		GEngine->AddOnScreenDebugMessage(-11, 1.0f, FColor::Yellow, HPStr);
+		m_Hp -= 10;
+		if (m_Hp <= 0)
+		{
+			m_bDead = true;
+		}
+		else
+		{
+			m_bGotHit = true;
+		}
+	}
+}

@@ -17,6 +17,10 @@ class CASTLEDEFENSE_API AEnemyAIController : public AAIController
 	GENERATED_BODY()
 public :
 	AEnemyAIController();
+
+	UFUNCTION()
+	void SetGotHit(bool bGotHit);
+
 	virtual void OnPossess(APawn* pPawn) override;
 private:
 	UFUNCTION()

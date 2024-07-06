@@ -15,6 +15,7 @@ class CASTLEDEFENSE_API ASkeletonEnemy : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ASkeletonEnemy();
+
 	UFUNCTION(BlueprintCallable)
 	void StartAttack();
 	
@@ -23,12 +24,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	bool IsAttacking() { return m_bAttacking; };
-
-	UFUNCTION(BlueprintCallable)
-	void SetHit() { m_bHit = true; };
-
-	UFUNCTION(BlueprintCallable)
-	bool IsHitAlready() { return m_bHit; };
+	bool IsHit() { return m_bGotHit; };
+	void SetHit();
+	void ResetHit();
+	void DecreaseHp();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -51,7 +50,9 @@ private:
 	USphereComponent* m_pSphereComponent;
 
 	bool m_bAttacking;
-	bool m_bHit;
+	bool m_bAttackSucceded;
+	bool m_bGotHit;
+	bool m_bDead;
 	int m_Hp;
 
 };

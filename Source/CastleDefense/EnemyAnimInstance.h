@@ -22,6 +22,9 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaTimeX) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* m_pHitMontage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	float m_speed;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")

@@ -3,6 +3,7 @@
 
 #include "NotifyHitEnd.h"
 #include "Wizard.h"
+#include "SkeletonEnemy.h"
 
 void UNotifyHitEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -12,6 +13,11 @@ void UNotifyHitEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* 
 	if (pOuter->IsA(AWizard::StaticClass()))
 	{
 		AWizard* pCharacter = Cast<AWizard>(pOuter);
+		pCharacter->ResetHit();
+	}
+	else if (pOuter->IsA(ASkeletonEnemy::StaticClass()))
+	{
+		ASkeletonEnemy* pCharacter = Cast<ASkeletonEnemy>(pOuter);
 		pCharacter->ResetHit();
 	}
 
