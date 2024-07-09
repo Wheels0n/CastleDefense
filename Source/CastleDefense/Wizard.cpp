@@ -3,11 +3,12 @@
 #include "Wizard.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "CastleDefenceGameMode.h"
 #include "SkeletonEnemy.h"
 #include "Weapon.h"
 // Sets default values
 AWizard::AWizard()
-	:m_Hp(100), m_bDead(false), m_bAttacking(false), m_bGotHit(false)
+	:m_Hp(100), m_bDead(false), m_bAttacking(false), m_bGotHit(false), m_bDestroySet(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -45,8 +46,24 @@ void AWizard::BeginPlay()
 	Super::BeginPlay();
 
 	UWorld* pWorld = GetWorld();
-	AActor* pWeapon = pWorld->SpawnActor(AWeapon::StaticClass());
-	pWeapon->AttachToComponent(m_pSkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("WeaponSocket")));
+	m_pWeapon = pWorld->SpawnActor(AWeapon::StaticClass());
+	m_pWeapon->AttachToComponent(m_pSkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("WeaponSocket")));
+
+}
+
+void AWizard::Destroyed()
+{
+
+	AController* pController = GetController();
+
+	Super::Destroyed();
+
+	UWorld* pWorld = GetWorld();
+	AGameModeBase* pGameMode = pWorld->GetAuthGameMode();
+	ACastleDefenceGameMode* pCastleDefenceGameMode = Cast<ACastleDefenceGameMode>(pGameMode);
+	const FOnPlayerDiedSignature& delegateRef = pCastleDefenceGameMode->GetOnPlayerDied();
+	delegateRef.Broadcast(pController);
+	UE_LOG(LogTemp, Display, TEXT("Destroyed"));
 
 }
 
@@ -160,5 +177,23 @@ void AWizard::DecreaseHp()
 			m_bGotHit = true;
 		}
 	}
+}
+
+void AWizard::DestroyTimer()
+{
+	m_bDestroySet = true;
+	AController* pController = GetController();
+	APlayerController* pPlayerController = Cast<APlayerController>(pController);
+	DisableInput(pPlayerController);
+
+	UWorld* pWolrd = GetWorld();
+	FTimerManager& timerManager = pWolrd->GetTimerManager();
+	timerManager.SetTimer(m_hTimer, this, &AWizard::DestroyPlayer, 4.0f);
+}
+
+void AWizard::DestroyPlayer()
+{
+	Destroy();
+	m_pWeapon->Destroy();
 }
 

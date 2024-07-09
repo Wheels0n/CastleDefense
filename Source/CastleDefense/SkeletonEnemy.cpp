@@ -4,10 +4,11 @@
 #include "SkeletonEnemy.h"
 #include "Wizard.h"
 #include "EnemyAIController.h"
+#include "CastleDefenseGameState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
 ASkeletonEnemy::ASkeletonEnemy()
-	: m_Hp(100), m_bAttacking(false), m_bAttackSucceded(false), m_bGotHit(false)
+	: m_Hp(100), m_bAttacking(false), m_bAttackSucceded(false), m_bGotHit(false), m_bDead(false), m_bDestroySet(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -60,6 +61,21 @@ void ASkeletonEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	m_pSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ASkeletonEnemy::OnHandOverlap);
+}
+
+void ASkeletonEnemy::Destroyed()
+{
+	AController* pController = GetController();
+
+	UWorld* pWorld = GetWorld();
+	AGameStateBase* pGameBase = pWorld->GetGameState();
+	if (pGameBase)
+	{
+		ACastleDefenseGameState* pCastleDefenseGameState = Cast<ACastleDefenseGameState>(pGameBase);
+		pCastleDefenseGameState->SetDelete(this);
+	}
+	Super::Destroyed();
+	UE_LOG(LogTemp, Display, TEXT("EnemyDestroyed"));
 }
 
 // Called every frame
@@ -115,7 +131,7 @@ void ASkeletonEnemy::DecreaseHp()
 	{
 		FString HPStr = FString::FromInt(m_Hp);
 		GEngine->AddOnScreenDebugMessage(-11, 1.0f, FColor::Yellow, HPStr);
-		m_Hp -= 10;
+		m_Hp -= 100;
 		if (m_Hp <= 0)
 		{
 			m_bDead = true;
@@ -125,4 +141,21 @@ void ASkeletonEnemy::DecreaseHp()
 			m_bGotHit = true;
 		}
 	}
+}
+
+void ASkeletonEnemy::DestroyTimer()
+{
+	m_bDestroySet = true;
+	AController* pController = GetController();
+	AEnemyAIController* pAIController = Cast<AEnemyAIController>(pController);
+	pAIController->StopBehaviorTree();
+
+	UWorld* pWolrd = GetWorld();
+	FTimerManager& timerManager = pWolrd->GetTimerManager();
+	timerManager.SetTimer(m_hTimer, this, &ASkeletonEnemy::DestroyEnemy, 4.0f);
+}
+
+void ASkeletonEnemy::DestroyEnemy()
+{
+	Destroy();
 }

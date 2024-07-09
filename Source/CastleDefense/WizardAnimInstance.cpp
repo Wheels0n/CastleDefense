@@ -2,7 +2,7 @@
 #include "WizardAnimInstance.h"
 #include "Wizard.h"
 UWizardAnimInstance::UWizardAnimInstance()
-	:m_speed(0.0f), m_dir(0.0f), m_bInAir(false)
+	:m_speed(0.0f), m_dir(0.0f), m_bInAir(false), m_bDead(false)
 {
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		attackMontageAsset(TEXT("/Script/Engine.AnimMontage'/Game/BattleWizardPolyart/Animations/WizardAttackMontage.WizardAttackMontage'"));
@@ -19,6 +19,7 @@ UWizardAnimInstance::UWizardAnimInstance()
 		m_pHitMontage = hitMontageAsset.Object;
 	}
 	check(m_pHitMontage != nullptr);
+
 }
 
 void UWizardAnimInstance::NativeInitializeAnimation()
@@ -44,6 +45,16 @@ void UWizardAnimInstance::NativeUpdateAnimation(float DeltaTimeX)
 			m_dir = CalculateDirection(velocity, rotation);
 			m_speed = velocity.Size();
 			
+			if (pCharacter->IsDead())
+			{
+				if (!pCharacter->IsDestroying())
+				{
+					GEngine->AddOnScreenDebugMessage(-11, 1.0f, FColor::Red, TEXT("PlayerDead"));
+					m_bDead = true;
+				}
+				return;
+			}
+
 			if (pCharacter->IsHit() && !Montage_IsPlaying(m_pHitMontage))
 			{
 				GEngine->AddOnScreenDebugMessage(-8, 1.0f, FColor::Yellow, TEXT("PlayHitMontage"));

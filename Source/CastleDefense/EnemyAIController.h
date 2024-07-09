@@ -21,6 +21,9 @@ public :
 	UFUNCTION()
 	void SetGotHit(bool bGotHit);
 
+	UFUNCTION()
+	void StopBehaviorTree();
+
 	virtual void OnPossess(APawn* pPawn) override;
 private:
 	UFUNCTION()

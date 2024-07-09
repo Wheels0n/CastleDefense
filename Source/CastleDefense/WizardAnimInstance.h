@@ -37,6 +37,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	bool m_bInAir;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	bool m_bDead;
+
 private:
 
 private:

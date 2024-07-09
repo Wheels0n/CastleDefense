@@ -32,6 +32,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	bool m_bAttacking;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	bool m_bDead;
 private:
 	APawn* m_pOwner;
 };

@@ -37,6 +37,15 @@ void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaTimeX)
 			m_speed = velocity.Size();
 			m_bAttacking = pEnemy->IsAttacking();
 
+			if (pEnemy->IsDead())
+			{
+				if (!pEnemy->IsDestroying())
+				{
+					m_bDead = true;
+				}
+				return;
+			}
+
 			if (pEnemy->IsHit() && !Montage_IsPlaying(m_pHitMontage))
 			{
 				Montage_Play(m_pHitMontage);

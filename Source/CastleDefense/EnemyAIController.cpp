@@ -5,6 +5,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "Wizard.h"
 AEnemyAIController::AEnemyAIController()
 {
 	static ConstructorHelpers::FObjectFinder<UBlackboardData> 
@@ -40,6 +41,7 @@ AEnemyAIController::AEnemyAIController()
 	check(PerceptionComponent!=nullptr);
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AEnemyAIController::OnTargetInSight);
 	PerceptionComponent->ConfigureSense(*m_pSightConfig);
+
 }
 
 
@@ -54,7 +56,6 @@ void AEnemyAIController::OnPossess(APawn* pPawn)
 			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("OnPossed"));
 			RunBehaviorTree(m_pBT);
 		}
-		
 	}
 }
 
@@ -62,8 +63,8 @@ void AEnemyAIController::OnTargetInSight(AActor* pActor, FAIStimulus const Stimu
 {
 	bool bWizard = pActor->ActorHasTag(TEXT("Wizard"));
 	bool bSensed = Stimulus.WasSuccessfullySensed();
-
-	if (bWizard && bSensed)
+	AWizard* pWizard = Cast<AWizard>(pActor);
+	if (bWizard &&!(pWizard->IsDead()) &&bSensed )
 	{
 		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Green, TEXT("TargetFound"));
 		m_hTimer.Invalidate();
@@ -85,6 +86,12 @@ void AEnemyAIController::OnTargetInSight(AActor* pActor, FAIStimulus const Stimu
 void AEnemyAIController::SetGotHit(bool bGotHit)
 {
 	Blackboard->SetValueAsBool(FName(TEXT("bGotHit")), bGotHit);
+}
+
+void AEnemyAIController::StopBehaviorTree()
+{
+	FString reasonStr = FString("EnemyDead");
+	BrainComponent->StopLogic(reasonStr);
 }
 
 void AEnemyAIController::StartEnemyTimer()

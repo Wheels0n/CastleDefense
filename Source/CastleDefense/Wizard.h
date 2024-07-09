@@ -20,15 +20,19 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 
 public:	
 	bool IsAttacking() { return m_bAttacking; };
+	bool IsDead() { return m_bDead; };
+	bool IsDestroying() { return m_bDestroySet; };
 	bool IsHit() { return m_bGotHit; };
 
 	void CheckPlayerAttack();
 	void DecreaseHp();
 	void ResetHit() { m_bGotHit = false; };
-
+	void DestroyTimer();
+	void DestroyPlayer();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -60,6 +64,8 @@ private:
 	void StopJump();
 
 private: 
+	UPROPERTY(VisibleDefaultsOnly, Category = Item)
+	AActor* m_pWeapon;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USkeletalMeshComponent* m_pSkeletalMeshComponent;
@@ -67,8 +73,11 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Camera)
 	UCameraComponent* m_pCamComponent;
 
+	FTimerHandle m_hTimer;
+
 	bool m_bAttacking;
 	bool m_bGotHit;
 	bool m_bDead;
+	bool m_bDestroySet;
 	int m_Hp;
 };

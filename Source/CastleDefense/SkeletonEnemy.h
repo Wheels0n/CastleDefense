@@ -24,14 +24,19 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	bool IsAttacking() { return m_bAttacking; };
+	bool IsDestroying() { return m_bDestroySet; };
+	bool IsDead() { return m_bDead; };
 	bool IsHit() { return m_bGotHit; };
 	void SetHit();
 	void ResetHit();
+	
 	void DecreaseHp();
+	void DestroyTimer();
+	void DestroyEnemy();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	virtual void Destroyed() override;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -49,10 +54,14 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Collision)
 	USphereComponent* m_pSphereComponent;
 
+	FTimerHandle m_hTimer;
+
 	bool m_bAttacking;
 	bool m_bAttackSucceded;
 	bool m_bGotHit;
 	bool m_bDead;
+	bool m_bDestroySet;
+
 	int m_Hp;
 
 };
