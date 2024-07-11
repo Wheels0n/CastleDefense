@@ -2,6 +2,7 @@
 
 
 #include "NotifyPlayerAttackHit.h"
+#include "Animation/AnimNotifies/AnimNotify.h"
 #include "Wizard.h"
 
 void UNotifyPlayerAttackHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
@@ -11,7 +12,11 @@ void UNotifyPlayerAttackHit::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 	if (pOuter->IsA(AWizard::StaticClass()))
 	{
 		AWizard* pCharacter = Cast<AWizard>(pOuter);
-		pCharacter->CheckPlayerAttack();
+		if (pCharacter)
+		{
+			pCharacter->CheckPlayerAttack();
+		}
+		
 	}
 
 }

@@ -1,5 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "WizardAnimInstance.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/Character.h"
+#include "Animation/AnimInstance.h"
 #include "Wizard.h"
 UWizardAnimInstance::UWizardAnimInstance()
 	:m_speed(0.0f), m_dir(0.0f), m_bInAir(false), m_bDead(false)
@@ -49,7 +52,7 @@ void UWizardAnimInstance::NativeUpdateAnimation(float DeltaTimeX)
 			{
 				if (!pCharacter->IsDestroying())
 				{
-					GEngine->AddOnScreenDebugMessage(-11, 1.0f, FColor::Red, TEXT("PlayerDead"));
+					UE_LOG(LogTemp, Display, TEXT("PlayerDead"));
 					m_bDead = true;
 				}
 				return;
@@ -57,7 +60,7 @@ void UWizardAnimInstance::NativeUpdateAnimation(float DeltaTimeX)
 
 			if (pCharacter->IsHit() && !Montage_IsPlaying(m_pHitMontage))
 			{
-				GEngine->AddOnScreenDebugMessage(-8, 1.0f, FColor::Yellow, TEXT("PlayHitMontage"));
+				UE_LOG(LogTemp, Display, TEXT("PlayHitMontage"));
 				Montage_Play(m_pHitMontage);
 				
 			}

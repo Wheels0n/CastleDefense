@@ -1,9 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Wizard.h"
+#include "Blueprint/UserWidget.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CastleDefenceGameMode.h"
+#include "GameFramework/Character.h"
+#include "Camera/CameraComponent.h"
+#include "Animation/Animinstance.h"
+#include "WizardWidget.h"
 #include "SkeletonEnemy.h"
 #include "Weapon.h"
 // Sets default values
@@ -36,6 +41,14 @@ AWizard::AWizard()
 	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
 	pCharacterMovement->MaxWalkSpeed = 150.0f;
 
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> wizardUIAsset(TEXT("UserWidget'/Game/WizardUI.WizardUI_C'"));
+	if (wizardUIAsset.Succeeded())
+	{
+		UE_LOG(LogTemp, Display, TEXT("GotBluePrintUIClass"));
+		WidgetClass = wizardUIAsset.Class;
+	}
+
 	Tags.Add(FName(TEXT("Wizard")));
 }
 
@@ -49,6 +62,15 @@ void AWizard::BeginPlay()
 	m_pWeapon = pWorld->SpawnActor(AWeapon::StaticClass());
 	m_pWeapon->AttachToComponent(m_pSkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("WeaponSocket")));
 
+
+	if (WidgetClass!=nullptr)
+	{
+		AController* pController = GetController();
+		APlayerController* pPlayerController = Cast<APlayerController>(pController);
+		m_pWidget = CreateWidget<UWizardWidget>(pPlayerController, WidgetClass);
+		m_pWidget->SetHp(m_Hp);
+		m_pWidget->AddToViewport();
+	}
 }
 
 void AWizard::Destroyed()
@@ -59,11 +81,15 @@ void AWizard::Destroyed()
 	Super::Destroyed();
 
 	UWorld* pWorld = GetWorld();
-	AGameModeBase* pGameMode = pWorld->GetAuthGameMode();
-	ACastleDefenceGameMode* pCastleDefenceGameMode = Cast<ACastleDefenceGameMode>(pGameMode);
-	const FOnPlayerDiedSignature& delegateRef = pCastleDefenceGameMode->GetOnPlayerDied();
-	delegateRef.Broadcast(pController);
-	UE_LOG(LogTemp, Display, TEXT("Destroyed"));
+	if (pWorld)
+	{
+		AGameModeBase* pGameMode = pWorld->GetAuthGameMode();
+		ACastleDefenceGameMode* pCastleDefenceGameMode = Cast<ACastleDefenceGameMode>(pGameMode);
+		const FOnPlayerDiedSignature& delegateRef = pCastleDefenceGameMode->GetOnPlayerDied();
+		delegateRef.Broadcast(pController);
+		UE_LOG(LogTemp, Display, TEXT("Destroyed"));
+	}
+	
 
 }
 
@@ -141,33 +167,42 @@ void AWizard::StopJump()
 void AWizard::CheckPlayerAttack()
 {
 	UWorld* pWorld = GetWorld();
-	FHitResult hitResult;
-	FVector start = GetActorLocation();
-	FVector end = start + GetActorForwardVector() * 500.f;
-	FCollisionObjectQueryParams queryObjParams;
-	queryObjParams.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
-	FCollisionQueryParams queryParams;
-	queryParams.AddIgnoredActor(this);
-	pWorld->LineTraceSingleByObjectType(hitResult, start, end, queryObjParams, queryParams);
-	DrawDebugLine(pWorld, start, end, FColor::Red, false, 5.0f);
-	if (hitResult.bBlockingHit)
+	if (pWorld)
 	{
-		AActor* pOther = hitResult.GetActor();
-		if (pOther->IsA(ASkeletonEnemy::StaticClass()))
+		FHitResult hitResult;
+		FVector start = GetActorLocation();
+		FVector end = start + GetActorForwardVector() * 500.f;
+		FCollisionObjectQueryParams queryObjParams;
+		queryObjParams.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
+		FCollisionQueryParams queryParams;
+		queryParams.AddIgnoredActor(this);
+		pWorld->LineTraceSingleByObjectType(hitResult, start, end, queryObjParams, queryParams);
+		DrawDebugLine(pWorld, start, end, FColor::Red, false, 5.0f);
+		if (hitResult.bBlockingHit)
 		{
-			GEngine->AddOnScreenDebugMessage(-10, 1.0f, FColor::Red, TEXT("EnemyGotHit"));
-			ASkeletonEnemy* pEnemy = Cast<ASkeletonEnemy>(pOther);
-			pEnemy->DecreaseHp();
+			AActor* pOther = hitResult.GetActor();
+			if (pOther&&pOther->IsA(ASkeletonEnemy::StaticClass()))
+			{
+				UE_LOG(LogTemp, Display, TEXT("EnemyGotHit"));
+				ASkeletonEnemy* pEnemy = Cast<ASkeletonEnemy>(pOther);
+				pEnemy->DecreaseHp();
+			}
 		}
 	}
-}
+	}
+	
 
 void AWizard::DecreaseHp()
 {
 	{
 		FString HPStr = FString::FromInt(m_Hp);
-		GEngine->AddOnScreenDebugMessage(-5, 1.0f, FColor::Yellow, HPStr);
+		UE_LOG(LogTemp, Display, TEXT("%s"), *HPStr);
 		m_Hp -= 10;
+		if (m_pWidget)
+		{
+			m_pWidget->SetHp(m_Hp);
+		}
+		
 		if (m_Hp <= 0)
 		{
 			m_bDead = true;
@@ -186,9 +221,12 @@ void AWizard::DestroyTimer()
 	APlayerController* pPlayerController = Cast<APlayerController>(pController);
 	DisableInput(pPlayerController);
 
-	UWorld* pWolrd = GetWorld();
-	FTimerManager& timerManager = pWolrd->GetTimerManager();
-	timerManager.SetTimer(m_hTimer, this, &AWizard::DestroyPlayer, 4.0f);
+	UWorld* pWorld = GetWorld();
+	if (pWorld)
+	{
+		FTimerManager& timerManager = pWorld->GetTimerManager();
+		timerManager.SetTimer(m_hTimer, this, &AWizard::DestroyPlayer, 4.0f);
+	}
 }
 
 void AWizard::DestroyPlayer()

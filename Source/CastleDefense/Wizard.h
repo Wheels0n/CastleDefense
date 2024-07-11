@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Camera/CameraComponent.h"
-#include "Animation/Animinstance.h"
 #include "Wizard.generated.h"
+
+class UWizardWidget;
+class UCameraComponent;
 
 UCLASS()
 class CASTLEDEFENSE_API AWizard : public ACharacter
@@ -64,6 +65,12 @@ private:
 	void StopJump();
 
 private: 
+	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
+	TSubclassOf<UWizardWidget> WidgetClass;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
+	UWizardWidget* m_pWidget;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = Item)
 	AActor* m_pWeapon;
 

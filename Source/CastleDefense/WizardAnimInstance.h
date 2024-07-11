@@ -3,11 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PawnMovementComponent.h"
-#include "GameFramework/Character.h"
-#include "Animation/AnimInstance.h"
 #include "WizardAnimInstance.generated.h"
 
+class APawn;
+class UAnimMontage;
 /**
  * 
  */

@@ -8,13 +8,16 @@ void UNotifyStopAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 {
 	Super::Notify(MeshComp, Animation, EventReference);
 
-	GEngine->AddOnScreenDebugMessage(-3, 1.0f, FColor::Green, TEXT("Notified"));
+	UE_LOG(LogTemp, Display, TEXT("UNotifyStopAttack::Notify"));
 	UObject* pOuter = MeshComp->GetOuter();
 	if (pOuter->IsA(ASkeletonEnemy::StaticClass()))
 	{
-		GEngine->AddOnScreenDebugMessage(-4, 1.0f, FColor::Green, TEXT("StopAttack"));
+		UE_LOG(LogTemp, Display, TEXT("StopAttack"));
 		ASkeletonEnemy* pEnemy = Cast<ASkeletonEnemy>(pOuter);
-		pEnemy->StopAttack();
+		if (pEnemy)
+		{
+		  pEnemy->StopAttack();
+		}
 	}
 	
 

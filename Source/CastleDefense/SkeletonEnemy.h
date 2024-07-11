@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SphereComponent.h"
 #include "GameFramework/Character.h"
 #include "SkeletonEnemy.generated.h"
 
+class UEnemyWidget;
+class UWidgetComponent;
+class USphereComponent;
 UCLASS()
 class CASTLEDEFENSE_API ASkeletonEnemy : public ACharacter
 {
@@ -48,11 +50,19 @@ private:
 	UFUNCTION()
 	void OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 private:
+	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
+	TSubclassOf<UEnemyWidget> WidgetClass;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
+	UWidgetComponent* m_pWidgetComponent;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	USkeletalMeshComponent* m_pSkeletalMeshComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Collision)
 	USphereComponent* m_pSphereComponent;
+
+	UEnemyWidget* m_pWidget;
 
 	FTimerHandle m_hTimer;
 

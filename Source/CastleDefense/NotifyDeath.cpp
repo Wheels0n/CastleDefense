@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NotifyDeath.h"
+#include "Animation/AnimNotifies/AnimNotify.h"
 #include "Wizard.h"
 #include "SkeletonEnemy.h"
 void UNotifyDeath::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
@@ -9,13 +10,19 @@ void UNotifyDeath::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* A
 	UObject* pOuter = MeshComp->GetOuter();
 	if (pOuter->IsA(AWizard::StaticClass()))
 	{
-		GEngine->AddOnScreenDebugMessage(-12, 1.0f, FColor::Yellow, TEXT("NotifyDeath"));
+		UE_LOG(LogTemp, Display, TEXT("NotifyDeath"));
 		AWizard* pCharacter = Cast<AWizard>(pOuter);
-		pCharacter->DestroyTimer();
+		if (pCharacter)
+		{
+			pCharacter->DestroyTimer();
+		}
 	}
 	else if (pOuter->IsA(ASkeletonEnemy::StaticClass()))
 	{
 		ASkeletonEnemy* pCharacter = Cast<ASkeletonEnemy>(pOuter);
-		pCharacter->DestroyTimer();
+		if (pCharacter)
+		{
+			pCharacter->DestroyTimer();
+		}
 	}
 }

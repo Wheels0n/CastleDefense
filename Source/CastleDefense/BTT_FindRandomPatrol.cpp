@@ -57,8 +57,7 @@ EBTNodeResult::Type UBTT_FindRandomPatrol::ExecuteTask(UBehaviorTreeComponent& o
 	}
 
 	pBBComp->SetValueAsVector(FName(TEXT("PatrolLocation")), bFound?dest.Location:location);
-	GEngine->AddOnScreenDebugMessage(3, 1.0f, FColor::Green, TEXT("SetNewPatrolLocation"));
-
+	UE_LOG(LogTemp, Display, TEXT("SetNewPatrolLocation"));
 
 	return EBTNodeResult::Succeeded;
 }

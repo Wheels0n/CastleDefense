@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "Perception/AISenseConfig_Sight.h"
 #include "EnemyAIController.generated.h"
 
 /**
  * 
  */
+class UAISenseConfig_Sight;
 
 UCLASS()
 class CASTLEDEFENSE_API AEnemyAIController : public AAIController

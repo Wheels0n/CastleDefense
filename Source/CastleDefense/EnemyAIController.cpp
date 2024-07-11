@@ -4,6 +4,7 @@
 #include "EnemyAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "Wizard.h"
 AEnemyAIController::AEnemyAIController()
@@ -53,7 +54,7 @@ void AEnemyAIController::OnPossess(APawn* pPawn)
 		Blackboard->InitializeBlackboard(*m_pBB);
 		if (m_pBT)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Green, TEXT("OnPossed"));
+			UE_LOG(LogTemp, Display, TEXT("OnPossed"));
 			RunBehaviorTree(m_pBT);
 		}
 	}
@@ -66,7 +67,7 @@ void AEnemyAIController::OnTargetInSight(AActor* pActor, FAIStimulus const Stimu
 	AWizard* pWizard = Cast<AWizard>(pActor);
 	if (bWizard &&!(pWizard->IsDead()) &&bSensed )
 	{
-		GEngine->AddOnScreenDebugMessage(0, 1.0f, FColor::Green, TEXT("TargetFound"));
+		UE_LOG(LogTemp, Display, TEXT("TargetFound"));
 		m_hTimer.Invalidate();
 		Blackboard->SetValueAsBool(FName(TEXT("bInSight")), true);
 		Blackboard->SetValueAsObject(FName(TEXT("Wizard")), pActor);
@@ -75,10 +76,14 @@ void AEnemyAIController::OnTargetInSight(AActor* pActor, FAIStimulus const Stimu
 	{
 		
 		Blackboard->SetValueAsBool(FName(TEXT("bInMeleeRange")), false);
-		GEngine->AddOnScreenDebugMessage(1, 1.0f, FColor::Green, TEXT("TargetMissing"));
-		UWorld* pWolrd = pActor->GetWorld();
-		FTimerManager& timerManager = pWolrd->GetTimerManager();
-		timerManager.SetTimer(m_hTimer, this, &AEnemyAIController::StartEnemyTimer, 4.0f);
+		UE_LOG(LogTemp, Display, TEXT("TargetMissing"));
+		UWorld* pWorld = pActor->GetWorld();
+		if (pWorld)
+		{
+			FTimerManager& timerManager = pWorld->GetTimerManager();
+			timerManager.SetTimer(m_hTimer, this, &AEnemyAIController::StartEnemyTimer, 4.0f);
+		}
+	
 
 	}
 }
@@ -96,7 +101,7 @@ void AEnemyAIController::StopBehaviorTree()
 
 void AEnemyAIController::StartEnemyTimer()
 {
-	GEngine->AddOnScreenDebugMessage(2,1.0f, FColor::Green, TEXT("SetTimer"));
+	UE_LOG(LogTemp, Display, TEXT("SetTimer"));
 	Blackboard->SetValueAsBool(FName(TEXT("bInSight")), false);
 	Blackboard->SetValueAsObject(FName(TEXT("Wizard")), nullptr);
 }

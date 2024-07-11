@@ -2,9 +2,12 @@
 
 
 #include "EnemyAnimInstance.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/Character.h"
+#include "Animation/AnimInstance.h"
 #include "SkeletonEnemy.h"
 UEnemyAnimInstance::UEnemyAnimInstance()
-	:m_speed(0.0f), m_dir(0.0f), m_bAttacking(false)
+	:m_speed(0.0f), m_dir(0.0f), m_bAttacking(false), m_pOwner(nullptr)
 {
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		hitMontageAsset(TEXT("/Script/Engine.AnimMontage'/Game/UndeadPack/SkeletonEnemy/Animations/EnemyHitMontage.EnemyHitMontage'"));

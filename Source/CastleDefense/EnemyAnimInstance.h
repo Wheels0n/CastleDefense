@@ -3,14 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PawnMovementComponent.h"
-#include "GameFramework/Character.h"
-#include "Animation/AnimInstance.h"
 #include "EnemyAnimInstance.generated.h"
 
 /**
  * 
  */
+
+class APawn;
+class UAnimMontage;
+
 UCLASS()
 class CASTLEDEFENSE_API UEnemyAnimInstance : public UAnimInstance
 {

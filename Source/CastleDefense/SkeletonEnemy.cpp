@@ -2,13 +2,18 @@
 
 
 #include "SkeletonEnemy.h"
+#include "Blueprint/UserWidget.h"
 #include "Wizard.h"
 #include "EnemyAIController.h"
 #include "CastleDefenseGameState.h"
+#include "Components/SphereComponent.h"
+#include "EnemyWidget.h" 
+#include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
 ASkeletonEnemy::ASkeletonEnemy()
-	: m_Hp(100), m_bAttacking(false), m_bAttackSucceded(false), m_bGotHit(false), m_bDead(false), m_bDestroySet(false)
+	: m_Hp(100), m_bAttacking(false), m_bAttackSucceded(false), m_bGotHit(false), m_bDead(false), m_bDestroySet(false),
+	m_pWidget(nullptr), m_pWidgetComponent(nullptr)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -34,6 +39,16 @@ ASkeletonEnemy::ASkeletonEnemy()
 	static ConstructorHelpers::FClassFinder<AEnemyAIController> enemyAIController(TEXT("/Script/CoreUObject.Class'/Script/CastleDefense.EnemyAIController'"));
 	AIControllerClass = enemyAIController.Class;
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+
+	m_pWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("EnemyHPBar"));
+	m_pWidgetComponent->SetupAttachment(m_pSkeletalMeshComponent);
+	static ConstructorHelpers::FClassFinder<UUserWidget> enemyUIAsset(TEXT("UserWidget'/Game/EnemyUI.EnemyUI_C'"));
+	if (enemyUIAsset.Succeeded())
+	{
+		UE_LOG(LogTemp, Display, TEXT("GotBluePrintUIClass"));
+		WidgetClass = enemyUIAsset.Class;
+	}
 }
 
 
@@ -61,6 +76,24 @@ void ASkeletonEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	m_pSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ASkeletonEnemy::OnHandOverlap);
+
+	if (WidgetClass != nullptr)
+	{
+		UWorld* pWorld = GetWorld();
+		if (pWorld!=nullptr)
+		{	
+			m_pWidget = CreateWidget<UEnemyWidget>(pWorld, WidgetClass);
+			if (m_pWidget != nullptr)
+			{
+				m_pWidget->SetHp(m_Hp);
+				m_pWidgetComponent->SetWidget(m_pWidget);
+				m_pWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+				m_pWidgetComponent->SetTwoSided(true);
+				m_pWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f));
+			}
+		}
+		
+	}
 }
 
 void ASkeletonEnemy::Destroyed()
@@ -83,7 +116,8 @@ void ASkeletonEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	FString bAttackignStr = FString::FromInt((int32)m_bAttacking);
-	GEngine->AddOnScreenDebugMessage(-2, 1.0f, FColor::Green, bAttackignStr);
+	UE_LOG(LogTemp, Display, TEXT("%s"), *bAttackignStr);
+
 }
 
 // Called to bind functionality to input
@@ -96,8 +130,8 @@ void ASkeletonEnemy::OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 {
 	if (m_bAttacking&& m_bAttackSucceded ==false)
 	{
-		GEngine->AddOnScreenDebugMessage(-6, 1.0f, FColor::Yellow, TEXT("OnOverlap"));
-		GEngine->AddOnScreenDebugMessage(-7, 1.0f, FColor::Yellow, TEXT("Attacking"));
+		UE_LOG(LogTemp, Display, TEXT("OnOverlap"));
+		UE_LOG(LogTemp, Display, TEXT("Attacking"));
 		if (OtherActor->IsA(AWizard::StaticClass()))
 		{
 			m_bAttackSucceded = true;
@@ -128,10 +162,16 @@ void ASkeletonEnemy::DecreaseHp()
 		m_bGotHit = true;
 		SetHit();
 	}
+
 	{
 		FString HPStr = FString::FromInt(m_Hp);
-		GEngine->AddOnScreenDebugMessage(-11, 1.0f, FColor::Yellow, HPStr);
-		m_Hp -= 100;
+		UE_LOG(LogTemp, Display, TEXT("%s"), *HPStr);
+		m_Hp -= 50;
+		if (m_pWidget != nullptr)
+		{
+			m_pWidget->SetHp(m_Hp);
+		}
+		
 		if (m_Hp <= 0)
 		{
 			m_bDead = true;
@@ -151,8 +191,12 @@ void ASkeletonEnemy::DestroyTimer()
 	pAIController->StopBehaviorTree();
 
 	UWorld* pWolrd = GetWorld();
-	FTimerManager& timerManager = pWolrd->GetTimerManager();
-	timerManager.SetTimer(m_hTimer, this, &ASkeletonEnemy::DestroyEnemy, 4.0f);
+	if (pWolrd)
+	{
+		FTimerManager& timerManager = pWolrd->GetTimerManager();
+		timerManager.SetTimer(m_hTimer, this, &ASkeletonEnemy::DestroyEnemy, 4.0f);
+	}
+	
 }
 
 void ASkeletonEnemy::DestroyEnemy()
