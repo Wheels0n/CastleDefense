@@ -15,7 +15,7 @@ int main()
 		return -1;
 	}
 
-	SOCKET  hSocket = socket(PF_INET, SOCK_STREAM, 0);
+	SOCKET  hSocket = socket(PF_INET, SOCK_DGRAM, 0);
 	if (hSocket == INVALID_SOCKET)
 	{
 		std::cout << "socket() Failed" << std::endl;
@@ -28,33 +28,27 @@ int main()
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(777);
 	InetPton(AF_INET, L"127.0.0.1", &serverAddr.sin_addr);
+	int toLen = sizeof(sockaddr_in);
 
-
-	result = connect(hSocket, (sockaddr*)&serverAddr, sizeof(sockaddr_in));
-	if (result == SOCKET_ERROR)
-	{
-		std::cout << "connect failed" << std::endl;
-		return -1;
-	}
-
-	std::cout << "Connected!" << std::endl;
-	
 	while (true)
 	{
 		char sendBuf[100] = "Hello?";
 		char recvBuf[100];
-		result = send(hSocket, sendBuf, 100, 0);
+		sendto(hSocket, sendBuf, 100, 0, (sockaddr*)&serverAddr, toLen);
 		if (result == SOCKET_ERROR)
 		{
 			int error = WSAGetLastError();
 			std::cout << "Recv ErrorCode: " << error << std::endl;
 		}
-		result = recv(hSocket, recvBuf, 100, 0);
+
+		result = recvfrom(hSocket, recvBuf, 100, 0, nullptr, nullptr);
 		if (result == SOCKET_ERROR)
 		{
 			int error = WSAGetLastError();
 			std::cout << "Recv ErrorCode: " << error << std::endl;
 		}
+
+		std::cout << recvBuf << std::endl;
 		std::cout << "Received : " << sizeof(recvBuf) << std::endl;
 	}
 
