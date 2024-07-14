@@ -41,7 +41,21 @@ int main()
 	
 	while (true)
 	{
-
+		char sendBuf[100] = "Hello?";
+		char recvBuf[100];
+		result = send(hSocket, sendBuf, 100, 0);
+		if (result == SOCKET_ERROR)
+		{
+			int error = WSAGetLastError();
+			std::cout << "Recv ErrorCode: " << error << std::endl;
+		}
+		result = recv(hSocket, recvBuf, 100, 0);
+		if (result == SOCKET_ERROR)
+		{
+			int error = WSAGetLastError();
+			std::cout << "Recv ErrorCode: " << error << std::endl;
+		}
+		std::cout << "Received : " << sizeof(recvBuf) << std::endl;
 	}
 
 	result = closesocket(hSocket);

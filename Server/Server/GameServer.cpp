@@ -4,6 +4,7 @@
 #include <WinSock2.h>
 #include <ws2tcpip.h>
 #include <iostream>
+#include <string.h>
 
 int main()
 {
@@ -43,21 +44,39 @@ int main()
 		return -1;
 	}
 
+	
+	sockaddr_in clientAddr;
+	memset(&clientAddr, 0, sizeof(sockaddr_in));
+	int addrLen = sizeof(sockaddr_in);
+	SOCKET clientSocket = accept(hListendSocket, (sockaddr*)&clientAddr, &addrLen);
+	if (clientSocket == INVALID_SOCKET)
+	{
+		int error = WSAGetLastError();
+		std::cout << "Accept ErrorCode: " << error << std::endl;
+		return -1;
+	}
+
+	std::cout << "Connected!" << std::endl;
+
 	while (true)
 	{
-		sockaddr_in clientAddr;
-		memset(&clientAddr, 0, sizeof(sockaddr_in));
-		int addrLen = sizeof(sockaddr_in);
-		SOCKET clientSocket = accept(hListendSocket, (sockaddr*)&clientAddr, &addrLen);
-		if (clientSocket == INVALID_SOCKET)
+		char sendBuf[100]="received";
+		char recvBuf[100];
+		result = recv(clientSocket, recvBuf, 100, 0);
+		if (result == SOCKET_ERROR)
 		{
 			int error = WSAGetLastError();
-			std::cout << "Accept ErrorCode: " << error << std::endl;
-			return -1;
+			std::cout << "Recv ErrorCode: " << error << std::endl;
 		}
 
-		std::cout << "Connected!" << std::endl;
-
+		std::cout << recvBuf << std::endl;
+		std::cout << "Received : "<<sizeof(recvBuf) << std::endl;
+		send(clientSocket, sendBuf, 100, 0);
+		if (result == SOCKET_ERROR)
+		{
+			int error = WSAGetLastError();
+			std::cout << "Recv ErrorCode: " << error << std::endl;
+		}
 	}
 
 	result = closesocket(hListendSocket);
