@@ -55,71 +55,95 @@ int main()
 	int addrLen = sizeof(sockaddr_in);
 	SOCKET clientSocket;
 
-	while (true)
-	{
 
-		clientSocket = accept(listenSocket, (sockaddr*)&clientAddr, &addrLen);
-		if (clientSocket == INVALID_SOCKET)
+	fd_set reads,cpyReads, writes, cpyWrites;
+	FD_ZERO(&reads);
+	FD_ZERO(&writes);
+
+	FD_SET(listenSocket, &reads);
+
+	result = select(0, &reads, nullptr, nullptr, nullptr);
+	if (result==0)
+	{
+		std::cout << "select to accept failed()" << std::endl;
+		int error = WSAGetLastError();
+		if (error != WSAEWOULDBLOCK)
 		{
-			int error = WSAGetLastError();
-			if (error != WSAEWOULDBLOCK)
-			{
-				std::cout << "Accept ErrorCode: " << error << std::endl;
-				return -1;
-			}
+			std::cout << "ErrorCode: " << error << std::endl;
 		}
-		else
-		{
-			std::cout << "Client Connected" << std::endl;
-			break;
-		}
+		return -1;
+	}
+
+	clientSocket = accept(listenSocket, (sockaddr*)&clientAddr, &addrLen);
+	if (clientSocket == INVALID_SOCKET)
+	{
+		int error = WSAGetLastError();
+		std::cout << "Accept ErrorCode: " << error << std::endl;
+		return -1;
 		
 	}
 		
-	
+	std::cout << "Client Connected" << std::endl;
 
+	FD_SET(clientSocket, &reads);
+	FD_SET(clientSocket, &writes);
+	cpyReads = reads;
+	cpyWrites = writes;
 	while (true)
 	{
+		reads = cpyReads;
+		writes = cpyWrites;
+
 		char sendBuf[100] = "received";
 		char recvBuf[100];
 
-		while (true)
+		result = select(0, &reads, nullptr, nullptr, nullptr);
+
+		if(result)
 		{
 			result = recv(clientSocket, recvBuf, 100, 0);
 			if (result == SOCKET_ERROR)
 			{
 				int error = WSAGetLastError();
-				if (error != WSAEWOULDBLOCK)
-				{
-					std::cout << "Recv ErrorCode: " << error << std::endl;
-					return -1;
-				}
+				std::cout << "Recv ErrorCode: " << error << std::endl;
+				return -1;
+				
 			}
 			else
 			{
 				std::cout << recvBuf << std::endl;
 				std::cout << "Received : " << sizeof(recvBuf) << std::endl;
 
-				while (true)
+				result = select(0, nullptr, &writes, nullptr, nullptr);
+				if(result)
 				{
 					result = send(clientSocket, sendBuf, 100, 0);
 					if (result == SOCKET_ERROR)
 					{
 						int error = WSAGetLastError();
-						if (error != WSAEWOULDBLOCK)
-						{
-							std::cout << "Send ErrorCode: " << error << std::endl;
-							return -1;
-						}
-						else
-						{
-							std::cout << "Send Data" << std::endl;
-							break;
-						}
+						std::cout << "Send ErrorCode: " << error << std::endl;
+						return -1;
 					}
+					
+					std::cout << "Send Data" << std::endl;
+					
+				}
+				else
+				{
+					std::cout << "select to write failed()" << std::endl;
+					int error = WSAGetLastError();
+					std::cout << "ErrorCode: " << error << std::endl;
+					return -1;
 				}
 			}
 
+		}
+		else
+		{
+			std::cout << "select to read failed()" << std::endl;
+			int error = WSAGetLastError();
+			std::cout << "ErrorCode: " << error << std::endl;
+			return -1;
 		}
 	}
 	
