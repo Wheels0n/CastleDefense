@@ -5,7 +5,6 @@
 #include <ws2tcpip.h>
 #include <iostream>
 #include <string.h>
-
 int main()
 {
 	WSADATA wsaData;
@@ -16,13 +15,20 @@ int main()
 		return -1;
 	}
 
-	SOCKET  hSocket = socket(PF_INET, SOCK_DGRAM, 0);
-	if (hSocket == INVALID_SOCKET)
+	SOCKET  listenSocket = socket(PF_INET, SOCK_STREAM, 0);
+	if (listenSocket == INVALID_SOCKET)
 	{
 		std::cout << "socket() Failed" << std::endl;
 		return -1;
 	}
 
+	u_long mode = 1;
+	result = ioctlsocket(listenSocket, FIONBIO, &mode);
+	if (result == SOCKET_ERROR)
+	{
+		std::cout << "ioctlsocket() Failed" << std::endl;
+		return -1;
+	}
 
 	sockaddr_in serverAddr;
 	memset(&serverAddr, 0, sizeof(sockaddr_in));
@@ -30,40 +36,94 @@ int main()
 	serverAddr.sin_port = htons(777);
 	InetPton(AF_INET, L"127.0.0.1", &serverAddr.sin_addr);
 
-	result = bind(hSocket, (sockaddr*)&serverAddr, sizeof(sockaddr_in));
+	result = bind(listenSocket, (sockaddr*)&serverAddr, sizeof(sockaddr_in));
 	if (result == SOCKET_ERROR)
 	{
 		std::cout << "bind() Failed" << std::endl;
 		return -1;
 	}
 
-	while (true)
+	result = listen(listenSocket, 5);
+	if (result == SOCKET_ERROR)
 	{
-		sockaddr_in clientAddr;
-		memset(&clientAddr, 0, sizeof(sockaddr_in));
-		char sendBuf[100]="received";
-		char recvBuf[100];
-		int fromLen = sizeof(sockaddr_in);
-		result = recvfrom(hSocket, recvBuf, 100, 0, (sockaddr*)&clientAddr, &fromLen);
-		if (result == SOCKET_ERROR)
-		{
-			int error = WSAGetLastError();
-			std::cout << "Recv ErrorCode: " << error << std::endl;
-		}
-
-		std::cout << recvBuf << std::endl;
-		std::cout << "Received : "<<sizeof(recvBuf) << std::endl;
-
-
-		sendto(hSocket, sendBuf, 100, 0, (sockaddr*)&clientAddr, fromLen);
-		if (result == SOCKET_ERROR)
-		{
-			int error = WSAGetLastError();
-			std::cout << "Recv ErrorCode: " << error << std::endl;
-		}
+		std::cout << "listen() Failed" << std::endl;
+		return -1;
 	}
 
-	result = closesocket(hSocket);
+	sockaddr_in clientAddr;
+	memset(&clientAddr, 0, sizeof(sockaddr_in));
+	int addrLen = sizeof(sockaddr_in);
+	SOCKET clientSocket;
+
+	while (true)
+	{
+
+		clientSocket = accept(listenSocket, (sockaddr*)&clientAddr, &addrLen);
+		if (clientSocket == INVALID_SOCKET)
+		{
+			int error = WSAGetLastError();
+			if (error != WSAEWOULDBLOCK)
+			{
+				std::cout << "Accept ErrorCode: " << error << std::endl;
+				return -1;
+			}
+		}
+		else
+		{
+			std::cout << "Client Connected" << std::endl;
+			break;
+		}
+		
+	}
+		
+	
+
+	while (true)
+	{
+		char sendBuf[100] = "received";
+		char recvBuf[100];
+
+		while (true)
+		{
+			result = recv(clientSocket, recvBuf, 100, 0);
+			if (result == SOCKET_ERROR)
+			{
+				int error = WSAGetLastError();
+				if (error != WSAEWOULDBLOCK)
+				{
+					std::cout << "Recv ErrorCode: " << error << std::endl;
+					return -1;
+				}
+			}
+			else
+			{
+				std::cout << recvBuf << std::endl;
+				std::cout << "Received : " << sizeof(recvBuf) << std::endl;
+
+				while (true)
+				{
+					result = send(clientSocket, sendBuf, 100, 0);
+					if (result == SOCKET_ERROR)
+					{
+						int error = WSAGetLastError();
+						if (error != WSAEWOULDBLOCK)
+						{
+							std::cout << "Send ErrorCode: " << error << std::endl;
+							return -1;
+						}
+						else
+						{
+							std::cout << "Send Data" << std::endl;
+							break;
+						}
+					}
+				}
+			}
+
+		}
+	}
+	
+	result = closesocket(listenSocket);
 	if (result == SOCKET_ERROR)
 	{
 		std::cout << "closesocket() Failed" << std::endl;
@@ -71,5 +131,5 @@ int main()
 
 	WSACleanup();
 	std::cout << "Exiting..." << std::endl;
-
+	return 0;
 }
