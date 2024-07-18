@@ -1,14 +1,27 @@
 #include <thread>
 #include <iostream>
-void PrintHello()
+#include <atomic>
+std::atomic<int> g_val=0;
+void Increase()
 {
-	std::cout << "Hello" << std::endl;
+	for (int i = 0; i < 50; ++i)
+	{
+		g_val++;
+	}
+}
+void Decrease()
+{
+	for (int i = 0; i < 50; ++i)
+	{
+		g_val--;
+	}
 }
 int main()
 {
-	std::thread t(PrintHello);
+	std::thread t1(Increase);
+	std::thread t2(Decrease);
+	t1.join();
+	t2.join();
 
-	std::thread::id threadID = t.get_id();
-
-	t.join();
+	std::cout << g_val;
 }
