@@ -1,27 +1,25 @@
 #include <thread>
 #include <iostream>
 #include <atomic>
-std::atomic<int> g_val=0;
-void Increase()
+#include <mutex>
+#include <vector>
+std::mutex g_m;
+std::vector<int> g_vec;
+void Push()
 {
 	for (int i = 0; i < 50; ++i)
 	{
-		g_val++;
+		std::lock_guard<std::mutex> lockGuard(g_m);
+		g_vec.push_back(i);
 	}
 }
-void Decrease()
-{
-	for (int i = 0; i < 50; ++i)
-	{
-		g_val--;
-	}
-}
+
 int main()
 {
-	std::thread t1(Increase);
-	std::thread t2(Decrease);
+	std::thread t1(Push);
+	std::thread t2(Push);
 	t1.join();
 	t2.join();
 
-	std::cout << g_val;
+	std::cout << g_vec.size();
 }
