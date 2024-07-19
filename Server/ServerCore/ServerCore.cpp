@@ -3,23 +3,31 @@
 #include <atomic>
 #include <mutex>
 #include <vector>
-std::mutex g_m;
-std::vector<int> g_vec;
-void Push()
+std::mutex g_m1;
+std::mutex g_m2;
+void Lock1()
 {
-	for (int i = 0; i < 50; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
-		std::lock_guard<std::mutex> lockGuard(g_m);
-		g_vec.push_back(i);
+		std::lock_guard<std::mutex> lockGuard1(g_m1);
+		std::lock_guard<std::mutex> lockGuard2(g_m2);
+	}
+}
+void Lock2()
+{	
+	for (int i = 0; i < 1; ++i)
+	{	
+		std::lock_guard<std::mutex> lockGuard2(g_m2);
+		std::lock_guard<std::mutex> lockGuard1(g_m1);
 	}
 }
 
+
 int main()
 {
-	std::thread t1(Push);
-	std::thread t2(Push);
+	std::thread t1(Lock1);
+	std::thread t2(Lock2);
 	t1.join();
 	t2.join();
 
-	std::cout << g_vec.size();
 }
