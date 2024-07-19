@@ -2,32 +2,54 @@
 #include <iostream>
 #include <atomic>
 #include <mutex>
-#include <vector>
-std::mutex g_m1;
-std::mutex g_m2;
-void Lock1()
+
+class SpinLock
 {
-	for (int i = 0; i < 1; ++i)
+public:
+	void lock()
+	{	
+		bool expected = false;
+		bool desired = true;
+		while (m_bLocked.compare_exchange_strong(expected, desired)==false)
+		{
+			expected = false;
+		}
+	}
+	void unlock()
 	{
-		std::lock_guard<std::mutex> lockGuard1(g_m1);
-		std::lock_guard<std::mutex> lockGuard2(g_m2);
+		m_bLocked = false;
+	}
+
+private:
+	std::atomic<bool> m_bLocked=false;
+};
+
+SpinLock g_lock;
+int n = 0;
+void Add()
+{
+	for (int i = 0; i < 100000; ++i)
+	{
+		std::lock_guard<SpinLock> spinLock(g_lock);
+		n++;
 	}
 }
-void Lock2()
+void Sub()
 {	
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 100000; ++i)
 	{	
-		std::lock_guard<std::mutex> lockGuard2(g_m2);
-		std::lock_guard<std::mutex> lockGuard1(g_m1);
+		std::lock_guard<SpinLock> spinLock(g_lock);
+		n--;
 	}
 }
 
 
 int main()
 {
-	std::thread t1(Lock1);
-	std::thread t2(Lock2);
+	std::thread t1(Add);
+	std::thread t2(Sub);
 	t1.join();
 	t2.join();
 
+	std::cout << n;
 }
