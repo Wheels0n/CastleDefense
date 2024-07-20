@@ -3,43 +3,30 @@
 #include <atomic>
 #include <mutex>
 #include <chrono>
-class SpinLock
-{
-public:
-	void lock()
-	{	
-		bool expected = false;
-		bool desired = true;
-		while (m_bLocked.compare_exchange_strong(expected, desired)==false)
-		{	
-			std::this_thread::sleep_for(std::chrono::seconds(10));
-			expected = false;
-		}
-	}
-	void unlock()
-	{
-		m_bLocked = false;
-	}
+#include <Windows.h>
 
-private:
-	std::atomic<bool> m_bLocked=false;
-};
-
-SpinLock g_lock;
+std::mutex m;
+HANDLE g_handle;
 int n = 0;
 void Add()
 {
-	for (int i = 0; i < 100000; ++i)
+	for (int i = 0; i < 100; ++i)
 	{
-		std::lock_guard<SpinLock> spinLock(g_lock);
-		n++;
+		{
+			std::lock_guard<std::mutex> lockGuard(m);
+			n++;
+		}
+		
+		SetEvent(g_handle);
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 void Sub()
 {	
-	for (int i = 0; i < 100000; ++i)
+	for (int i = 0; i < 100; ++i)
 	{	
-		std::lock_guard<SpinLock> spinLock(g_lock);
+		WaitForSingleObject(g_handle, INFINITE);
+		std::lock_guard<std::mutex> lockGuard(m);
 		n--;
 	}
 }
@@ -47,6 +34,7 @@ void Sub()
 
 int main()
 {
+	g_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
 	std::thread t1(Add);
 	std::thread t2(Sub);
 	t1.join();
