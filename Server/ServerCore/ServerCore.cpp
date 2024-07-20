@@ -2,7 +2,7 @@
 #include <iostream>
 #include <atomic>
 #include <mutex>
-
+#include <chrono>
 class SpinLock
 {
 public:
@@ -11,7 +11,8 @@ public:
 		bool expected = false;
 		bool desired = true;
 		while (m_bLocked.compare_exchange_strong(expected, desired)==false)
-		{
+		{	
+			std::this_thread::sleep_for(std::chrono::seconds(10));
 			expected = false;
 		}
 	}
