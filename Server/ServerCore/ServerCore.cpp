@@ -6,37 +6,47 @@
 #include <Windows.h>
 
 std::mutex m;
-HANDLE g_handle;
 int n = 0;
-void Add()
+std::condition_variable cv;
+void Producer()
 {
-	for (int i = 0; i < 100; ++i)
+	while(true)
 	{
+		if (n)
 		{
-			std::lock_guard<std::mutex> lockGuard(m);
-			n++;
+			std::this_thread::yield();
+		}
+		else
+		{
+			{
+				std::unique_lock<std::mutex> ulock(m);
+				n++;
+			}
+
+			cv.notify_one();
 		}
 		
-		SetEvent(g_handle);
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
-void Sub()
+void Consumer()
 {	
-	for (int i = 0; i < 100; ++i)
+	while (true)
 	{	
-		WaitForSingleObject(g_handle, INFINITE);
-		std::lock_guard<std::mutex> lockGuard(m);
-		n--;
+		std::unique_lock<std::mutex> ulock(m);
+		cv.wait(ulock, []() {return n > 0; });
+		--n;
+		std::cout << n << std::endl;
+		
+		
 	}
 }
 
 
 int main()
 {
-	g_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
-	std::thread t1(Add);
-	std::thread t2(Sub);
+	std::thread t2(Consumer);
+	std::thread t1(Producer);
 	t1.join();
 	t2.join();
 
