@@ -3,52 +3,24 @@
 #include <atomic>
 #include <mutex>
 #include <chrono>
+#include <future>
 #include <Windows.h>
 
-std::mutex m;
-int n = 0;
-std::condition_variable cv;
-void Producer()
+int Sum()
 {
-	while(true)
+	int sum = 0;
+	for (int i = 0; i < 100000; ++i)
 	{
-		if (n)
-		{
-			std::this_thread::yield();
-		}
-		else
-		{
-			{
-				std::unique_lock<std::mutex> ulock(m);
-				n++;
-			}
-
-			cv.notify_one();
-		}
-		
-		//std::this_thread::sleep_for(std::chrono::seconds(1));
+		sum++;
 	}
-}
-void Consumer()
-{	
-	while (true)
-	{	
-		std::unique_lock<std::mutex> ulock(m);
-		cv.wait(ulock, []() {return n > 0; });
-		--n;
-		std::cout << n << std::endl;
-		
-		
-	}
+	return sum;
 }
 
 
 int main()
 {
-	std::thread t2(Consumer);
-	std::thread t1(Producer);
-	t1.join();
-	t2.join();
+	std::future<int> f= std::async(std::launch::async, Sum);
 
-	std::cout << n;
+	int sum = f.get();
+	std::cout << sum;
 }
