@@ -139,7 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LockQueue.h" />
     <ClCompile Include="ServerCore.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LockStack.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

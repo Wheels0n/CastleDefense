@@ -1,3 +1,5 @@
+#pragma once
+
 #include <thread>
 #include <iostream>
 #include <atomic>
@@ -6,21 +8,42 @@
 #include <future>
 #include <Windows.h>
 
-int Sum()
+#include "LockStack.h"
+#include "LockQueue.h"
+
+LockStack<int> g_stack;
+LockQueue<int> g_queue;
+
+void Producer()
 {
-	int sum = 0;
-	for (int i = 0; i < 100000; ++i)
+	while (true)
 	{
-		sum++;
+		int val = rand()&100;
+		g_queue.Push(val);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
-	return sum;
 }
+
+void Consumer()
+{
+	while (true)
+	{
+		int val = 0;
+		if (g_queue.TryPop(val))
+		{
+			std::cout << val << std::endl;
+		}
+	}
+}
+
+
 
 
 int main()
 {
-	std::future<int> f= std::async(std::launch::async, Sum);
+	std::thread t1(Producer);
+	std::thread t2(Consumer);
 
-	int sum = f.get();
-	std::cout << sum;
+	t1.join();
+	t2.join();
 }

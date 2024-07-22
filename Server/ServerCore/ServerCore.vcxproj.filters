@@ -18,5 +18,13 @@
     <ClCompile Include="ServerCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LockQueue.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LockStack.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
