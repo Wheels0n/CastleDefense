@@ -141,9 +141,11 @@
   <ItemGroup>
     <ClCompile Include="LockQueue.h" />
     <ClCompile Include="ServerCore.cpp" />
+    <ClCompile Include="ThreadPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LockStack.h" />
+    <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

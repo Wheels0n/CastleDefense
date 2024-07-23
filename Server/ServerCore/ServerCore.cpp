@@ -8,42 +8,19 @@
 #include <future>
 #include <Windows.h>
 
-#include "LockStack.h"
-#include "LockQueue.h"
-
-LockStack<int> g_stack;
-LockQueue<int> g_queue;
-
-void Producer()
-{
-	while (true)
-	{
-		int val = rand()&100;
-		g_queue.Push(val);
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-}
-
-void Consumer()
-{
-	while (true)
-	{
-		int val = 0;
-		if (g_queue.TryPop(val))
-		{
-			std::cout << val << std::endl;
-		}
-	}
-}
-
-
+#include "ThreadPool.h"
 
 
 int main()
 {
-	std::thread t1(Producer);
-	std::thread t2(Consumer);
+	ThreadPool threadPool;
 
-	t1.join();
-	t2.join();
+	while (true)	
+	{
+		threadPool.EnqueueTask([] {
+			cout << "Doing Task" << " " << this_thread::get_id() << endl;
+			this_thread::sleep_for(chrono::milliseconds(100));
+			});
+	}
+	
 }
