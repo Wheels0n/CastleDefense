@@ -4,18 +4,18 @@ void ThreadPool::DoTask()
 {
 	while (true)
 	{
-		unique_lock<mutex> lock(m_mutex);
-
-		m_cv.wait(lock, [this] {return !m_tasks.empty() || m_bStop; });
-
-		if (m_bStop && m_tasks.empty())
-		{
-			return;
-		}
-
 		function<void()> task;
-		task = move(m_tasks.front());
-		m_tasks.pop();
+		{
+			unique_lock<mutex> lock(m_mutex);
+			m_cv.wait(lock, [this] {return !m_tasks.empty() || m_bStop; });
+			if (m_bStop && m_tasks.empty())
+			{
+				return;
+			}
+
+			task = move(m_tasks.front());
+			m_tasks.pop();
+		}
 		task();
 	}
 	

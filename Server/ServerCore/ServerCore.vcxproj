@@ -139,11 +139,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Lock.cpp" />
     <ClCompile Include="LockQueue.h" />
     <ClCompile Include="ServerCore.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Lock.h" />
     <ClInclude Include="LockStack.h" />
     <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
