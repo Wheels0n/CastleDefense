@@ -140,13 +140,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Lock.cpp" />
+    <ClCompile Include="LockOrderChecker.cpp" />
     <ClCompile Include="LockQueue.h" />
     <ClCompile Include="ServerCore.cpp" />
+    <ClCompile Include="ThreadLocal.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lock.h" />
+    <ClInclude Include="LockOrderChecker.h" />
     <ClInclude Include="LockStack.h" />
+    <ClInclude Include="ThreadLocal.h" />
     <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

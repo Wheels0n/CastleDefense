@@ -1,5 +1,6 @@
 #include "ThreadPool.h"
-
+#include "ThreadLocal.h"
+#include "LockOrderChecker.h"
 void ThreadPool::DoTask()
 {
 	while (true)
@@ -28,7 +29,14 @@ ThreadPool::ThreadPool() :m_bStop(false)
 
 	for (int i = 0; i < nThreads; ++i)
 	{
-		m_threads.emplace_back([this]() {this->DoTask(); });
+		auto startFunction = [this](int id)
+			{
+				LThreadId = id;
+				LLockOrderChecker = new LockOrderChecker();
+				this->DoTask();
+			};
+
+		m_threads.emplace_back(startFunction,i);
 	}
 }
 
@@ -44,6 +52,7 @@ ThreadPool::~ThreadPool()
 	{
 		if (m_threads[i].joinable())
 		{
+			delete LLockOrderChecker;
 			m_threads[i].join();
 		}
 	}
