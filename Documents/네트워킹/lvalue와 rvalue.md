@@ -32,6 +32,47 @@ std:move(val)를 호출하면 rvalue참조를 반환 하거나 lvalue를 rvalue�
 ravlue 참조를 받는 이동생성자와 이동대입자는 다른 개체 멤버 변수들의 소유권을 가져온다. 복사 생성자와  
 달리 메모리 재할당을 하지 않는다.
 
+## std::forawrd
+
+템플릿을 쓰다보면 이 함수가 등장한다. lvalue 참조면 lvalue참조로 ravlue참조면 rvalue참조를 반환한다.  
+당연한 걸 왜 굳이 이렇게 함수로 뻈는가 싶었다. 문제는 함수 매개변수처럼 이름이 있는 값들은 항상 lvaue로  
+평가한다는 것이다. rvalue참조로 선언되어 있어도말이다. 그래서 다른 함수에 인자를 전달하는 템플릿 함수의  
+경우 move를 보존하기가 어려워 진다.
+
+```c++
+// forward example
+#include <utility>      // std::forward
+#include <iostream>     // std::cout
+
+// function with lvalue and rvalue reference overloads:
+void overloaded (const int& x) {std::cout << "[lvalue]";}
+void overloaded (int&& x) {std::cout << "[rvalue]";}
+
+// function template taking rvalue reference to deduced type:
+template <class T> void fn (T&& x) {
+  overloaded (x);                   // always an lvalue
+  overloaded (std::forward<T>(x));  // rvalue if argument is rvalue
+}
+
+int main () {
+  int a;
+
+  std::cout << "calling fn with lvalue: ";
+  fn (a);
+  std::cout << '\n';
+
+  std::cout << "calling fn with rvalue: ";
+  fn (0);
+  std::cout << '\n';
+
+  return 0;
+}
+/* 결과
+calling fn with lvalue: [lvalue][lvalue]
+calling fn with rvalue: [lvalue][rvalue]
+/
+```
+
 #### 참조
 
 - [MSDN: Lvalue 및 Rvalue](https://learn.microsoft.com/ko-kr/cpp/cpp/lvalues-and-rvalues-visual-cpp?view=msvc-170)
@@ -39,3 +80,5 @@ ravlue 참조를 받는 이동생성자와 이동대입자는 다른 개체 멤�
 - [Move constructors](https://en.cppreference.com/w/cpp/language/move_constructor)
 - [Move assignment operator](https://en.cppreference.com/w/cpp/language/move_assignment)
 - [씹어먹는 C++ - <12 - 1. 우측값 레퍼런스와 이동 생성자>](https://modoocode.com/227)
+- [std::forward](https://cplusplus.com/reference/utility/forward/)
+- [Universal References in C++11](https://isocpp.org/blog/2012/11/universal-references-in-c11-scott-meyers)

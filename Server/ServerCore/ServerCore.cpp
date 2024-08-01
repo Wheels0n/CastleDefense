@@ -11,30 +11,27 @@
 #include "ThreadPool.h"
 #include "Lock.h"
 
-RWLock a(100);
-RWLock b(1000);
-void AToB()
-{
-	cout << "AtoB" << endl;
-	WriteLockGuard aGuard(a);
-	WriteLockGuard bGuard(b);
-}
+#include "Memory.h"
 
-void BToA()
+class A
 {
-	cout << "BtoA" << endl;
-	WriteLockGuard bGuard(b);
-	WriteLockGuard aGuard(a);
-}
+public:
+	A() { cout << "A Constructor" << endl; };
+	~A() { cout << "A Destructor" << endl; };
+};
+class B
+{
+public:
+	B() { cout << "B Constructor" << endl; };
+	~B() { cout << "B Destructor" << endl; };
+};
 
 
 int main()
 {
-	ThreadPool threadPool;
+	A* pA = xnew<A>();
+	B* pB = xnew<B>();
 
-	while(true)
-	{
-		threadPool.EnqueueTask(AToB);
-		threadPool.EnqueueTask(AToB);
-	}
+	xdelete(pA);
+	xdelete(pB);
 }
