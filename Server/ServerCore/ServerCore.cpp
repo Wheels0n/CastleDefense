@@ -18,20 +18,22 @@ class A
 public:
 	A() { cout << "A Constructor" << endl; };
 	~A() { cout << "A Destructor" << endl; };
+
 };
-class B
+class B : public A
 {
 public:
 	B() { cout << "B Constructor" << endl; };
 	~B() { cout << "B Destructor" << endl; };
+	int num;
 };
 
 
 int main()
 {
 	A* pA = xnew<A>();
-	B* pB = xnew<B>();
+	B* pB = static_cast<B*>(pA);
 
-	xdelete(pA);
-	xdelete(pB);
+
+	pB->num = 0;
 }
