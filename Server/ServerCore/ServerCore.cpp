@@ -13,6 +13,8 @@
 
 #include "Memory.h"
 
+#include <vector>
+
 class A
 {
 public:
@@ -31,9 +33,6 @@ public:
 
 int main()
 {
-	A* pA = xnew<A>();
-	B* pB = static_cast<B*>(pA);
-
-
-	pB->num = 0;
+	vector<A, StlAllocator<A>> vec;
+	vec.emplace_back();
 }
