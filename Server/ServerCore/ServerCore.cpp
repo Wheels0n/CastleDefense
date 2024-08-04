@@ -11,7 +11,9 @@
 #include "ThreadPool.h"
 #include "Lock.h"
 
+
 #include "Memory.h"
+
 
 #include <vector>
 
@@ -33,6 +35,29 @@ public:
 
 int main()
 {
-	vector<A, StlAllocator<A>> vec;
-	vec.emplace_back();
+	g_pMemoryPoolManager = new MemoryPoolManager();
+	A* As[100];
+	for (int i = 0; i < 100; ++i)
+	{
+		As[i] = ObjectPool<A>::Pop();
+	}
+
+	for (int i = 0; i < 100; ++i)
+	{
+		ObjectPool<A>::Push(As[i]);
+	}
+	shared_ptr<A> pA = MakeShared<A>();
+	ThreadPool* pThreadPool = new ThreadPool();
+/*
+	while (true)
+	{
+		pThreadPool->EnqueueTask([]()
+			{
+				A* pA = xnew<A>();
+				this_thread::sleep_for(std::chrono::microseconds(10));
+				xdelete<A>(pA);
+			});
+		this_thread::sleep_for(std::chrono::microseconds(100));
+	}
+*/
 }

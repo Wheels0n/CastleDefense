@@ -1,7 +1,11 @@
 #include "Allocator.h"
+
 #include <cstdlib>
 #include <windows.h>
 #include <memoryapi.h>
+
+#include "Memory.h"
+
 void* BaseAllocator::Alloc(int size)
 {
     return malloc(size);
@@ -22,4 +26,14 @@ void* StompAllocator::Alloc(int size)
 void StompAllocator::Release(void* ptr)
 {
     VirtualFree(ptr, 0, MEM_RELEASE);
+}
+
+void* PoolAllocator::Alloc(int size)
+{
+    return g_pMemoryPoolManager->Allocate(size);
+}
+
+void PoolAllocator::Release(void* ptr)
+{
+    g_pMemoryPoolManager->Deallocate(ptr);
 }
