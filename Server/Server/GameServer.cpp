@@ -10,10 +10,15 @@
 
 struct Session
 {
+	WSAOVERLAPPED overlapped = {};
 	SOCKET socket = INVALID_SOCKET;
 	char recvBuf[100] = {};
-	WSAOVERLAPPED overlapped = {};
 };
+
+void CALLBACK RecvCallback(DWORD error, DWORD recvLen, LPWSAOVERLAPPED overlapped, DWORD flags)
+{
+	std::cout << recvLen<<std::endl;
+}
 
 int main()
 {
@@ -75,9 +80,10 @@ int main()
 
 	}
 	
-	Session session = Session{ clientSocket };
-	WSAEVENT wsaEvent = WSACreateEvent();
-	session.overlapped.hEvent = wsaEvent;
+	Session session = {};
+	session.socket = clientSocket;
+	//WSAEVENT wsaEvent = WSACreateEvent();
+	//session.overlapped.hEvent = wsaEvent;
 
 	while (true)
 	{
@@ -88,25 +94,20 @@ int main()
 		DWORD recvLen = 0;
 		DWORD flags = 0;
 		
-		if (WSARecv(session.socket, &wsaBuf, 1, &recvLen, &flags, &session.overlapped, nullptr) == SOCKET_ERROR)
+		if (WSARecv(session.socket, &wsaBuf, 1, &recvLen, &flags, &session.overlapped, RecvCallback) == SOCKET_ERROR)
 		{
 			int error = WSAGetLastError();
 			if (error == WSA_IO_PENDING)
 			{
-				WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
-				WSAGetOverlappedResult(session.socket, &session.overlapped, &recvLen, FALSE, &flags);
-				std::cout << recvLen << std::endl;
+				SleepEx(INFINITE,TRUE);
 			}
 		}
-		else
-		{
-			std::cout << recvLen << std::endl;
-		}
+		
 	}
 
 	closesocket(session.socket);
 	closesocket(listenSocket);
-	WSACloseEvent(wsaEvent);
+	//WSACloseEvent(wsaEvent);
 	WSACleanup();
 	std::cout << "Exiting..." << std::endl;
 	return 0;
