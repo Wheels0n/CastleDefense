@@ -10,8 +10,9 @@
 
 struct Session
 {
-	char sendBuf[100];
-	char recvBuf[100];
+	SOCKET socket = INVALID_SOCKET;
+	char recvBuf[100] = {};
+	WSAOVERLAPPED overlapped = {};
 };
 
 int main()
@@ -59,123 +60,53 @@ int main()
 		return -1;
 	}
 
-	std::vector<SOCKET> sockets;
-	std::vector<WSAEVENT> events;
 
-	WSAEVENT listenEvent = WSACreateEvent();
-	events.push_back(listenEvent);
-	sockets.push_back(listenSocket);
+	SOCKADDR_IN clientAddr;
+	int addrLen = sizeof(clientAddr);
+	SOCKET clientSocket = INVALID_SOCKET;
 
-	result = WSAEventSelect(listenSocket, listenEvent, FD_ACCEPT);
-	if (result != 0)
-	{
-		std::cout << "wsaselect to accept failed()" << std::endl;
-		int error = WSAGetLastError();
-		if (error != WSAEWOULDBLOCK)
-		{
-			std::cout << "ErrorCode: " << error << std::endl;
-		}
-	}
-
-	std::vector<Session> sessions;
 	while (true)
 	{
+		clientSocket = accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
+		if (clientSocket != INVALID_SOCKET)
+		{
+			break;
+		}
+
+	}
+	
+	Session session = Session{ clientSocket };
+	WSAEVENT wsaEvent = WSACreateEvent();
+	session.overlapped.hEvent = wsaEvent;
+
+	while (true)
+	{
+		WSABUF wsaBuf;
+		wsaBuf.buf = session.recvBuf;
+		wsaBuf.len = 100;
+
+		DWORD recvLen = 0;
+		DWORD flags = 0;
 		
-		int idx = WSAWaitForMultipleEvents(events.size(), &events[0], FALSE, INFINITE, FALSE);
-		if (idx == WSA_WAIT_FAILED)
+		if (WSARecv(session.socket, &wsaBuf, 1, &recvLen, &flags, &session.overlapped, nullptr) == SOCKET_ERROR)
 		{
 			int error = WSAGetLastError();
-			std::cout << "ErrorCode: " << error << std::endl;
-			break;
+			if (error == WSA_IO_PENDING)
+			{
+				WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
+				WSAGetOverlappedResult(session.socket, &session.overlapped, &recvLen, FALSE, &flags);
+				std::cout << recvLen << std::endl;
+			}
 		}
 		else
 		{
-			idx -= WSA_WAIT_EVENT_0;
-			WSANETWORKEVENTS networkEvents;
-			result = WSAEnumNetworkEvents(sockets[idx], events[idx], &networkEvents);
-			if (result == SOCKET_ERROR)
-			{
-				int error = WSAGetLastError();
-				std::cout << "Recv ErrorCode: " << error << std::endl;
-				break;
-
-			}
-
-			if (networkEvents.lNetworkEvents & FD_ACCEPT && networkEvents.iErrorCode[FD_ACCEPT_BIT] == 0)
-			{
-				sockaddr_in clientAddr;
-				memset(&clientAddr, 0, sizeof(sockaddr_in));
-				int addrLen = sizeof(sockaddr_in);
-				SOCKET clientSocket;
-
-				clientSocket = accept(listenSocket, (sockaddr*)&clientAddr, &addrLen);
-				if (clientSocket == INVALID_SOCKET)
-				{
-					int error = WSAGetLastError();
-					std::cout << "Accept ErrorCode: " << error << std::endl;
-					break;
-				}
-				std::cout << "Client Connected" << std::endl;
-
-				WSAEVENT clientEvent = WSACreateEvent();
-				sockets.push_back(clientSocket);
-				events.push_back(clientEvent);
-
-				std::string idxStr = std::to_string(sessions.size());
-				Session session;
-				strncpy(session.sendBuf,idxStr.c_str(), idxStr.size());
-				session.sendBuf[idxStr.size()] = '\0';
-				sessions.push_back(session);
-				result = WSAEventSelect(clientSocket, clientEvent, FD_READ| FD_WRITE);
-				if (result != 0)
-				{
-					int error = WSAGetLastError();
-					std::cout << "ErrorCode: " << error << std::endl;
-					break;
-				}
-			}
-			//클라이언트는 Send-Recv순서를 지키는데 FD_READ만 켜진경우 읽기만 하면 읽기 이후에 어떠한 플래그도 안켜져서
-			//먹통이 될 수있다.
-			if ((networkEvents.lNetworkEvents & (FD_READ)) && (networkEvents.iErrorCode[FD_READ_BIT] == 0)
-				|| ((networkEvents.lNetworkEvents & FD_WRITE) && (networkEvents.iErrorCode[FD_WRITE_BIT] == 0)))
-			{
-				Session& session = sessions[idx - 1];
-				result = recv(sockets[idx], session.recvBuf, 100, 0);
-				if (result == SOCKET_ERROR)
-				{
-					int error = WSAGetLastError();
-					std::cout << "Recv ErrorCode: " << error << std::endl;
-					break;
-
-				}
-				std::cout << session.recvBuf << std::endl;
-				std::cout << "Received : " << sizeof(session.recvBuf) << std::endl;
-
-				result = send(sockets[idx], session.sendBuf, 100, 0);
-				if (result == SOCKET_ERROR)
-				{
-					int error = WSAGetLastError();
-					std::cout << "Send ErrorCode: " << error << std::endl;
-					break;
-				}
-
-				std::cout << "Send Data" << std::endl;
-			}
-
+			std::cout << recvLen << std::endl;
 		}
 	}
-	
-	for (int i = 0; i < sockets.size(); ++i)
-	{
-		result = closesocket(sockets[i]);
-		if (result == SOCKET_ERROR)
-		{
-			std::cout << "closesocket() Failed" << std::endl;
-		}
-		
-		WSACloseEvent(events[i]);
-	}
-	
+
+	closesocket(session.socket);
+	closesocket(listenSocket);
+	WSACloseEvent(wsaEvent);
 	WSACleanup();
 	std::cout << "Exiting..." << std::endl;
 	return 0;

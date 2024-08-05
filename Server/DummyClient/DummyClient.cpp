@@ -65,47 +65,35 @@ int main()
 	while(true)
 	{
 
-		char sendBuf[100] = "Hello?";
-		char recvBuf[100];
+		char sendBuf[100] = {0,};
 
-		while (true)
+		WSAOVERLAPPED overlapped = {};
+		WSAEVENT wsaEvent = WSACreateEvent();
+		overlapped.hEvent = wsaEvent;
+
+		DWORD sendLen = 0;
+		DWORD flags = 0;
+
+		std::cin >> sendBuf;
+		WSABUF wsaBuf;
+		wsaBuf.buf = sendBuf;
+
+		int i = 0;
+		while (sendBuf[i++] != '\0') {};
+		
+		wsaBuf.len = i;
+
+
+		if (WSASend(hSocket, &wsaBuf, 1, &sendLen, flags, &overlapped, nullptr) == SOCKET_ERROR)
 		{
-			result = send(hSocket, sendBuf, 100, 0);
-			if (result == SOCKET_ERROR)
+			if (WSAGetLastError() == WSA_IO_PENDING)
 			{
-				int error = WSAGetLastError();
-				if (error != WSAEWOULDBLOCK)
-				{
-					std::cout << "Send ErrorCode: " << error << std::endl;
-					return -1;
-				}
+				WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
+				WSAGetOverlappedResult(hSocket, &overlapped, &sendLen, FALSE, &flags);
 			}
-			else
-			{
-				std::cout << "Send Data" << std::endl;
-				while (true)
-				{
-					result = recv(hSocket, recvBuf, 100, 0);
-					if (result == SOCKET_ERROR)
-					{
-						int error = WSAGetLastError();
-						if (error != WSAEWOULDBLOCK)
-						{
-							std::cout << "Recv ErrorCode: " << error << std::endl;
-							return -1;
-						}
-					}
-					else
-					{
-						std::cout << recvBuf << std::endl;
-						std::cout << "Received : " << sizeof(recvBuf) << std::endl;
-						break;
-					}
-				}
-			}
-
 		}
 
+		std::cout << sendLen << std::endl;
 	}
 
 	result = closesocket(hSocket);
