@@ -1,5 +1,6 @@
 #pragma once
 #pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "Debug\\ServerCore.lib")
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <WinSock2.h>
@@ -8,17 +9,60 @@
 #include <string>
 #include <vector>
 
+#include "Memory.h"
+#include "Allocator.h"
+#include "ThreadPool.h"
 struct Session
 {
-	WSAOVERLAPPED overlapped = {};
 	SOCKET socket = INVALID_SOCKET;
 	char recvBuf[100] = {};
 };
 
-void CALLBACK RecvCallback(DWORD error, DWORD recvLen, LPWSAOVERLAPPED overlapped, DWORD flags)
+enum eIO_TYPE
 {
-	std::cout << recvLen<<std::endl;
+	NONE,
+	READ,
+	WRITE,
+	ACCEPT,
+	CONNECT
+};
+
+struct OverlappedEx
+{
+	WSAOVERLAPPED overlapped = {};
+	eIO_TYPE ioType = NONE;
+};
+
+void WorkerThreadMain(HANDLE hIocp)
+{
+	while (true)
+	{
+		DWORD transferredBytes=0;
+		Session* pSession = nullptr;
+		OverlappedEx* pOverlappedEx = nullptr;
+
+		BOOL ret = ::GetQueuedCompletionStatus(hIocp, &transferredBytes,
+			(ULONG_PTR*)&pSession, (LPOVERLAPPED*)&pOverlappedEx, INFINITE);
+
+		if (ret == FALSE || transferredBytes ==0)
+		{
+			continue;
+		}
+
+		std::cout << transferredBytes << std::endl;
+
+		WSABUF wsaBuf;
+		wsaBuf.buf = pSession->recvBuf;
+		wsaBuf.len = 100;
+
+		DWORD recvLen = 0;
+		DWORD flags = 0;
+
+		WSARecv(pSession->socket, &wsaBuf, 1, &recvLen, &flags, &pOverlappedEx->overlapped, NULL);
+	}
 }
+
+
 
 int main()
 {
@@ -37,21 +81,13 @@ int main()
 		return -1;
 	}
 
-	u_long mode = 1;
-	result = ioctlsocket(listenSocket, FIONBIO, &mode);
-	if (result == SOCKET_ERROR)
-	{
-		std::cout << "ioctlsocket() Failed" << std::endl;
-		return -1;
-	}
-
 	sockaddr_in serverAddr;
 	memset(&serverAddr, 0, sizeof(sockaddr_in));
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(777);
 	InetPton(AF_INET, L"127.0.0.1", &serverAddr.sin_addr);
 
-	result = bind(listenSocket, (sockaddr*)&serverAddr, sizeof(sockaddr_in));
+	result = ::bind(listenSocket, (sockaddr*)&serverAddr, sizeof(sockaddr_in));
 	if (result == SOCKET_ERROR)
 	{
 		std::cout << "bind() Failed" << std::endl;
@@ -66,48 +102,53 @@ int main()
 	}
 
 
-	SOCKADDR_IN clientAddr;
-	int addrLen = sizeof(clientAddr);
-	SOCKET clientSocket = INVALID_SOCKET;
+	HANDLE hIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+
+	ThreadPool* pThreadPool = new ThreadPool();
+	for (int i = 0; i < 5; ++i)
+	{
+		pThreadPool->EnqueueTask([=]() { WorkerThreadMain(hIocp); });
+	}
+
+	g_pMemoryPoolManager = new MemoryPoolManager();
+
+	std::vector<Session*> sessionManager;
 
 	while (true)
 	{
+		SOCKADDR_IN clientAddr;
+		int addrLen = sizeof(clientAddr);
+		SOCKET clientSocket = INVALID_SOCKET;
+
 		clientSocket = accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
-		if (clientSocket != INVALID_SOCKET)
+		if (clientSocket == INVALID_SOCKET)
 		{
-			break;
+			return -1;
 		}
 
-	}
-	
-	Session session = {};
-	session.socket = clientSocket;
-	//WSAEVENT wsaEvent = WSACreateEvent();
-	//session.overlapped.hEvent = wsaEvent;
+		Session* pSession = xnew<Session>();
+		pSession->socket = clientSocket;
+		sessionManager.push_back(pSession);
 
-	while (true)
-	{
+		std::cout << "Client Connected!" << std::endl;
+		CreateIoCompletionPort((HANDLE)clientSocket, hIocp, (ULONG_PTR)pSession, 0);
+
+
 		WSABUF wsaBuf;
-		wsaBuf.buf = session.recvBuf;
+		wsaBuf.buf = pSession->recvBuf;
 		wsaBuf.len = 100;
+
+		OverlappedEx* pOverlappedEx = xnew<OverlappedEx>();
+		pOverlappedEx->ioType = READ;
 
 		DWORD recvLen = 0;
 		DWORD flags = 0;
 		
-		if (WSARecv(session.socket, &wsaBuf, 1, &recvLen, &flags, &session.overlapped, RecvCallback) == SOCKET_ERROR)
-		{
-			int error = WSAGetLastError();
-			if (error == WSA_IO_PENDING)
-			{
-				SleepEx(INFINITE,TRUE);
-			}
-		}
+		WSARecv(pSession->socket, &wsaBuf, 1, &recvLen, &flags, &pOverlappedEx->overlapped, NULL);
 		
 	}
 
-	closesocket(session.socket);
 	closesocket(listenSocket);
-	//WSACloseEvent(wsaEvent);
 	WSACleanup();
 	std::cout << "Exiting..." << std::endl;
 	return 0;
