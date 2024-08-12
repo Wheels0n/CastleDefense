@@ -1,7 +1,5 @@
 #pragma once
 
-#include <atomic>
-
 using namespace std;
 class RWLock
 {

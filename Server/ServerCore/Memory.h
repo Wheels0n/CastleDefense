@@ -1,9 +1,5 @@
 #pragma once
-#include "Allocator.h"
-#include <atomic>
-#include <utility>
-#include <memory>
-#include <Windows.h>
+#include "stdafx.h"
 const int MAX_ALLOC_SIZE = 4096;
 const int MEM_POOL_CNT = (1024 / 32) + (1024 / 128) + (2048 / 256);
 
@@ -33,6 +29,10 @@ public:
 	MemoryPool(int allocSize);
 	~MemoryPool();
 
+	int GetNumAlloc()
+	{
+		return m_nAlloc.load();
+	}
 	void Push(MemoryHeader* pHeader);
 	MemoryHeader* Pop();
 private:
@@ -75,6 +75,11 @@ public:
 	static std::shared_ptr<T> MakeShared()
 	{
 		return std::shared_ptr<T> {Pop(), Push()};
+	}
+
+	static int GetNumOfAlloc()
+	{
+		return m_memoryPool.GetNumAlloc();
 	}
 private:
 	static int m_allocSize;

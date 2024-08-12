@@ -1,7 +1,7 @@
 #pragma once
-#include <memory>
-#include <utility>
+
 const int PAGE_SIZE = 0x1000;
+#include <memory.h>
 class BaseAllocator
 {
 

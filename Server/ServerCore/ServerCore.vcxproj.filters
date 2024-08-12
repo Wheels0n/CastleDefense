@@ -30,13 +30,31 @@
     <ClCompile Include="ThreadLocal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LockOrderChecker.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="Allocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Memory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IocpManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LockOrderChecker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Exception.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CircularBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,13 +71,34 @@
     <ClInclude Include="ThreadLocal.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="LockOrderChecker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Allocator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Memory.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LockOrderChecker.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XTL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Exception.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CircularBuffer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

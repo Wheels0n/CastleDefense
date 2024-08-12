@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Lock.h"
 #include "LockOrderChecker.h"
 #include "ThreadLocal.h"

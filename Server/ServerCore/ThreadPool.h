@@ -1,17 +1,17 @@
 #pragma once
 
-#include <thread>
-#include <mutex>
-#include <vector>
-#include <queue>
-#include <functional>
 using namespace std;
 
 class ThreadPool
 {
 
 public:
+	inline int GetNumOfThreads() {
+		return m_threads.size();
+	};
+
 	void DoTask();
+	void Join();
 
 	ThreadPool();
 	~ThreadPool();

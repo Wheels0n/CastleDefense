@@ -1,7 +1,5 @@
 #pragma once
-#include <mutex>
-#include <queue>
-
+#include "stdafx.h"
 using namespace std;
 template<typename T>
 class LockQueue

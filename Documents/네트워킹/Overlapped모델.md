@@ -1,4 +1,4 @@
-# Overlapped 모델
+# Overlapped(또는 비동기) 모델
 
 비동기-넌블락 오버랲드 모델을 도입해보자
 
@@ -24,6 +24,9 @@
 - ConnectEx
 
 다만 아래 2개는 준비 작업이 필요해서 나중에 다루겠다.
+
+오버랲드 IO는 오로지 WSA_FLAG_OVERLAPPED 인자와 함께 WSPSocket함수로 생성된 소켓만 작동한다.
+오버랲드 send/recv 콜은 곧바로 반환한다.
 
 ### WSASend
 
@@ -60,7 +63,19 @@ typedef struct _WSAOVERLAPPED {
 완료 루틴 인자가 널이면 완료시 오버랲드 개체의 이벤트가 시그널 상태가된다. 그게 아니라면 이벤트 인자는  
 무시 되며 정보 전달용으로 쓸 수는 있다.
 
+전송계층에 의해 버퍼들이 소진되면 완료 통지가 난다. 넌 블로킹에 스트림 지향 소켓인데 전송계층의 버퍼에  
+충분한 공간이 없다면 어플리케이션 측의 버퍼의 일부만을 소진하고 반환 할 것이다.
+
 WSARecv도 사실상 같은 원리다.
+
+바이트 스트림 스타일의 소켓(SOCK_STREAM)의 경우 버퍼가 가득 차거나, 연결이 종료 되거나, 내부적으로  
+버퍼링 된 데이터가 소진 될떄까지 버퍼로 들어간다. 오는 데이터 들이 모든 버퍼를 채우던 말던 모든 소켓에게  
+완료 통지가 간다.
+
+연결지향의 프로토콜의 경우 사용가능한 버퍼 공간과 받은 데이터 크기를 감안해서 최대한 많이 반환하려고 한다.  
+허나 단 1바이트만 있어도 반환하기엔 충분하다.
+
+연결지향 소켓에게 0바이트가 읽혀지면 우아한 종료를 나타낸다.
 
 ### WSAGetOverlappedResult
 
@@ -231,4 +246,6 @@ void CALLBACK RecvCallback(DWORD error, DWORD recvLen, LPWSAOVERLAPPED overlappe
 - [CppCon2017 리액터/프로액터 패턴](https://www.youtube.com/watch?v=iMRbm32O0ws)
 - [리액터 패턴에 관한 글](https://www.modernescpp.com/index.php/reactor/)
 - [Reactor pattern](https://en.wikipedia.org/wiki/Reactor_pattern)
-- [](https://en.wikipedia.org/wiki/Proactor_pattern)
+- [Proactor pattern](https://en.wikipedia.org/wiki/Proactor_pattern)
+- [MSDN : Overlapped IO](https://learn.microsoft.com/en-us/windows/win32/winsock/overlapped-i-o-2)
+- [MSDN : Overlapped](https://learn.microsoft.com/en-us/windows/win32/api/minwinbase/ns-minwinbase-overlapped)

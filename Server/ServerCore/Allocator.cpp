@@ -1,9 +1,5 @@
+#include "stdafx.h"
 #include "Allocator.h"
-
-#include <cstdlib>
-#include <windows.h>
-#include <memoryapi.h>
-
 #include "Memory.h"
 
 void* BaseAllocator::Alloc(int size)

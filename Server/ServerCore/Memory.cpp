@@ -1,10 +1,10 @@
+#include "stdafx.h"
 #include "Memory.h"
-#include <cassert>
-#include <interlockedapi.h>
+
 
 MemoryPoolManager* g_pMemoryPoolManager = nullptr;
 
-MemoryPool::MemoryPool(int allocSize) : m_allocSize(allocSize)
+MemoryPool::MemoryPool(int allocSize) : m_allocSize(allocSize), m_nAlloc(0)
 {
 	InitializeSListHead(&m_pHeader);
 }

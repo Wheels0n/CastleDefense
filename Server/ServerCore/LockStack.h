@@ -1,7 +1,5 @@
 #pragma once
-#include <stack>
-#include <mutex>
-
+#include "stdafx.h"
 using namespace std;
 template<typename T>
 class LockStack

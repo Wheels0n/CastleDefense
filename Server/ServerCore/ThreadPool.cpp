@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ThreadPool.h"
 #include "ThreadLocal.h"
 #include "LockOrderChecker.h"
@@ -22,6 +23,24 @@ void ThreadPool::DoTask()
 	
 }
 
+void ThreadPool::Join()
+{
+	{
+		unique_lock<mutex> lock(m_mutex);
+		m_bStop = true;
+	}
+
+	m_cv.notify_all();
+	for (int i = 0; i < m_threads.size(); ++i)
+	{
+		if (m_threads[i].joinable())
+		{
+			delete LLockOrderChecker;
+			m_threads[i].join();
+		}
+	}
+}
+
 ThreadPool::ThreadPool() :m_bStop(false)
 {
 	int nThreads = thread::hardware_concurrency();
@@ -42,20 +61,7 @@ ThreadPool::ThreadPool() :m_bStop(false)
 
 ThreadPool::~ThreadPool()
 {
-	{
-		unique_lock<mutex> lock(m_mutex);
-		m_bStop = true;
-	}
-
-	m_cv.notify_all();
-	for (int i = 0; i < m_threads.size(); ++i)
-	{
-		if (m_threads[i].joinable())
-		{
-			delete LLockOrderChecker;
-			m_threads[i].join();
-		}
-	}
+	Join();
 }
 
 void ThreadPool::EnqueueTask(function<void()> task)

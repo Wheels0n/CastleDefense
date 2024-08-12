@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "LockOrderChecker.h"
 #include "Lock.h"
 void LockOrderChecker::Push(RWLock* pLock)
@@ -5,12 +6,7 @@ void LockOrderChecker::Push(RWLock* pLock)
 	if (!m_lockStack.empty())
 	{
 		RWLock* pPrevLock = m_lockStack.top();
-		if (pPrevLock->GetOrder() > pLock->GetOrder())
-		{
-			//Å©·¡½Ã
-			int* ptr = nullptr;
-			*ptr = 0xDEAD;
-		}
+		assert(pPrevLock->GetOrder() < pLock->GetOrder());
 	}
 	m_lockStack.push(pLock);
 }

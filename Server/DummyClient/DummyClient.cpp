@@ -35,7 +35,7 @@ int main()
 	memset(&serverAddr, 0, sizeof(sockaddr_in));
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons(777);
-	InetPton(AF_INET, L"127.0.0.1", &serverAddr.sin_addr);
+	InetPtonA(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
 
 	while (true)
 	{
@@ -61,39 +61,45 @@ int main()
 	
 
 	std::cout << "Connected!" << std::endl;
+	char sendBuf[100] = "Hello";
+	char recvBuf[100] = { 0, };
+	WSAOVERLAPPED overlapped = {};
+	WSAEVENT wsaEvent = WSACreateEvent();
+	overlapped.hEvent = wsaEvent;
 
 	while(true)
 	{
 
-		char sendBuf[100] = {0,};
-
-		WSAOVERLAPPED overlapped = {};
-		WSAEVENT wsaEvent = WSACreateEvent();
-		overlapped.hEvent = wsaEvent;
-
-		DWORD sendLen = 0;
+		DWORD bytes = 0;
 		DWORD flags = 0;
 
-		std::cin >> sendBuf;
-		WSABUF wsaBuf;
-		wsaBuf.buf = sendBuf;
+		WSABUF sendWsaBuf;
+		sendWsaBuf.buf = sendBuf;
+		sendWsaBuf.len = 6;
 
-		int i = 0;
-		while (sendBuf[i++] != '\0') {};
-		
-		wsaBuf.len = i;
+		if (WSASend(hSocket, &sendWsaBuf, 1, &bytes, flags, &overlapped, nullptr) == SOCKET_ERROR)
+		{
+			int errorno = WSAGetLastError();
+			if (WSAGetLastError() == WSA_IO_PENDING)
+			{
+				WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
+				WSAGetOverlappedResult(hSocket, &overlapped, &bytes, FALSE, &flags);
+			}
+		}
 
-
-		if (WSASend(hSocket, &wsaBuf, 1, &sendLen, flags, &overlapped, nullptr) == SOCKET_ERROR)
+		WSABUF recvWsaBuf;
+		recvWsaBuf.buf = recvBuf;
+		recvWsaBuf.len = bytes;
+		if (WSARecv(hSocket, &recvWsaBuf, 1, &bytes, &flags, &overlapped, nullptr) == SOCKET_ERROR)
 		{
 			if (WSAGetLastError() == WSA_IO_PENDING)
 			{
 				WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
-				WSAGetOverlappedResult(hSocket, &overlapped, &sendLen, FALSE, &flags);
+				WSAGetOverlappedResult(hSocket, &overlapped, &bytes, FALSE, &flags);
+				std::cout << recvBuf << std::endl;
 			}
 		}
-
-		std::cout << sendLen << std::endl;
+		
 	}
 
 	result = closesocket(hSocket);
