@@ -11,6 +11,8 @@ public:
 	void PrepareSessions();
 	
 	void AcceptSessions();
+	void ConnectSession();
+	void DisconnectSession();
 	void ReturnSession(Session*);
 
 	SessionManager();

@@ -1,7 +1,7 @@
 #pragma once
 
-
 #include "Memory.h"
+#include "Lock.h"
 enum eIO_TYPE
 {
 	NONE,
@@ -29,9 +29,14 @@ public:
 	void ReleaseRef();
 
 	void ResetSession();
-	
+	void ShutdownSocket();
+
 	bool RequestAccept();
 	void ProcessAccept();
+
+	bool PrepareConnect();
+	bool RequestConnect();
+	void ProcessConnect();
 
 	bool RequestDisconnect();
 	void ProcessDisconnect();
@@ -41,6 +46,9 @@ public:
 
 	bool RequestSend(int);
 	void ProcessSend(int);
+
+	void  SetConnection(bool b) { m_bConnected.store(b); };
+	bool  GetConnection() { return m_bConnected.load(); };
 
 	Session();
 	~Session();
@@ -57,5 +65,7 @@ private:
 
 	shared_ptr<CircularBuffer> m_recvBuf;
 	shared_ptr<CircularBuffer> m_sendBuf;
+
+	RWLock m_writeLock;
 
 };

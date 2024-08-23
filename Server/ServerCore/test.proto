@@ -1,0 +1,5 @@
+message Packet
+{
+	required uint64 id = 1;
+	required string msg =2;
+}

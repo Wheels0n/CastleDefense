@@ -1,3 +1,3 @@
 #pragma once
 
-void PrintError(const char* pFunctionName);
+void PrintError(const char* pFunctionName, int errorno);

@@ -35,7 +35,8 @@ void ThreadPool::Join()
 	{
 		if (m_threads[i].joinable())
 		{
-			delete LLockOrderChecker;
+			//TODO:
+			//delete LLockOrderChecker;
 			m_threads[i].join();
 		}
 	}

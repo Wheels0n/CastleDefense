@@ -32,6 +32,37 @@ void SessionManager::AcceptSessions()
 	return;
 }
 
+void SessionManager::ConnectSession()
+{
+	Session* pSession = xnew<Session>();
+	m_sessions.push_back(pSession);
+	m_nCurSessions.fetch_add(1);
+
+	if(pSession->PrepareConnect() == false)
+	{
+		return;
+	}
+	
+	if (pSession->RequestConnect() == false)
+	{
+		return;
+	}
+	return;
+
+}
+
+void SessionManager::DisconnectSession()
+{
+	m_nCurSessions.fetch_sub(1);
+	Session* pSession = m_sessions.back();
+	m_sessions.pop_back();
+	pSession->ShutdownSocket();
+	while (pSession->GetConnection())
+	{
+
+	}
+}
+
 void SessionManager::ReturnSession(Session* pSession)
 {
 

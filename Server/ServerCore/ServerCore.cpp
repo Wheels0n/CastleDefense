@@ -40,7 +40,7 @@ int main()
 /*
 	while (true)
 	{
-		pThreadPool->EnqueueTask([]()
+		m_pThreadPool->EnqueueTask([]()
 			{
 				A* pA = xnew<A>();
 				this_thread::sleep_for(std::chrono::microseconds(10));

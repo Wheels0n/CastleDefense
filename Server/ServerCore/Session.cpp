@@ -3,12 +3,13 @@
 #include "Exception.h"
 #include "Session.h"
 #include "SessionManager.h"
+#include "PacketHandler.h"
 #include "IocpManager.h"
 #include "Memory.h"
 
 
 extern const int SERVER_PORT;
-extern const wchar_t* SERVER_ADDR;
+extern const char* SERVER_ADDR;
 
 ObjectPool<OverlappedEx>* s_pOverlappedExPool = new ObjectPool<OverlappedEx>;
 void Session::AddRef()
@@ -27,7 +28,7 @@ void Session::ReleaseRef()
 
 
 Session::Session()
-	:m_socket(INVALID_SOCKET), m_nRef(0), m_bConnected(false), m_recvBuf(nullptr), m_sendBuf(nullptr)
+	:m_socket(INVALID_SOCKET), m_nRef(0), m_bConnected(false), m_recvBuf(nullptr), m_sendBuf(nullptr), m_writeLock(1)
 {
 	memset(&m_sockaddr, 0, sizeof(sockaddr_in));
 	m_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -39,6 +40,7 @@ Session::Session()
 
 Session::~Session()
 {
+	
 }
 
 void Session::ResetSession()
@@ -50,13 +52,25 @@ void Session::ResetSession()
 	//바로 사용할 수 있게 TIME_WAIT를 없애 버림
 	LINGER lingerOption;
 	lingerOption.l_onoff = 1;
-	lingerOption.l_linger = 0;
+	lingerOption.l_linger = 1000;
 
 	if (setsockopt(m_socket, SOL_SOCKET, SO_LINGER, (char*)&lingerOption, sizeof(LINGER)) == SOCKET_ERROR)
 	{
-		PrintError("setsockopt()");
+		int errorno = WSAGetLastError();
+		PrintError("setsockopt()", errorno);
 	}
 
+}
+
+void Session::ShutdownSocket()
+{
+	
+	if (shutdown(m_socket, SD_SEND) == SOCKET_ERROR)
+	{
+		int errorno = WSAGetLastError();
+		PrintError("shutdown()", errorno);
+	}
+	
 }
 
 bool Session::RequestAccept()
@@ -72,12 +86,15 @@ bool Session::RequestAccept()
 
 	if (IocpManager::AcceptEx(*g_pIocpManager->GetListenSocket(), m_socket, m_recvBuf->GetBuf(), 0,
 		sizeof(sockaddr_in)+16, sizeof(sockaddr_in)+16,
-		&bytes, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx)) == FALSE)
+		nullptr, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx)) == FALSE)
 	{
 		int errorno = WSAGetLastError();
-		if (WSAGetLastError() != WSA_IO_PENDING)
+		if (errorno != WSA_IO_PENDING)
 		{
-			PrintError("AcceptEx()");
+			ReleaseRef();
+			s_pOverlappedExPool->Push(pOverlappedEx);
+			int errorno = WSAGetLastError();
+			PrintError("AcceptEx()", errorno);
 			return false;
 		}
 	}
@@ -87,7 +104,7 @@ bool Session::RequestAccept()
 
 void Session::ProcessAccept()
 {
-	if (m_bConnected.exchange(true))
+	if (m_bConnected.exchange(true)==true)
 	{
 		//TODO :  크래시. 연결에 연결
 	}
@@ -96,7 +113,8 @@ void Session::ProcessAccept()
 		reinterpret_cast<char*>(g_pIocpManager->GetListenSocket()), sizeof(SOCKET))
 		== SOCKET_ERROR)
 	{
-		PrintError("setsockopt()");
+		int errorno = WSAGetLastError();
+		PrintError("setsockopt()", errorno);
 	}
 
 
@@ -104,7 +122,8 @@ void Session::ProcessAccept()
 	
 	if(getpeername(m_socket, OUT reinterpret_cast<sockaddr*>(&m_sockaddr), &addrLen)== SOCKET_ERROR)
 	{
-		PrintError("getpeername()");
+		int errorno = WSAGetLastError();
+		PrintError("getpeername()",errorno);
 	}
 
 	g_pIocpManager->RegisterSocket(m_socket);
@@ -115,6 +134,79 @@ void Session::ProcessAccept()
 	cout << "Client Connected: IP = " << addrArr << ", PORT = "
 		<< ntohs(m_sockaddr.sin_port) << endl;
 
+	RequestRecv();
+}
+
+bool Session::PrepareConnect()
+{
+	memset(&m_sockaddr, 0, sizeof(sockaddr_in));
+	m_sockaddr.sin_family = AF_INET;
+	m_sockaddr.sin_port = htons(555);
+	InetPtonA(AF_INET, SERVER_ADDR, OUT & m_sockaddr.sin_addr);
+
+	if (::bind(m_socket, reinterpret_cast<sockaddr*>(& m_sockaddr), sizeof(sockaddr_in))==SOCKET_ERROR)
+	{
+		int errorno = WSAGetLastError();
+		PrintError("bind()", errorno);
+		return false;
+	}
+
+	g_pIocpManager->RegisterSocket(m_socket);
+
+	return true;
+}
+
+bool Session::RequestConnect()
+{
+	// TODO: 실패시 오버랲드EX 누수와,  소켓 재등록 문제를 해결 할 것
+	OverlappedEx* pOverlappedEx = s_pOverlappedExPool->Pop();
+
+	DWORD bytes = 0;
+	DWORD flags = 0;
+	pOverlappedEx->m_ioType = eIO_TYPE::CONNECT;
+	pOverlappedEx->m_owningSession = this;
+
+	AddRef();
+	//TODO : 매개변수 에러
+	if (IocpManager::ConnectEx(m_socket, reinterpret_cast<sockaddr*>(g_pIocpManager->GetServerSockaddr()),
+		sizeof(sockaddr), nullptr, 0, &bytes, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx)) == FALSE)
+	{
+		int errorno = WSAGetLastError();
+		if (errorno != WSA_IO_PENDING)
+		{
+			ReleaseRef();
+			s_pOverlappedExPool->Push(pOverlappedEx);
+
+			PrintError("ConectEx()", errorno);
+			return false;
+		}
+	}
+	return true;
+}
+
+void Session::ProcessConnect()
+{	
+	if (m_bConnected.exchange(true) == true)
+	{
+		//TODO :  크래시. 해제에 해제
+	}
+
+	if (setsockopt(m_socket, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT,NULL, 0)== SOCKET_ERROR)
+	{
+		int errorno = WSAGetLastError();
+		PrintError("setsockopt()", errorno);
+	}
+
+
+	Packet pkt;
+	pkt.set_id(m_socket);
+	pkt.set_msg("hello");
+	
+	int packetSize = (pkt.ByteSizeLong() + sizeof(PacketHeader));
+
+	PacketHandler::WritePacket(pkt, m_sendBuf->GetBuf());
+	m_sendBuf->MoveWritePos(packetSize);
+	RequestSend(packetSize);
 	RequestRecv();
 }
 
@@ -132,9 +224,11 @@ bool Session::RequestDisconnect()
 	if (IocpManager::DisconnectEx(m_socket, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx), TF_REUSE_SOCKET, 0) == FALSE)
 	{
 		int errorno = WSAGetLastError();
-		if (WSAGetLastError() != WSA_IO_PENDING)
+		if (errorno != WSA_IO_PENDING)
 		{
-			PrintError("DisconnectEx()");
+			ReleaseRef();
+			s_pOverlappedExPool->Push(pOverlappedEx);
+			PrintError("DisconnectEx()", errorno);
 			return false;
 		}
 	}
@@ -176,9 +270,12 @@ bool Session::RequestRecv()
 	if (WSARecv(m_socket, &wsabuf, 1, &bytes, &flags, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx), NULL) == SOCKET_ERROR)
 	{
 		int errorno = WSAGetLastError();
-		if (WSAGetLastError() != WSA_IO_PENDING)
+		if (errorno != WSA_IO_PENDING)
 		{
-			PrintError("WSARecv()");
+			ReleaseRef();
+			s_pOverlappedExPool->Push(pOverlappedEx);
+			int errorno = WSAGetLastError();
+			PrintError("WSARecv()",errorno);
 			return false;
 		}
 	}
@@ -188,11 +285,19 @@ bool Session::RequestRecv()
 
 void Session::ProcessRecv(int recvlen)
 {
+	if (m_bConnected.load() == false)
+	{
+		return;
+	}
+	WriteLockGuard writelockGuard(m_writeLock);
 	m_recvBuf->MoveWritePos(recvlen);
-	cout << m_recvBuf->GetBuf() << endl;
 	
+	PacketHandler::ReadPacket(m_recvBuf->GetBuf());
+	void* recvBuf= m_recvBuf->GetBuf();
+	PacketHeader* pHeader = reinterpret_cast<PacketHeader*>(recvBuf);
 
-	memcpy(m_sendBuf->GetBuf(), m_recvBuf->GetBuf(), recvlen * sizeof(char));
+	memcpy(m_sendBuf->GetBuf(), recvBuf, pHeader->size);
+
 	m_recvBuf->MoveReadPos(recvlen);
 	m_sendBuf->MoveWritePos(recvlen);
 
@@ -218,9 +323,12 @@ bool Session::RequestSend(int recvlen)
 	if (WSASend(m_socket, &wsabuf, 1, &bytes, flags, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx), NULL) == SOCKET_ERROR)
 	{
 		int errorno = WSAGetLastError();
-		if (WSAGetLastError() != WSA_IO_PENDING)
+		if (errorno != WSA_IO_PENDING)
 		{
-			PrintError("WSASend()");
+			ReleaseRef();
+			s_pOverlappedExPool->Push(pOverlappedEx);
+			int errorno = WSAGetLastError();
+			PrintError("WSASend()", errorno);
 			return false;
 		}
 	}
@@ -231,5 +339,10 @@ bool Session::RequestSend(int recvlen)
 
 void Session::ProcessSend(int sendLen)
 {
+	if (m_bConnected.load() == false)
+	{
+		return;
+	}
+	WriteLockGuard writelockGuard(m_writeLock);
 	m_sendBuf->MoveReadPos(sendLen);
 }

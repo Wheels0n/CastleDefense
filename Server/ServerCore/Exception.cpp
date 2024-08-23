@@ -1,9 +1,7 @@
 #include "stdafx.h"
 #include "Exception.h"
 
-void PrintError(const char* pFunctionName)
+void PrintError(const char* pFunctionName, int errorno)
 {
-	int error = 0;
-	error = WSAGetLastError();
-	std::cout << pFunctionName << "Failed :" << error << std::endl;
+	std::cout << pFunctionName << "Failed :" << errorno << std::endl;
 }

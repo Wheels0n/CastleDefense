@@ -39,7 +39,7 @@ SO_UPDATE_ACCEPT_CONTEXT로 accept후 쓸 소켓의 속성을 설정해야지 ge
 당장 쓸 일은 없지만 connect()의 비동기 버전도 보자. lpfnConnectex()라고 이름이 되어있다.  
 오로지 연결 지향형 소켓에만 사용 가능하다.
 
-첫 번쨰 인자는 연결을 할 소켓이다.  
+첫 번쨰 인자는 연결을 할 소켓이다. 바인드는 되어 있어야한다.  
 두 번쨰 인자는 sockaddr에 대한 포인터이다.  
 세 번쨰 인자는 sockaddr 구조체의 바이트 크기이다.  
 네 번쨰 인자는 연결 후 보낼 데이터를 담는 버퍼에 대한 포인터이다.  
@@ -54,6 +54,10 @@ SO_UPDATE_ACCEPT_CONTEXT로 accept후 쓸 소켓의 속성을 설정해야지 ge
 - 새 연결을 한다.
 - (있다면)데이터 블록을 보낸다. 마치 send/WSASend처럼 쓸 수는 있다.  
   다만 시스템 자원을 많이 먹는 다고 한다.
+
+이로부터 생성된 소켓은 AceeptEx로 생성된 소켓과 마찬가지로 쓸 수 있는 소켓함수가 제한적이다.  
+setsockopt() 함수에 SO_UPDATE_CONNECT_CONTEXT 인자를 넘겨서 이전에 설정한 옵션들을 활성화
+시킬 수 있다.
 
 ## DisconnectEx
 

@@ -20,38 +20,36 @@ bool IocpManager::Init()
 {	
 	using namespace std;
 	WSADATA wsaData;
-	int error = 0;
+
 	int result = WSAStartup(MAKEWORD(2, 2), OUT &wsaData);
 	if (result != 0)
 	{	
-		PrintError("WSAStartUp()");
+		int errorno = WSAGetLastError();
+		PrintError("WSAStartUp()", errorno);
 		return false;
 	}
 
-	m_hListenSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (m_hListenSock == INVALID_SOCKET)
-	{
-		PrintError("socket()");
-		return false;
-	}
+	memset(&m_sockaddr, 0, sizeof(sockaddr_in));
+	m_sockaddr.sin_family = AF_INET;
+	m_sockaddr.sin_port = htons(SERVER_PORT);
+	InetPtonA(AF_INET, SERVER_ADDR, OUT & m_sockaddr.sin_addr);
 
-	sockaddr_in serverAddr;
-	memset(&serverAddr, 0, sizeof(sockaddr_in));
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(SERVER_PORT);
-	InetPtonA(AF_INET, SERVER_ADDR, OUT &serverAddr.sin_addr);
-	result = ::bind(m_hListenSock, (sockaddr*)&serverAddr, sizeof(sockaddr_in));
-	if (result == SOCKET_ERROR)
-	{
-		PrintError("bind()");
-		return false;
-	}
 
 	m_hIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (m_hIocp == INVALID_HANDLE_VALUE)
 	{  
-		PrintError("CreateIoCompletionPort()");
+		int errorno = WSAGetLastError();
+		PrintError("CreateIoCompletionPort()", errorno);
 		return false;  
+	}
+
+
+	SOCKET dummySock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (dummySock == INVALID_SOCKET)
+	{
+		int errorno = WSAGetLastError();
+		PrintError("socket()", errorno);
+		return false;
 	}
 
 	GUID guids[] = {
@@ -67,56 +65,105 @@ bool IocpManager::Init()
 	};
 	for (int i = 0; i < sizeof(guids)/sizeof(GUID); ++i)
 	{
-		if (GetWindowFunction(guids[i], pFunctions[i]) == false)
+		if (GetWindowFunction(dummySock, guids[i], pFunctions[i]) == false)
 		{
-			PrintError("GetWindowFunction()");
+			int errorno = WSAGetLastError();
+			PrintError("GetWindowFunction()", errorno);
 			return false;
 		}
 	}
 
-	g_pSessionManager->PrepareSessions();
+	closesocket(dummySock);
 
 	return true;
 }
 
 void IocpManager::Destroy()
 {
+	if (m_hListenSock != INVALID_SOCKET)
+	{
+		closesocket(m_hListenSock);
+	}
 
-	closesocket(m_hListenSock);
-	WSACleanup();
+	//WSACleanup();
 	std::cout << "Closing..." << std::endl;
 
 }
 
 
-void IocpManager::StartAccept()
+bool IocpManager::StartListen()
 {
-	 LLockOrderChecker = new LockOrderChecker();
+	m_hListenSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (m_hListenSock == INVALID_SOCKET)
+	{
+		int errorno = WSAGetLastError();
+		PrintError("socket()", errorno);
+		return false;
+	}
+	
+	if (::bind(m_hListenSock, (sockaddr*)&m_sockaddr, sizeof(sockaddr_in)) == SOCKET_ERROR)
+	{
+		int errorno = WSAGetLastError();
+		PrintError("bind()", errorno);
+		return false;
+	}
 
 	if (listen(m_hListenSock, MAX_CONNECTION) == SOCKET_ERROR)
 	{
-		PrintError("listen()");
-		return;
+		int errorno = WSAGetLastError();
+		PrintError("listen()", errorno);
+		return false;
 	}
+
 
 	RegisterSocket(m_hListenSock);
 
+	return true;
+}
+
+void IocpManager::StartAccept()
+{
+	LLockOrderChecker = new LockOrderChecker();
+	g_pSessionManager->PrepareSessions();
 	while (1)
 	{
 		g_pSessionManager->AcceptSessions();
 		Sleep(100);
 	}
-	delete LLockOrderChecker;
+	
+}
+
+void IocpManager::StartConnect()
+{
+	LLockOrderChecker = new LockOrderChecker();
+
+	g_pSessionManager->ConnectSession();
+}
+
+void IocpManager::StartDisconnect()
+{
+	g_pSessionManager->DisconnectSession();
 }
 
 void IocpManager::RunIOThreads()
 {
-	ThreadPool* pThreadPool = new ThreadPool();
-	int nThreads = pThreadPool->GetNumOfThreads();
+	m_pThreadPool = new ThreadPool();
+	int nThreads = m_pThreadPool->GetNumOfThreads();
 	for (int i = 0; i < nThreads; ++i)
 	{
-		pThreadPool->EnqueueTask([=]() { IOThreadMain(m_hIocp); });
+		m_pThreadPool->EnqueueTask([=]() { IOThreadMain(m_hIocp); });
 	}
+}
+
+void IocpManager::StopIOThreads()
+{
+	int nThreads = m_pThreadPool->GetNumOfThreads();
+	for (int i = 0; i < nThreads; ++i)
+	{
+		PostQueuedCompletionStatus(m_hIocp, 0, NULL, NULL);
+	}
+
+	m_pThreadPool->Join();
 }
 
 void IocpManager::IOThreadMain(HANDLE hIocp)
@@ -124,25 +171,32 @@ void IocpManager::IOThreadMain(HANDLE hIocp)
 	while (true)
 	{
 		DWORD transferredBytes = 0;
-		DWORD key = 0;
+		PULONG_PTR key = 0;
 		OverlappedEx* pOverlappedEx = nullptr;
 		Session* pSession = nullptr;
 		BOOL ret = ::GetQueuedCompletionStatus(hIocp, &transferredBytes,
-			(ULONG_PTR*)&key, (LPOVERLAPPED*)&pOverlappedEx, INFINITE);
-		
+			(PULONG_PTR)&key, (LPOVERLAPPED*)&pOverlappedEx, INFINITE);
+		if (key == NULL)
+		{
+			delete LLockOrderChecker;
+			break;
+		}
+
 		pSession = pOverlappedEx->m_owningSession;
 
 		if (ret == FALSE ||transferredBytes==0)
 		{
-			int errono = WSAGetLastError();
-			
+			int errono = WSAGetLastError();		
+
 			if (pOverlappedEx->m_ioType == eIO_TYPE::RECV|| pOverlappedEx->m_ioType == eIO_TYPE::SEND)
 			{
-				cout << errono << endl;
+				cout << "RequestDisconnect: "<<errono << endl;
+				pSession->SetConnection(false);
+				//TODO:서버에서만 호출하도록
 				pSession->RequestDisconnect();
 				continue;
 			}
-
+			
 		}
 
 		pSession = pOverlappedEx->m_owningSession;
@@ -151,6 +205,9 @@ void IocpManager::IOThreadMain(HANDLE hIocp)
 		{
 		case ACCEPT:
 			pSession->ProcessAccept();
+			break;
+		case CONNECT:
+			pSession->ProcessConnect();
 			break;
 		case RECV:
 			pSession->ProcessRecv(transferredBytes);
@@ -177,19 +234,20 @@ void IocpManager::RegisterSocket(SOCKET hSock)
 }
 
 IocpManager::IocpManager()
-	:m_hIocp(INVALID_HANDLE_VALUE), m_hListenSock(INVALID_SOCKET)
+	:m_hIocp(INVALID_HANDLE_VALUE), m_hListenSock(INVALID_SOCKET), m_pThreadPool(nullptr)
 {
 }
 
 IocpManager::~IocpManager()
 {
+	delete LLockOrderChecker;
 	Destroy();
 }
 
-bool IocpManager::GetWindowFunction(GUID guid, LPVOID* pFn)
+bool IocpManager::GetWindowFunction(SOCKET dummySock, GUID guid, LPVOID* pFn)
 {	
 	DWORD bytes = 0;
 
-	return WSAIoctl(m_hListenSock, SIO_GET_EXTENSION_FUNCTION_POINTER, 
+	return WSAIoctl(dummySock, SIO_GET_EXTENSION_FUNCTION_POINTER,
 		&guid, sizeof(guid), pFn, sizeof(*pFn), OUT &bytes, NULL, NULL) != SOCKET_ERROR;
 }

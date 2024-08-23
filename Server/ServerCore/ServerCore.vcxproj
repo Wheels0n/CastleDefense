@@ -72,15 +72,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)Server\$(Configuration)\</OutDir>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Unreal\CastleDefense\Server\protobuf-27.3\protobuf-27.3\src;$(SolutionDir)Server\protobuf-27.3\protobuf-27.3\third_party\abseil-cpp;$(SolutionDir)Server\ProtoBuf\protobuf-27.3\src;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Server\$(Configuration)\</OutDir>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Unreal\CastleDefense\Server\protobuf-27.3\protobuf-27.3\src;$(SolutionDir)Server\protobuf-27.3\protobuf-27.3\third_party\abseil-cpp;$(SolutionDir)Server\ProtoBuf\protobuf-27.3\src;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Server\$(Configuration)\</OutDir>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Unreal\CastleDefense\Server\protobuf-27.3\protobuf-27.3\src;$(SolutionDir)Server\protobuf-27.3\protobuf-27.3\third_party\abseil-cpp;$(SolutionDir)Server\ProtoBuf\protobuf-27.3\src;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Server\$(Configuration)\</OutDir>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Unreal\CastleDefense\Server\protobuf-27.3\protobuf-27.3\src;$(SolutionDir)Server\protobuf-27.3\protobuf-27.3\third_party\abseil-cpp;$(SolutionDir)Server\ProtoBuf\protobuf-27.3\src;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -155,6 +163,7 @@
     <ClCompile Include="LockQueue.h" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="CircularBuffer.cpp" />
+    <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="ServerCore.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SessionManager.cpp" />
@@ -164,6 +173,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="test.pb.cc" />
     <ClCompile Include="ThreadLocal.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
   </ItemGroup>
@@ -176,12 +186,17 @@
     <ClInclude Include="LockStack.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="CircularBuffer.h" />
+    <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionManager.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="test.pb.h" />
     <ClInclude Include="ThreadLocal.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="XTL.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

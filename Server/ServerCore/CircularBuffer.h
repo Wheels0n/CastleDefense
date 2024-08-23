@@ -1,5 +1,5 @@
 #pragma once
-const int BUF_SIZE = 16;
+const int BUF_SIZE = 256;
 class CircularBuffer
 {
 public:

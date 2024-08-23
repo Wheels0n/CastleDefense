@@ -57,6 +57,12 @@
     <ClCompile Include="CircularBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="test.pb.cc">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LockStack.h">
@@ -101,5 +107,16 @@
     <ClInclude Include="CircularBuffer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="test.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandler.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test.proto">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

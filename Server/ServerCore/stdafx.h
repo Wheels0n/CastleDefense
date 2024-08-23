@@ -1,6 +1,8 @@
 #pragma once
 
 #pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "Debug\\libprotobufd.lib")
+
 #include <WinSock2.h> 
 #include <windows.h> 
 #include <mswsock.h>
