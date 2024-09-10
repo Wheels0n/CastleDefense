@@ -12,7 +12,10 @@ struct PacketHeader
 class PacketHandler
 {
 public:
-	static void WritePacket(Packet& pkt, char* pBuf);
-	static void ReadPacket(char* pBuf);
+	static void SerializeC_Chat(C_Chat& pkt, char* pBuf);
+	static C_Chat ParseC_Chat(char* pBuf);
+	static void ProcessPacket(PacketHeader*);
+
+	static void ProcessC_Chat(PacketHeader*);
 };
 

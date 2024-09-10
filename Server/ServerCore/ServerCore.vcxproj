@@ -130,6 +130,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessToFile>false</PreprocessToFile>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,6 +147,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessToFile>false</PreprocessToFile>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -164,6 +166,7 @@
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="CircularBuffer.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
+    <ClCompile Include="SendBuffer.cpp" />
     <ClCompile Include="ServerCore.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SessionManager.cpp" />
@@ -187,6 +190,7 @@
     <ClInclude Include="Memory.h" />
     <ClInclude Include="CircularBuffer.h" />
     <ClInclude Include="PacketHandler.h" />
+    <ClInclude Include="SendBuffer.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionManager.h" />
     <ClInclude Include="stdafx.h" />

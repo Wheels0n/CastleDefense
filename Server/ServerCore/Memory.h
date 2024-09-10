@@ -22,7 +22,6 @@ inline MemoryHeader* DetachMemoryHeader(void* ptr)
 	return reinterpret_cast<MemoryHeader*>(ptr) - 1;
 }
 
-
 class MemoryPool
 {
 public:
@@ -40,6 +39,7 @@ private:
 	int m_allocSize;
 	std::atomic<int> m_nAlloc;
 };
+
 
 class MemoryPoolManager
 {

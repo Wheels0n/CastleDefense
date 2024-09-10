@@ -2,7 +2,7 @@
 // NO CHECKED-IN PROTOBUF GENCODE
 // source: test.proto
 // Protobuf C++ Version: 5.27.3
-#include "stdafx.h"
+
 #include "test.pb.h"
 
 #include <algorithm>

@@ -9,7 +9,6 @@
 #pragma comment(lib, "Release\\libprotobuf.lib")
 #endif // DEBUG
 
-
 //#pragma comment(lib, "absl_bad_any_cast_impl.lib")
 #pragma comment(lib, "absl_bad_optional_access.lib")
 //#pragma comment(lib, "absl_bad_variant_access.lib")
@@ -105,6 +104,8 @@
 #include "SessionManager.h"
 #include "IocpManager.h"
 #include "PacketHandler.h"
+#include "ThreadLocal.h"
+#include "LockOrderChecker.h"
 int main()
 {
 	g_pMemoryPoolManager = new MemoryPoolManager();
@@ -115,13 +116,32 @@ int main()
 	{
 		return -1;
 	}
-	
-	g_pIocpManager->RunIOThreads();
-	g_pIocpManager->StartConnect();
 
-	cout << "종료 하려면 아무 키나 누르세요" << endl;
-	string cmd;
-	cin >> cmd;
+
+	g_pIocpManager->RunIOThreads();
+	Session* pSession = g_pSessionManager->ConnectSession();
+	LLockOrderChecker = new LockOrderChecker();
+	//TODO: 클라 세션 메모리 누수 
+	C_Packet pkt;
+	while (1)
+	{
+		string msg;
+		cout << "아무거나 입력하세요" << endl;
+		cin >> msg;
+		C_Chat chat;
+		chat.set_msg(msg);
+
+		pkt.set_id(E_TYPE::Chat);
+		pkt.set_allocated_chat(&chat);
+
+		int packetSize = (pkt.ByteSizeLong() + sizeof(PacketHeader));
+		shared_ptr<SendBuffer> pSendBuffer = make_shared<SendBuffer>(packetSize);
+		PacketHandler::WritePacket(pkt, pSendBuffer->GetBuffer());
+		pSession->RequestSend(pSendBuffer);
+		Sleep(500);
+	}
+
+	
 	g_pSessionManager->DisconnectSession();
 	g_pIocpManager->StopIOThreads();
 

@@ -107,7 +107,7 @@ void MemoryPoolManager::Deallocate(void* ptr)
 	assert(realAllocSize > 0);
 	if (realAllocSize > MAX_ALLOC_SIZE)
 	{
-		_aligned_free(ptr);
+		_aligned_free(pHeader);
 	}
 	else
 	{

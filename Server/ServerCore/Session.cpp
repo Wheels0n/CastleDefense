@@ -28,14 +28,14 @@ void Session::ReleaseRef()
 
 
 Session::Session()
-	:m_socket(INVALID_SOCKET), m_nRef(0), m_bConnected(false), m_recvBuf(nullptr), m_sendBuf(nullptr), m_writeLock(1)
+	:m_socket(INVALID_SOCKET), m_nRef(0), m_bConnected(false), m_recvBuf(nullptr),  
+	m_recvLock(1), m_sendLock(1)
 {
 	memset(&m_sockaddr, 0, sizeof(sockaddr_in));
 	m_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	//TODO : 소켓 생성 실패 시?
 
 	m_recvBuf = MakeShared<CircularBuffer>();
-	m_sendBuf = MakeShared<CircularBuffer>();
 }
 
 Session::~Session()
@@ -141,7 +141,7 @@ bool Session::PrepareConnect()
 {
 	memset(&m_sockaddr, 0, sizeof(sockaddr_in));
 	m_sockaddr.sin_family = AF_INET;
-	m_sockaddr.sin_port = htons(555);
+	m_sockaddr.sin_port = 0;
 	InetPtonA(AF_INET, SERVER_ADDR, OUT & m_sockaddr.sin_addr);
 
 	if (::bind(m_socket, reinterpret_cast<sockaddr*>(& m_sockaddr), sizeof(sockaddr_in))==SOCKET_ERROR)
@@ -197,16 +197,6 @@ void Session::ProcessConnect()
 		PrintError("setsockopt()", errorno);
 	}
 
-
-	Packet pkt;
-	pkt.set_id(m_socket);
-	pkt.set_msg("hello");
-	
-	int packetSize = (pkt.ByteSizeLong() + sizeof(PacketHeader));
-
-	PacketHandler::WritePacket(pkt, m_sendBuf->GetBuf());
-	m_sendBuf->MoveWritePos(packetSize);
-	RequestSend(packetSize);
 	RequestRecv();
 }
 
@@ -288,45 +278,62 @@ void Session::ProcessRecv(int recvlen)
 	if (m_bConnected.load() == false)
 	{
 		return;
+
 	}
-	WriteLockGuard writelockGuard(m_writeLock);
-	m_recvBuf->MoveWritePos(recvlen);
+
 	
-	PacketHandler::ReadPacket(m_recvBuf->GetBuf());
-	void* recvBuf= m_recvBuf->GetBuf();
-	PacketHeader* pHeader = reinterpret_cast<PacketHeader*>(recvBuf);
-
-	memcpy(m_sendBuf->GetBuf(), recvBuf, pHeader->size);
-
+	WriteLockGuard writelockGuard(m_recvLock);
+	m_recvBuf->MoveWritePos(recvlen);
+	PacketHandler::ProcessPacket((PacketHeader*)m_recvBuf->GetBuf());
 	m_recvBuf->MoveReadPos(recvlen);
-	m_sendBuf->MoveWritePos(recvlen);
-
-	RequestSend(recvlen);
+	
 	RequestRecv();
 }
 
-bool Session::RequestSend(int recvlen)
+bool Session::RequestSend(shared_ptr<SendBuffer> pSbuffer)
 {
+	xvector<WSABUF> wsabufs;
+	OverlappedEx* pOverlappedEx;
+	{
+		WriteLockGuard writelockGuard(m_sendLock);
+		m_sendQueue.push(pSbuffer);
+		if (m_bSending.exchange(true) == true)
+		{
+			return true;
+		}
+
+		pOverlappedEx = s_pOverlappedExPool->Pop();
+		while (!m_sendQueue.empty())
+		{
+			shared_ptr<SendBuffer> cur = m_sendQueue.front();
+			m_sendQueue.pop();
+			pOverlappedEx->m_sendBuffers.push_back(cur);
+
+			WSABUF wsabuf;
+			wsabuf.buf = cur->GetBuffer();
+			wsabuf.len = cur->GetSize();
+
+			wsabufs.push_back(wsabuf);
+		}
+
+	}
+	//몰아서 처리하니까 한번만 Ref하도록 함
 	AddRef();
 	
-	OverlappedEx* pOverlappedEx = s_pOverlappedExPool->Pop();
-
 	DWORD bytes = 0;
 	DWORD flags = 0;
 	pOverlappedEx->m_ioType = eIO_TYPE::SEND;
 	pOverlappedEx->m_owningSession = this;
+	
 
-	WSABUF wsabuf;
-	wsabuf.buf = m_sendBuf->GetBuf();
-	wsabuf.len = recvlen;
-
-	if (WSASend(m_socket, &wsabuf, 1, &bytes, flags, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx), NULL) == SOCKET_ERROR)
+	if (WSASend(m_socket, &wsabufs[0], wsabufs.size(), &bytes, flags, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx), NULL) == SOCKET_ERROR)
 	{
 		int errorno = WSAGetLastError();
 		if (errorno != WSA_IO_PENDING)
 		{
 			ReleaseRef();
 			s_pOverlappedExPool->Push(pOverlappedEx);
+			m_bSending.store(false);
 			int errorno = WSAGetLastError();
 			PrintError("WSASend()", errorno);
 			return false;
@@ -334,7 +341,7 @@ bool Session::RequestSend(int recvlen)
 	}
 
 
-	return false;
+	return true;
 }
 
 void Session::ProcessSend(int sendLen)
@@ -343,6 +350,6 @@ void Session::ProcessSend(int sendLen)
 	{
 		return;
 	}
-	WriteLockGuard writelockGuard(m_writeLock);
-	m_sendBuf->MoveReadPos(sendLen);
+
+	m_bSending.store(false);
 }

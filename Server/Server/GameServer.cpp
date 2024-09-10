@@ -7,7 +7,7 @@
 #else
 #pragma comment(lib, "Release\\ServerCore.lib")
 #pragma comment(lib, "Release\\libprotobuf.lib")
-#endif // DEBUG
+#endif // _DEBUG
 
 //#pragma comment(lib, "absl_bad_any_cast_impl.lib")
 #pragma comment(lib, "absl_bad_optional_access.lib")
