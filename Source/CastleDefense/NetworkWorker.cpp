@@ -50,7 +50,7 @@ void RecvWorker::RecvPacket()
 	TArray<uint8> buffer;
 	buffer.AddZeroed(headerSize);
 	int recvBytes = 0;
-	uint8* pos = buffer.GetData();
+	uint8* pos = &buffer[0];
 
 	while (headerSize)
 	{
@@ -67,27 +67,32 @@ void RecvWorker::RecvPacket()
 		recvBytes = 0;
 	}
 	
-	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(buffer.GetData());
-	UE_LOG(LogTemp, Error, TEXT("%d"), pHeader->size);
+	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(&buffer[0]);
+	UE_LOG(LogTemp, Error, TEXT("PacketSize : %d"), pHeader->size);
+	UE_LOG(LogTemp, Error, TEXT("PacketType : %d"), pHeader->id);
 	headerSize = sizeof(CPacketHeader);
 	int payloadSize = pHeader->size - headerSize;
-	buffer.AddZeroed(payloadSize);
-
-	pos = &buffer[headerSize];
-	while (payloadSize)
+	if (payloadSize)
 	{
-		bool bSucceded =
-			m_pSocket->Recv(pos, payloadSize, recvBytes);
-		if (!bSucceded)
+		buffer.AddZeroed(payloadSize);
+
+		pos = &buffer[headerSize];
+		while (payloadSize)
 		{
-			UE_LOG(LogTemp, Error, TEXT("RecvPacket() Failed"));
-			return;
+			bool bSucceded =
+				m_pSocket->Recv(pos, payloadSize, recvBytes);
+			if (!bSucceded)
+			{
+				UE_LOG(LogTemp, Error, TEXT("RecvPacket() Failed"));
+				return;
+			}
+			UE_LOG(LogTemp, Error, TEXT("RecvBytes : %d"), recvBytes);
+			pos += recvBytes;
+			payloadSize -= recvBytes;
+			recvBytes = 0;
 		}
-		UE_LOG(LogTemp, Error, TEXT("RecvBytes : %d"), recvBytes);
-		pos += recvBytes;
-		payloadSize -= recvBytes;
-		recvBytes = 0;
 	}
+	
 	UE_LOG(LogTemp, Error, TEXT("RecvPacket() Succeded"));
 	TSharedPtr<ClientSession> pSession = m_session.Pin();
 	pSession->EnqueueRecvPacket(buffer);
@@ -102,7 +107,7 @@ uint32 SendWorker::Run()
 {
 	while (m_bRunning)
 	{
-		FPlatformProcess::Sleep(0.5);
+		
 		if (m_session != nullptr)
 		{
 			TSharedPtr<ClientSession> pSession = m_session.Pin();
@@ -139,8 +144,7 @@ SendWorker::~SendWorker()
 
 void SendWorker::SendPacket(TSharedPtr<SendBuffer> pkt)
 {
-	
-	//TODO:서버 로그인하면 통지 패킷 브로드캐스팅하기
+
 	uint8* pos = (uint8*)pkt->GetBuffer();
 	int toSend = pkt->GetSize();
 	int sentBytes = 0;
@@ -158,4 +162,10 @@ void SendWorker::SendPacket(TSharedPtr<SendBuffer> pkt)
 		sentBytes = 0;
 	}
 	UE_LOG(LogTemp, Log, TEXT("SendPacket() Succeded"));
+	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(pkt->GetBuffer());
+	if (pHeader->id == Despawn)
+	{
+		FGenericPlatformMisc::RequestExit(false);
+	}
+
 }

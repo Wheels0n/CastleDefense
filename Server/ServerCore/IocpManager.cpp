@@ -173,7 +173,7 @@ void IocpManager::IOThreadMain(HANDLE hIocp)
 		DWORD transferredBytes = 0;
 		PULONG_PTR key = 0;
 		OverlappedEx* pOverlappedEx = nullptr;
-		Session* pSession = nullptr;
+		shared_ptr<Session> pSession = nullptr;
 		BOOL ret = ::GetQueuedCompletionStatus(hIocp, &transferredBytes,
 			(PULONG_PTR)&key, (LPOVERLAPPED*)&pOverlappedEx, INFINITE);
 		if (key == NULL)

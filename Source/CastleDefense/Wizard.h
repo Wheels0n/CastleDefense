@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Network/test.pb.h"
 #include "Wizard.generated.h"
 
+
 class UWizardWidget;
+class UChatWidget;
 class UCameraComponent;
 
 UCLASS()
@@ -29,11 +32,16 @@ public:
 	bool IsDestroying() { return m_bDestroySet; };
 	bool IsHit() { return m_bGotHit; };
 
+	void AddChat(std::string&);
 	void CheckPlayerAttack();
+	void LazyCreateWidget();
 	void DecreaseHp();
 	void ResetHit() { m_bGotHit = false; };
 	void DestroyTimer();
 	void DestroyPlayer();
+	void BrodcastPos();
+	void SetNewDest(Player*);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -59,6 +67,12 @@ private:
 	void StopSprint();
 
 	UFUNCTION()
+	void OpenPauseMenu();
+
+	UFUNCTION()
+	void FocusOnChat();
+
+	UFUNCTION()
 	void StartJump();
 
 	UFUNCTION()
@@ -66,10 +80,22 @@ private:
 
 private: 
 	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
-	TSubclassOf<UWizardWidget> WidgetClass;
+	TSubclassOf<UWizardWidget> PlayerWidgetClass;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
-	UWizardWidget* m_pWidget;
+	TSubclassOf<UUserWidget> pauseWidgetClass;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
+	TSubclassOf<UChatWidget> chatWidgetClass;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
+	UWizardWidget* m_pPlayerWidget;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
+	UUserWidget* m_pPauseWidget;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
+	UChatWidget* m_pChatWidget;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Item)
 	AActor* m_pWeapon;
@@ -81,10 +107,19 @@ private:
 	UCameraComponent* m_pCamComponent;
 
 	FTimerHandle m_hTimer;
+	
+	Coordiante m_curCoord;
+	Coordiante m_dstCoord;
+	Rotation m_curRot;
+	Rotation m_dstRot;
+	MoveState m_curMoveState;
 
+	bool m_bMoveStateChanged;
 	bool m_bAttacking;
 	bool m_bGotHit;
 	bool m_bDead;
 	bool m_bDestroySet;
 	int m_Hp;
+
+	float m_broadCastTime;
 };

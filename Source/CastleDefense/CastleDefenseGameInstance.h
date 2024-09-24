@@ -16,13 +16,25 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 
-	UCastleDefenseGameInstance();
-	
+	TSharedPtr<ClientSession> GetSession() { return m_pSession; };
+
+	int32 GetUserID();
 
 	UFUNCTION(BlueprintCallable)
-	void ConnectToServer();
+	bool ConnectToServer();
+
+	UFUNCTION(BlueprintCallable)
+	void DisconnectFromServer();
+
+	void SendMessage(char* pBuf);
+
+	UFUNCTION(BlueprintCallable)
+	void SpawnPlayer();
+
 	UFUNCTION(BlueprintCallable)
 	void DequeuePacket();
+
+	UCastleDefenseGameInstance();
 private:
 	
 

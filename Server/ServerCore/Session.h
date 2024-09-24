@@ -18,13 +18,13 @@ class Session;
 struct OverlappedEx
 {		
 	OVERLAPPED m_overlapped;
-	Session* m_owningSession;
+	shared_ptr<Session> m_owningSession;
 	eIO_TYPE m_ioType;
 	xvector<shared_ptr<SendBuffer>> m_sendBuffers;
 };
 
 class CircularBuffer; 
-class Session
+class Session : public enable_shared_from_this<Session>
 {
 public:
 	void AddRef();

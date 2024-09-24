@@ -64,8 +64,8 @@ void xdelete(T* pObj)
 	PoolAllocator::Release(pObj);
 }
 
-template<typename T>
-std::shared_ptr<T> MakeShared()
+template<typename T, typename... Args>
+std::shared_ptr<T> MakeShared(Args&&... args)
 {
-	return std::shared_ptr<T>{xnew<T>(), xdelete<T>};
+	return std::shared_ptr<T>{xnew<T>(std::forward<Args>(args)...), xdelete<T>};
 }

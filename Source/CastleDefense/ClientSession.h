@@ -11,6 +11,8 @@ class FSocket;
 class RecvWorker;
 class SendWorker;
 class SendBuffer;
+class CPacketHandler;
+class UCastleDefenseGameInstance;
 class CASTLEDEFENSE_API ClientSession : public TSharedFromThis<ClientSession>
 {
 public:
@@ -21,11 +23,20 @@ public:
 	bool DequeueSendPacket(TSharedPtr<SendBuffer>&);
 
 	void CreateWorkers();
+
+	void SendC_Login();
+	UFUNCTION(BlueprintCallable)
+	void SendC_Spawn();
+	void SendC_Despawn();
+	void SendC_Move(Coordiante*, Rotation*, MoveState);
 	void SendC_Chat(char* pBuf);
-	ClientSession(FSocket*);
+	ClientSession(FSocket*, UCastleDefenseGameInstance*);
 	~ClientSession();
 
 public:
+	Player m_player;
+	TSharedPtr<CPacketHandler> m_pPacketHandler;
+
 	TSharedPtr<RecvWorker> m_pRecvWorker;
 	TSharedPtr<SendWorker> m_pSendWorker;
 	FSocket* m_pSocket;

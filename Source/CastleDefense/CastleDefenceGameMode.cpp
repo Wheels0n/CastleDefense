@@ -6,8 +6,8 @@
 
 ACastleDefenceGameMode::ACastleDefenceGameMode()
 {
-	static ConstructorHelpers::FClassFinder<AWizard> wizardClass(TEXT("/Script/CoreUObject.Class'/Script/CastleDefense.Wizard'"));
-	DefaultPawnClass = wizardClass.Class;
+	//static ConstructorHelpers::FClassFinder<AWizard> wizardClass(TEXT("/Script/CoreUObject.Class'/Script/CastleDefense.Wizard'"));
+	//DefaultPawnClass = wizardClass.Class;
 }
 
 void ACastleDefenceGameMode::BeginPlay()

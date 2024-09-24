@@ -22,7 +22,7 @@ void Session::ReleaseRef()
 	m_nRef.fetch_sub(1);
 	if (m_bConnected.load()==false&& m_nRef.load()==0)
 	{
-		g_pSessionManager->ReturnSession(this);
+		g_pSessionManager->ReturnSession(shared_from_this());
 	}
 }
 
@@ -80,7 +80,7 @@ bool Session::RequestAccept()
 	DWORD bytes = 0;
 	DWORD flags = 0;
 	pOverlappedEx->m_ioType = eIO_TYPE::ACCEPT;
-	pOverlappedEx->m_owningSession = this;
+	pOverlappedEx->m_owningSession = shared_from_this();
 
 	AddRef();
 
@@ -164,7 +164,7 @@ bool Session::RequestConnect()
 	DWORD bytes = 0;
 	DWORD flags = 0;
 	pOverlappedEx->m_ioType = eIO_TYPE::CONNECT;
-	pOverlappedEx->m_owningSession = this;
+	pOverlappedEx->m_owningSession = shared_from_this();
 
 	AddRef();
 	//TODO : 매개변수 에러
@@ -207,7 +207,7 @@ bool Session::RequestDisconnect()
 	DWORD bytes = 0;
 	DWORD flags = 0;
 	pOverlappedEx->m_ioType = eIO_TYPE::DISCONNECT;
-	pOverlappedEx->m_owningSession = this;
+	pOverlappedEx->m_owningSession = shared_from_this();
 
 	AddRef();
 
@@ -251,7 +251,7 @@ bool Session::RequestRecv()
 	DWORD bytes = 0;
 	DWORD flags = 0;
 	pOverlappedEx->m_ioType = eIO_TYPE::RECV;
-	pOverlappedEx->m_owningSession = this;
+	pOverlappedEx->m_owningSession =  shared_from_this();
 
 	WSABUF wsabuf;
 	wsabuf.buf = m_recvBuf->GetBuf();
@@ -281,11 +281,15 @@ void Session::ProcessRecv(int recvlen)
 
 	}
 
+	xvector<char> tmp(recvlen);
+	{
+		WriteLockGuard writelockGuard(m_recvLock);
+		m_recvBuf->MoveWritePos(recvlen);
+		memcpy(&tmp[0], m_recvBuf->GetBuf(), recvlen);
+		m_recvBuf->MoveReadPos(recvlen);
+	}
 	
-	WriteLockGuard writelockGuard(m_recvLock);
-	m_recvBuf->MoveWritePos(recvlen);
-	PacketHandler::ProcessPacket((PacketHeader*)m_recvBuf->GetBuf());
-	m_recvBuf->MoveReadPos(recvlen);
+	PacketHandler::ProcessPacket((PacketHeader*)&tmp[0], shared_from_this());
 	
 	RequestRecv();
 }
@@ -323,7 +327,7 @@ bool Session::RequestSend(shared_ptr<SendBuffer> pSbuffer)
 	DWORD bytes = 0;
 	DWORD flags = 0;
 	pOverlappedEx->m_ioType = eIO_TYPE::SEND;
-	pOverlappedEx->m_owningSession = this;
+	pOverlappedEx->m_owningSession = shared_from_this();
 	
 
 	if (WSASend(m_socket, &wsabufs[0], wsabufs.size(), &bytes, flags, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx), NULL) == SOCKET_ERROR)

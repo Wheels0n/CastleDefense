@@ -8,7 +8,7 @@ void SessionManager::PrepareSessions()
 {
 	for (int i = 0; i<MAX_CONNECTION; ++i)
 	{
-		Session* pSession = xnew<Session>();
+		shared_ptr<Session> pSession = MakeShared<Session>();
 		m_sessionPool.push_back(pSession);
 		m_sessionVec.push_back(pSession);
 	}
@@ -20,7 +20,7 @@ void SessionManager::AcceptSessions()
 
 	while (m_nCurSessions.load() < MAX_CONNECTION)
 	{
-		Session* pSession = m_sessionPool.back();
+		shared_ptr<Session> pSession = m_sessionPool.back();
 		m_sessionPool.pop_back();
 		m_nCurSessions.fetch_add(1);
 		
@@ -34,9 +34,9 @@ void SessionManager::AcceptSessions()
 	return;
 }
 
-Session* SessionManager::ConnectSession()
+shared_ptr<Session> SessionManager::ConnectSession()
 {
-	Session* pSession = xnew<Session>();
+	shared_ptr<Session> pSession = MakeShared<Session>();
 	m_sessionPool.push_back(pSession);
 	m_nCurSessions.fetch_add(1);
 
@@ -56,7 +56,7 @@ Session* SessionManager::ConnectSession()
 void SessionManager::DisconnectSession()
 {
 	m_nCurSessions.fetch_sub(1);
-	Session* pSession = m_sessionPool.back();
+	shared_ptr<Session> pSession = m_sessionPool.back();
 	m_sessionPool.pop_back();
 	pSession->ShutdownSocket();
 	while (pSession->GetConnection())
@@ -65,7 +65,7 @@ void SessionManager::DisconnectSession()
 	}
 }
 
-void SessionManager::ReturnSession(Session* pSession)
+void SessionManager::ReturnSession(shared_ptr<Session> pSession)
 {
 
 	WriteLockGuard wLockGuard(m_rwLock);
@@ -74,17 +74,27 @@ void SessionManager::ReturnSession(Session* pSession)
 	m_nCurSessions.fetch_sub(1);
 }
 
-void SessionManager::Brodcast(shared_ptr<SendBuffer> pSendBuffer)
+void SessionManager::Brodcast(shared_ptr<SendBuffer> pSendBuffer, shared_ptr<Session> pSession)
 {
 
 	for (int i = 0; i < m_sessionVec.size(); ++i)
 	{
-		if (m_sessionVec[i]->GetConnection())
+		if (m_sessionVec[i]!=pSession&&m_sessionVec[i]->GetConnection())
 		{
 			//TODO: ¿©±â ³¢¾îµé±â ¾îÂ¼Áö?
 			m_sessionVec[i]->RequestSend(pSendBuffer);
 		}
 	}
+}
+
+void SessionManager::MapIdToSession(int id, shared_ptr<Session> pSession)
+{
+	m_idToSession[id] = pSession;
+}
+
+shared_ptr<Session> SessionManager::GetSessionById(int id)
+{
+	return m_idToSession[id];
 }
 
 SessionManager::SessionManager()

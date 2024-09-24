@@ -32,15 +32,18 @@ UCastleDefenseGameInstance::UCastleDefenseGameInstance()
 	
 }
 
-void UCastleDefenseGameInstance::ConnectToServer()
+int32 UCastleDefenseGameInstance::GetUserID()
+{
+	return m_pSession==nullptr?
+		0:m_pSocket->GetPortNo();
+}
+
+bool UCastleDefenseGameInstance::ConnectToServer()
 {
 	ISocketSubsystem* pSocketSubsystem =
 		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
 	m_pSocket = pSocketSubsystem->
 		CreateSocket(TEXT("Stream"), TEXT("Client Socket"));
-
-	m_pSession = MakeShared<ClientSession>(m_pSocket);
-	m_pSession->CreateWorkers();
 
 	FIPv4Address ip;
 	FIPv4Address::Parse(m_ipAddress, ip);
@@ -50,21 +53,46 @@ void UCastleDefenseGameInstance::ConnectToServer()
 	internetAddr->SetPort(m_port);
 
 	UE_LOG(LogInit, Display, TEXT("Created Socket"));
-	
-	bool bConnected = m_pSocket->Connect(*internetAddr);
 
+	bool bConnected = m_pSocket->Connect(*internetAddr);
+	m_pSession = MakeShared<ClientSession>(m_pSocket, this);
+	m_pSession->CreateWorkers();
 	if (bConnected)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Yellow, "Connected");
 		UE_LOG(LogInit, Display, TEXT("ConnectSucceded"));
-		m_pSession->SendC_Chat(nullptr);
+		m_pSession->SendC_Login();
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Yellow, "NotConnected");
 		UE_LOG(LogInit, Display, TEXT("FailedToConnect"));
 	}
+	return bConnected;
+}
 
+void UCastleDefenseGameInstance::DisconnectFromServer()
+{
+	if (m_pSession != nullptr)
+	{
+		m_pSession->SendC_Despawn();
+	}
+}
+
+void UCastleDefenseGameInstance::SendMessage(char* pBuf)
+{
+	if (m_pSession != nullptr)
+	{
+		m_pSession->SendC_Chat(pBuf);
+	}
+}
+
+void UCastleDefenseGameInstance::SpawnPlayer()
+{
+	if (m_pSession != nullptr)
+	{
+		m_pSession->SendC_Spawn();
+	}
 }
 
 void UCastleDefenseGameInstance::DequeuePacket()

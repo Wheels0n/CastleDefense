@@ -1,3 +1,74 @@
+message Coordiante
+{
+	required float x=1;
+	required float y=2;
+	required float z=3;
+}
+
+message Rotation
+{
+	required float x=1;
+	required float y=2;
+	required float z=3;
+}
+
+enum MoveState
+{
+	IDLE =1;
+	WALK =2;
+	SPRINT=3;
+	JUMP=4;
+}
+
+message Player
+{
+	required int32 id=1;
+	required Coordiante coord=2;
+	required Rotation rot=3;
+	required MoveState moveState=4;
+}
+
+
+message C_Login
+{
+	required int32 id = 1;
+}
+
+message S_Login
+{
+	required bool bSucceded = 1;
+}
+
+message C_Spawn
+{
+	required int32 id = 1;
+}
+
+message S_Spawn
+{
+	repeated Player player =1;
+}
+
+message C_Despawn
+{
+	required int32 id = 1;
+}
+
+message S_Despawn
+{
+	required int32 id = 1;
+}
+
+message C_Move
+{
+	required Player player=1;
+}
+
+message S_Move
+{
+	required Player player=1;
+}
+
 message C_Chat
 {
 	required string msg =1;
@@ -10,5 +81,9 @@ message S_Chat
 
 enum E_TYPE
 {
-	Chat = 0;
+	Login = 0;
+	Spawn = 1;
+	Despawn = 2;
+	Movement = 3;
+	Chat = 4;
 }
