@@ -502,3 +502,4 @@ FodyWeavers.xsd
 /Server/ProtoBuf
 /Server/protobuf-27.3/protobuf-27.3
 /Source/ProtobufCore
+*.mp4
