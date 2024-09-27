@@ -50,6 +50,16 @@ void CPacketHandler::SerializeC_Chat(C_Chat& pkt, char* pBuf)
 	pkt.SerializeToArray(pHeader + 1, pkt.ByteSizeLong());
 }
 
+void CPacketHandler::SerializeC_Attack(C_Attack& pkt, char* pBuf)
+{
+	int packetSize = sizeof(CPacketHeader) + pkt.ByteSizeLong();
+	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(pBuf);
+	pHeader->size = packetSize;
+	pHeader->id = E_TYPE::Attack;
+
+	pkt.SerializeToArray(pHeader + 1, pkt.ByteSizeLong());
+}
+
 S_Login CPacketHandler::ParseS_Login(char* pBuf)
 {
 	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(pBuf);
@@ -117,6 +127,31 @@ S_Chat CPacketHandler::ParseS_Chat(char* pBuf)
 	return pkt;
 }
 
+S_EnemySpawn CPacketHandler::ParseS_EnemySpawn(char* pBuf)
+{
+	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(pBuf);
+	int size = (pHeader->size) - sizeof(CPacketHeader);
+	S_EnemySpawn pkt;
+	if (pkt.ParseFromArray(pHeader + 1, size) == false)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ParseFromArray() Failed"));
+	}
+	return pkt;
+}
+
+S_Attack CPacketHandler::ParseS_Attack(char* pBuf)
+{
+	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(pBuf);
+	int size = (pHeader->size) - sizeof(CPacketHeader);
+	S_Attack pkt;
+	if (pkt.ParseFromArray(pHeader + 1, size) == false)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ParseFromArray() Failed"));
+	}
+	return pkt;
+}
+
+
 
 void CPacketHandler::ProcessPacket(CPacketHeader* pHeader)
 {
@@ -137,6 +172,12 @@ void CPacketHandler::ProcessPacket(CPacketHeader* pHeader)
 		break;
 	case Chat:
 		ProcessS_Chat(pHeader);
+		break;
+	case EnemySpawn:
+		ProcessS_EnemySpawn(pHeader);
+		break;
+	case Attack:
+		ProcessS_Attack(pHeader);
 		break;
 	default:
 		break;
@@ -212,6 +253,29 @@ void CPacketHandler::ProcessS_Chat(CPacketHeader* pHeader)
 	std::string msg = pkt.msg();
 	pPlayer->AddChat(msg);
 	
+}
+
+void CPacketHandler::ProcessS_EnemySpawn(CPacketHeader* pHeader)
+{
+	S_EnemySpawn pkt = ParseS_EnemySpawn(reinterpret_cast<char*>(pHeader));
+	UWorld* pCurWorld = m_pGameInstance->GetWorld();
+	ACastleDefenseGameState* pGameState = pCurWorld->GetGameState<ACastleDefenseGameState>();
+
+	for (int i = 0; i < pkt.enemy_size(); ++i)
+	{
+		Enemy curEnemy= pkt.enemy(i);
+		pGameState->AddEnemy(&curEnemy);
+	}
+}
+
+void CPacketHandler::ProcessS_Attack(CPacketHeader* pHeader)
+{
+	S_Attack pkt = ParseS_Attack(reinterpret_cast<char*>(pHeader));
+
+	UWorld* pCurWorld = m_pGameInstance->GetWorld();
+	ACastleDefenseGameState* pGameState = pCurWorld->GetGameState<ACastleDefenseGameState>();
+	pGameState->UpdateEnemyHp(pkt.target());
+
 }
 
 CPacketHandler::CPacketHandler(UCastleDefenseGameInstance* pGameInstacne, int id)

@@ -3,6 +3,7 @@
 #include "Session.h"
 #include "SessionManager.h"
 #include "PlayerManager.h"
+#include "EnemyManager.h"
 void PacketHandler::SerializeS_Login(S_Login& pkt, char* pBuf)
 {
 	int packetSize = sizeof(PacketHeader) + pkt.ByteSizeLong();
@@ -47,6 +48,26 @@ void PacketHandler::SerializeS_Chat(S_Chat& pkt, char* pBuf)
 	pHeader->id = E_TYPE::Chat;
 	
 	pkt.SerializeToArray(pHeader+1, pkt.ByteSizeLong());
+}
+
+void PacketHandler::SerializeS_EnemySpawn(S_EnemySpawn& pkt, char* pBuf)
+{
+	int packetSize = sizeof(PacketHeader) + pkt.ByteSizeLong();
+	PacketHeader* pHeader = reinterpret_cast<PacketHeader*>(pBuf);
+	pHeader->size = packetSize;
+	pHeader->id = E_TYPE::EnemySpawn;
+
+	pkt.SerializeToArray(pHeader + 1, pkt.ByteSizeLong());
+}
+
+void PacketHandler::SerializeS_Attack(S_Attack& pkt, char* pBuf)
+{
+	int packetSize = sizeof(PacketHeader) + pkt.ByteSizeLong();
+	PacketHeader* pHeader = reinterpret_cast<PacketHeader*>(pBuf);
+	pHeader->size = packetSize;
+	pHeader->id = E_TYPE::Attack;
+
+	pkt.SerializeToArray(pHeader + 1, pkt.ByteSizeLong());
 }
 
 C_Chat PacketHandler::ParseC_Chat(char* pBuf)
@@ -95,6 +116,15 @@ C_Move PacketHandler::ParseC_Move(char* pBuf)
 	return pkt;
 }
 
+C_Attack PacketHandler::ParseC_Attack(char* pBuf)
+{
+	PacketHeader* pHeader = reinterpret_cast<PacketHeader*>(pBuf);
+	int size = (pHeader->size) - sizeof(PacketHeader);
+	C_Attack pkt;
+	pkt.ParseFromArray(pHeader + 1, size);
+	return pkt;
+}
+
 void PacketHandler::ProcessPacket(PacketHeader* pHeader, shared_ptr<Session> pSession)
 {
 	E_TYPE id = (E_TYPE)pHeader->id;
@@ -114,6 +144,9 @@ void PacketHandler::ProcessPacket(PacketHeader* pHeader, shared_ptr<Session> pSe
 		break;
 	case Chat:
 		ProcessC_Chat(pHeader, pSession);
+		break;
+	case Attack:
+		ProcessC_Attack(pHeader);
 		break;
 	default:
 		cout << "Packet Header Error!" << endl;
@@ -180,6 +213,16 @@ void PacketHandler::ProcessC_Spawn(PacketHeader* pHeader)
 		pSession->RequestSend(pSendBuffer);
 	}
 
+	//적 스폰 패킷 
+	{
+		S_EnemySpawn pkt;
+		g_pEnemyManager->MakeEnemySpawnPacket(pkt);
+		int packetSize = sizeof(PacketHeader) + pkt.ByteSizeLong();
+		shared_ptr<SendBuffer> pSendBuffer = make_shared<SendBuffer>(packetSize);
+		PacketHandler::SerializeS_EnemySpawn(pkt, pSendBuffer->GetBuffer());
+		shared_ptr<Session> pSession = g_pSessionManager->GetSessionById(c_spawn.id());
+		pSession->RequestSend(pSendBuffer);
+	}
 }
 
 void PacketHandler::ProcessC_Despawn(PacketHeader* pHeader)
@@ -212,7 +255,7 @@ void PacketHandler::ProcessC_Move(PacketHeader* pHeader)
 	shared_ptr<SendBuffer> pSendBuffer = make_shared<SendBuffer>(packetSize);
 	SerializeS_Move(pkt, pSendBuffer->GetBuffer());
 	shared_ptr<Session> pCurSession = g_pSessionManager->GetSessionById(playerRef.id());
-	cout << playerRef.id() << " " <<playerRef.coord().x()<<" "<< playerRef.coord().y() << " "<<playerRef.coord().z() <<endl;
+	//cout << playerRef.id() << " " <<playerRef.coord().x()<<" "<< playerRef.coord().y() << " "<<playerRef.coord().z() <<endl;
 	g_pSessionManager->Brodcast(pSendBuffer, pCurSession);
 	pkt.release_player();
 }
@@ -226,5 +269,34 @@ void PacketHandler::ProcessC_Chat(PacketHeader* pHeader, shared_ptr<Session> pSe
 	shared_ptr<SendBuffer> pSendBuffer = make_shared<SendBuffer>(packetSize);
 	SerializeS_Chat(pkt, pSendBuffer->GetBuffer());
 	g_pSessionManager->Brodcast(pSendBuffer, pSession );
+
+}
+
+void PacketHandler::ProcessC_Attack(PacketHeader* pHeader)
+{
+	C_Attack pkt = ParseC_Attack((char*)pHeader);
+
+	//서버 판정
+	shared_ptr<PlayerInfo> pPlayerInfo = g_pPlayerManager->GetPlayerById(pkt.attacker());
+	Coordiante* pPlayerCoord = pPlayerInfo->GetCoord();
+	shared_ptr<EnemyInfo> pEnemyInfo = g_pEnemyManager->GetEnemyById(pkt.target());
+	Coordiante* pEnemyCoord = pEnemyInfo->GetCoord();
+	int xLen = abs(pEnemyCoord->x() - pPlayerCoord->x());
+	int yLen = abs(pEnemyCoord->y() - pPlayerCoord->y());
+	
+	bool bInRange = sqrt(xLen * xLen + yLen * yLen)<510;
+	if (bInRange)
+	{
+		g_pEnemyManager->DecreaseHp(pkt.target());
+		cout << pkt.attacker() << " attack " << pkt.target() << endl;
+		S_Attack response;
+		response.set_target(pkt.target());
+
+		int packetSize = sizeof(PacketHeader) + response.ByteSizeLong();
+		shared_ptr<SendBuffer> pSendBuffer = make_shared<SendBuffer>(packetSize);
+		SerializeS_Attack(response, pSendBuffer->GetBuffer());
+		g_pSessionManager->Brodcast(pSendBuffer, nullptr);
+
+	}
 
 }

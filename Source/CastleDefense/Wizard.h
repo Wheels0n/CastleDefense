@@ -47,18 +47,19 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-private:
-	UFUNCTION()
-	void MoveForward(float value);
-
-	UFUNCTION()
-	void MoveRight(float value);
 
 	UFUNCTION()
 	void StartAttack();
 
 	UFUNCTION()
 	void StopAttack();
+
+private:
+	UFUNCTION()
+	void MoveForward(float value);
+
+	UFUNCTION()
+	void MoveRight(float value);
 
 	UFUNCTION()
 	void StartSprint();

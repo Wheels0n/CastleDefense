@@ -35,6 +35,7 @@ RecvWorker::RecvWorker(FSocket* pSocket, TSharedPtr<ClientSession> session)
 RecvWorker::~RecvWorker()
 {
 	m_bRunning = false;
+	m_pSocket = nullptr;
 	m_pThread->Kill();
 }
 
@@ -138,6 +139,7 @@ SendWorker::SendWorker(FSocket* pSocket, TSharedPtr<ClientSession> session)
 SendWorker::~SendWorker()
 {
 	m_session = nullptr;
+	m_pSocket = nullptr;
 	m_bRunning = false;
 	m_pThread->Kill();
 }

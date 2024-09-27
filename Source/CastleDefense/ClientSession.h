@@ -28,8 +28,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SendC_Spawn();
 	void SendC_Despawn();
-	void SendC_Move(Coordiante*, Rotation*, MoveState);
+	void SendC_Move(Coordiante*, Rotation*, MoveState, bool);
 	void SendC_Chat(char* pBuf);
+	void SendC_Attack(int);
 	ClientSession(FSocket*, UCastleDefenseGameInstance*);
 	~ClientSession();
 

@@ -63,7 +63,7 @@ void ClientSession::SendC_Despawn()
 	m_pPacketHandler->SerializeC_Despawn(pkt, sendbuf->GetBuffer());
 	EnqueueSendPacket(sendbuf);
 }
-void ClientSession::SendC_Move(Coordiante* newPos, Rotation* newRot, MoveState moveState)
+void ClientSession::SendC_Move(Coordiante* newPos, Rotation* newRot, MoveState moveState, bool bAttack)
 {
 	C_Move pkt;
 	if (m_player.has_coord() == false)
@@ -71,8 +71,9 @@ void ClientSession::SendC_Move(Coordiante* newPos, Rotation* newRot, MoveState m
 		m_player.set_allocated_coord(newPos);
 		m_player.set_allocated_rot(newRot);
 		m_player.set_id(m_pSocket->GetPortNo());
+		m_player.set_hp(0);
 	}
-	
+	m_player.set_battack(bAttack);
 	m_player.set_movestate(moveState);
 	pkt.set_allocated_player(&m_player);
 	
@@ -89,6 +90,15 @@ void ClientSession::SendC_Chat(char* pBuf)
 	chat.set_msg(pBuf);
 	TSharedPtr<SendBuffer> sendbuf = MakeShared<SendBuffer>(sizeof(CPacketHeader) + chat.ByteSizeLong());
 	m_pPacketHandler->SerializeC_Chat(chat, sendbuf->GetBuffer());
+	EnqueueSendPacket(sendbuf);
+}
+void ClientSession::SendC_Attack(int idx)
+{
+	C_Attack pkt;
+	pkt.set_attacker(m_pSocket->GetPortNo());
+	pkt.set_target(idx);
+	TSharedPtr<SendBuffer> sendbuf = MakeShared<SendBuffer>(sizeof(CPacketHeader) + pkt.ByteSizeLong());
+	m_pPacketHandler->SerializeC_Attack(pkt, sendbuf->GetBuffer());
 	EnqueueSendPacket(sendbuf);
 }
 ClientSession::ClientSession(FSocket* pSocket, UCastleDefenseGameInstance* pGameInstance)

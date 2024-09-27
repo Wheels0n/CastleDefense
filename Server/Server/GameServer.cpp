@@ -103,6 +103,7 @@
 #include "Session.h"
 #include "SessionManager.h"
 #include "PlayerManager.h"
+#include "EnemyManager.h"
 #include "IocpManager.h"
 
 int main()
@@ -111,6 +112,7 @@ int main()
 	g_pMemoryPoolManager = new MemoryPoolManager();
 	g_pSessionManager = new SessionManager();
 	g_pPlayerManager = new PlayerManager();
+	g_pEnemyManager = new EnemyManager();
 	g_pIocpManager = new IocpManager();
 
 	if (!g_pIocpManager->Init())
@@ -129,6 +131,7 @@ int main()
 	delete g_pIocpManager;
 	delete g_pSessionManager;
 	delete g_pPlayerManager;
+	delete g_pEnemyManager;
 	delete g_pMemoryPoolManager;
 
 	return 0;

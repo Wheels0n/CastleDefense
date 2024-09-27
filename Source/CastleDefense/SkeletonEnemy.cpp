@@ -104,8 +104,8 @@ void ASkeletonEnemy::Destroyed()
 	AGameStateBase* pGameBase = pWorld->GetGameState();
 	if (pGameBase)
 	{
-		ACastleDefenseGameState* pCastleDefenseGameState = Cast<ACastleDefenseGameState>(pGameBase);
-		pCastleDefenseGameState->SetDeleteEnemy(this);
+		//ACastleDefenseGameState* pCastleDefenseGameState = Cast<ACastleDefenseGameState>(pGameBase);
+		//pCastleDefenseGameState->SetDeleteEnemy(this);
 	}
 	Super::Destroyed();
 	UE_LOG(LogTemp, Display, TEXT("EnemyDestroyed"));

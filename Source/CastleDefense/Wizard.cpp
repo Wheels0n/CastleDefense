@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Animation/Animinstance.h"
 #include "CastleDefenceGameMode.h"
+#include "CastleDefenseGameState.h"
 #include "CastleDefenseGameInstance.h"
 #include "Weapon.h"
 #include "WizardWidget.h"
@@ -336,11 +337,19 @@ void AWizard::CheckPlayerAttack()
 			{
 				UE_LOG(LogTemp, Display, TEXT("EnemyGotHit"));
 				ASkeletonEnemy* pEnemy = Cast<ASkeletonEnemy>(pOther);
-				pEnemy->DecreaseHp();
-			}
+				
+				UWorld* pCurWorld = GetWorld();
+				ACastleDefenseGameState* pGameState = pCurWorld->GetGameState<ACastleDefenseGameState>();
+				int idx = pGameState->GetEnemyIndexByPtr(pEnemy);
+
+				UCastleDefenseGameInstance* pGameInstance = pCurWorld->GetGameInstance<UCastleDefenseGameInstance>();
+				TSharedPtr<ClientSession> pSession = pGameInstance->GetSession();
+				pSession->SendC_Attack(idx);
+
+			}	
 		}
 	}
-	}
+}
 
 void AWizard::LazyCreateWidget()
 {
@@ -440,9 +449,9 @@ void AWizard::BrodcastPos()
 	m_curRot.set_x(0);
 	m_curRot.set_y(curRot.Yaw);
 	m_curRot.set_z(0);
-
+	
 	m_bMoveStateChanged = false;
-	pSession->SendC_Move(&m_dstCoord, &m_curRot, m_curMoveState);
+	pSession->SendC_Move(&m_dstCoord, &m_curRot, m_curMoveState, m_bAttacking);
 }
 
 void AWizard::SetNewDest(Player* pPlayer)

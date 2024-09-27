@@ -12,12 +12,15 @@ public:
 	void SerializeC_Despawn(C_Despawn& pkt, char* pBuf);
 	void SerializeC_Move(C_Move& pkt, char* pBuf);
 	void SerializeC_Chat(C_Chat& pkt, char* pBuf);
+	void SerializeC_Attack(C_Attack& pkt, char* pBuf);
 
 	S_Login ParseS_Login(char* pBuf);
 	S_Spawn ParseS_Spawn(char* pBuf);
 	S_Despawn ParseS_Despawn(char* pBuf);
 	S_Move ParseS_Move(char* pBuf);
 	S_Chat ParseS_Chat(char* pBuf);
+	S_EnemySpawn ParseS_EnemySpawn(char* pBuf);
+	S_Attack ParseS_Attack(char* pBuf);
 
 	void ProcessPacket(CPacketHeader*);
 
@@ -26,6 +29,8 @@ public:
 	void ProcessS_Despawn(CPacketHeader*);
 	void ProcessS_Move(CPacketHeader*);
 	void ProcessS_Chat(CPacketHeader*);
+	void ProcessS_EnemySpawn(CPacketHeader*);
+	void ProcessS_Attack(CPacketHeader*);
 
 	CPacketHandler(UCastleDefenseGameInstance*, int);
 

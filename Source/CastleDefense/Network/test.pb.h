@@ -50,6 +50,9 @@ struct TableStruct_test_2eproto {
 };
 extern const ::google::protobuf::internal::DescriptorTable
     descriptor_table_test_2eproto;
+class C_Attack;
+struct C_AttackDefaultTypeInternal;
+extern C_AttackDefaultTypeInternal _C_Attack_default_instance_;
 class C_Chat;
 struct C_ChatDefaultTypeInternal;
 extern C_ChatDefaultTypeInternal _C_Chat_default_instance_;
@@ -68,18 +71,30 @@ extern C_SpawnDefaultTypeInternal _C_Spawn_default_instance_;
 class Coordiante;
 struct CoordianteDefaultTypeInternal;
 extern CoordianteDefaultTypeInternal _Coordiante_default_instance_;
+class Enemy;
+struct EnemyDefaultTypeInternal;
+extern EnemyDefaultTypeInternal _Enemy_default_instance_;
 class Player;
 struct PlayerDefaultTypeInternal;
 extern PlayerDefaultTypeInternal _Player_default_instance_;
 class Rotation;
 struct RotationDefaultTypeInternal;
 extern RotationDefaultTypeInternal _Rotation_default_instance_;
+class S_Attack;
+struct S_AttackDefaultTypeInternal;
+extern S_AttackDefaultTypeInternal _S_Attack_default_instance_;
 class S_Chat;
 struct S_ChatDefaultTypeInternal;
 extern S_ChatDefaultTypeInternal _S_Chat_default_instance_;
 class S_Despawn;
 struct S_DespawnDefaultTypeInternal;
 extern S_DespawnDefaultTypeInternal _S_Despawn_default_instance_;
+class S_EnemyDespawn;
+struct S_EnemyDespawnDefaultTypeInternal;
+extern S_EnemyDespawnDefaultTypeInternal _S_EnemyDespawn_default_instance_;
+class S_EnemySpawn;
+struct S_EnemySpawnDefaultTypeInternal;
+extern S_EnemySpawnDefaultTypeInternal _S_EnemySpawn_default_instance_;
 class S_Login;
 struct S_LoginDefaultTypeInternal;
 extern S_LoginDefaultTypeInternal _S_Login_default_instance_;
@@ -131,13 +146,16 @@ enum E_TYPE : int {
   Despawn = 2,
   Movement = 3,
   Chat = 4,
+  EnemySpawn = 5,
+  EnemyDespawn = 6,
+  Attack = 7,
 };
 
 bool E_TYPE_IsValid(int value);
 extern const uint32_t E_TYPE_internal_data_[];
 constexpr E_TYPE E_TYPE_MIN = static_cast<E_TYPE>(0);
-constexpr E_TYPE E_TYPE_MAX = static_cast<E_TYPE>(4);
-constexpr int E_TYPE_ARRAYSIZE = 4 + 1;
+constexpr E_TYPE E_TYPE_MAX = static_cast<E_TYPE>(7);
+constexpr int E_TYPE_ARRAYSIZE = 7 + 1;
 const ::google::protobuf::EnumDescriptor*
 E_TYPE_descriptor();
 template <typename T>
@@ -150,7 +168,7 @@ const std::string& E_TYPE_Name(T value) {
 template <>
 inline const std::string& E_TYPE_Name(E_TYPE value) {
   return ::google::protobuf::internal::NameOfDenseEnum<E_TYPE_descriptor,
-                                                 0, 4>(
+                                                 0, 7>(
       static_cast<int>(value));
 }
 inline bool E_TYPE_Parse(absl::string_view name, E_TYPE* value) {
@@ -218,7 +236,7 @@ class S_Login final : public ::google::protobuf::Message
     return reinterpret_cast<const S_Login*>(
         &_S_Login_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(S_Login& a, S_Login& b) { a.Swap(&b); }
   inline void Swap(S_Login* other) {
     if (other == this) return;
@@ -341,6 +359,184 @@ class S_Login final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
+class S_EnemyDespawn final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:S_EnemyDespawn) */ {
+ public:
+  inline S_EnemyDespawn() : S_EnemyDespawn(nullptr) {}
+  ~S_EnemyDespawn() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR S_EnemyDespawn(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline S_EnemyDespawn(const S_EnemyDespawn& from) : S_EnemyDespawn(nullptr, from) {}
+  inline S_EnemyDespawn(S_EnemyDespawn&& from) noexcept
+      : S_EnemyDespawn(nullptr, std::move(from)) {}
+  inline S_EnemyDespawn& operator=(const S_EnemyDespawn& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline S_EnemyDespawn& operator=(S_EnemyDespawn&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const S_EnemyDespawn& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const S_EnemyDespawn* internal_default_instance() {
+    return reinterpret_cast<const S_EnemyDespawn*>(
+        &_S_EnemyDespawn_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 15;
+  friend void swap(S_EnemyDespawn& a, S_EnemyDespawn& b) { a.Swap(&b); }
+  inline void Swap(S_EnemyDespawn* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(S_EnemyDespawn* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  S_EnemyDespawn* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<S_EnemyDespawn>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const S_EnemyDespawn& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const S_EnemyDespawn& from) { S_EnemyDespawn::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return IsInitializedImpl(*this);
+  }
+
+  private:
+  static bool IsInitializedImpl(const MessageLite& msg);
+
+  public:
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(S_EnemyDespawn* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "S_EnemyDespawn"; }
+
+ protected:
+  explicit S_EnemyDespawn(::google::protobuf::Arena* arena);
+  S_EnemyDespawn(::google::protobuf::Arena* arena, const S_EnemyDespawn& from);
+  S_EnemyDespawn(::google::protobuf::Arena* arena, S_EnemyDespawn&& from) noexcept
+      : S_EnemyDespawn(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kIdFieldNumber = 1,
+  };
+  // required int32 id = 1;
+  bool has_id() const;
+  void clear_id() ;
+  ::int32_t id() const;
+  void set_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_id() const;
+  void _internal_set_id(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:S_EnemyDespawn)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_S_EnemyDespawn_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const S_EnemyDespawn& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int32_t id_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_test_2eproto;
+};
+// -------------------------------------------------------------------
+
 class S_Despawn final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:S_Despawn) */ {
  public:
@@ -396,7 +592,7 @@ class S_Despawn final : public ::google::protobuf::Message
     return reinterpret_cast<const S_Despawn*>(
         &_S_Despawn_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 8;
+  static constexpr int kIndexInFileMessages = 9;
   friend void swap(S_Despawn& a, S_Despawn& b) { a.Swap(&b); }
   inline void Swap(S_Despawn* other) {
     if (other == this) return;
@@ -574,7 +770,7 @@ class S_Chat final : public ::google::protobuf::Message
     return reinterpret_cast<const S_Chat*>(
         &_S_Chat_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 12;
+  static constexpr int kIndexInFileMessages = 13;
   friend void swap(S_Chat& a, S_Chat& b) { a.Swap(&b); }
   inline void Swap(S_Chat* other) {
     if (other == this) return;
@@ -696,6 +892,184 @@ class S_Chat final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr msg_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_test_2eproto;
+};
+// -------------------------------------------------------------------
+
+class S_Attack final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:S_Attack) */ {
+ public:
+  inline S_Attack() : S_Attack(nullptr) {}
+  ~S_Attack() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR S_Attack(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline S_Attack(const S_Attack& from) : S_Attack(nullptr, from) {}
+  inline S_Attack(S_Attack&& from) noexcept
+      : S_Attack(nullptr, std::move(from)) {}
+  inline S_Attack& operator=(const S_Attack& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline S_Attack& operator=(S_Attack&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const S_Attack& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const S_Attack* internal_default_instance() {
+    return reinterpret_cast<const S_Attack*>(
+        &_S_Attack_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 17;
+  friend void swap(S_Attack& a, S_Attack& b) { a.Swap(&b); }
+  inline void Swap(S_Attack* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(S_Attack* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  S_Attack* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<S_Attack>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const S_Attack& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const S_Attack& from) { S_Attack::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return IsInitializedImpl(*this);
+  }
+
+  private:
+  static bool IsInitializedImpl(const MessageLite& msg);
+
+  public:
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(S_Attack* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "S_Attack"; }
+
+ protected:
+  explicit S_Attack(::google::protobuf::Arena* arena);
+  S_Attack(::google::protobuf::Arena* arena, const S_Attack& from);
+  S_Attack(::google::protobuf::Arena* arena, S_Attack&& from) noexcept
+      : S_Attack(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kTargetFieldNumber = 1,
+  };
+  // required int32 Target = 1;
+  bool has_target() const;
+  void clear_target() ;
+  ::int32_t target() const;
+  void set_target(::int32_t value);
+
+  private:
+  ::int32_t _internal_target() const;
+  void _internal_set_target(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:S_Attack)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_S_Attack_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const S_Attack& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int32_t target_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1166,7 +1540,7 @@ class C_Spawn final : public ::google::protobuf::Message
     return reinterpret_cast<const C_Spawn*>(
         &_C_Spawn_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 5;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(C_Spawn& a, C_Spawn& b) { a.Swap(&b); }
   inline void Swap(C_Spawn* other) {
     if (other == this) return;
@@ -1344,7 +1718,7 @@ class C_Login final : public ::google::protobuf::Message
     return reinterpret_cast<const C_Login*>(
         &_C_Login_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(C_Login& a, C_Login& b) { a.Swap(&b); }
   inline void Swap(C_Login* other) {
     if (other == this) return;
@@ -1522,7 +1896,7 @@ class C_Despawn final : public ::google::protobuf::Message
     return reinterpret_cast<const C_Despawn*>(
         &_C_Despawn_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 7;
+  static constexpr int kIndexInFileMessages = 8;
   friend void swap(C_Despawn& a, C_Despawn& b) { a.Swap(&b); }
   inline void Swap(C_Despawn* other) {
     if (other == this) return;
@@ -1700,7 +2074,7 @@ class C_Chat final : public ::google::protobuf::Message
     return reinterpret_cast<const C_Chat*>(
         &_C_Chat_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 11;
+  static constexpr int kIndexInFileMessages = 12;
   friend void swap(C_Chat& a, C_Chat& b) { a.Swap(&b); }
   inline void Swap(C_Chat* other) {
     if (other == this) return;
@@ -1822,6 +2196,197 @@ class C_Chat final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr msg_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_test_2eproto;
+};
+// -------------------------------------------------------------------
+
+class C_Attack final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:C_Attack) */ {
+ public:
+  inline C_Attack() : C_Attack(nullptr) {}
+  ~C_Attack() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR C_Attack(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline C_Attack(const C_Attack& from) : C_Attack(nullptr, from) {}
+  inline C_Attack(C_Attack&& from) noexcept
+      : C_Attack(nullptr, std::move(from)) {}
+  inline C_Attack& operator=(const C_Attack& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline C_Attack& operator=(C_Attack&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const C_Attack& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const C_Attack* internal_default_instance() {
+    return reinterpret_cast<const C_Attack*>(
+        &_C_Attack_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 16;
+  friend void swap(C_Attack& a, C_Attack& b) { a.Swap(&b); }
+  inline void Swap(C_Attack* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(C_Attack* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  C_Attack* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<C_Attack>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const C_Attack& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const C_Attack& from) { C_Attack::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return IsInitializedImpl(*this);
+  }
+
+  private:
+  static bool IsInitializedImpl(const MessageLite& msg);
+
+  public:
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(C_Attack* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "C_Attack"; }
+
+ protected:
+  explicit C_Attack(::google::protobuf::Arena* arena);
+  C_Attack(::google::protobuf::Arena* arena, const C_Attack& from);
+  C_Attack(::google::protobuf::Arena* arena, C_Attack&& from) noexcept
+      : C_Attack(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kAttackerFieldNumber = 1,
+    kTargetFieldNumber = 2,
+  };
+  // required int32 Attacker = 1;
+  bool has_attacker() const;
+  void clear_attacker() ;
+  ::int32_t attacker() const;
+  void set_attacker(::int32_t value);
+
+  private:
+  ::int32_t _internal_attacker() const;
+  void _internal_set_attacker(::int32_t value);
+
+  public:
+  // required int32 Target = 2;
+  bool has_target() const;
+  void clear_target() ;
+  ::int32_t target() const;
+  void set_target(::int32_t value);
+
+  private:
+  ::int32_t _internal_target() const;
+  void _internal_set_target(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:C_Attack)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      1, 2, 0,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_C_Attack_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const C_Attack& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int32_t attacker_;
+    ::int32_t target_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1958,12 +2523,14 @@ class Player final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kCoordFieldNumber = 2,
-    kRotFieldNumber = 3,
+    kCoordFieldNumber = 4,
+    kRotFieldNumber = 5,
     kIdFieldNumber = 1,
-    kMoveStateFieldNumber = 4,
+    kHpFieldNumber = 2,
+    kBAttackFieldNumber = 3,
+    kMoveStateFieldNumber = 6,
   };
-  // required .Coordiante coord = 2;
+  // required .Coordiante coord = 4;
   bool has_coord() const;
   void clear_coord() ;
   const ::Coordiante& coord() const;
@@ -1978,7 +2545,7 @@ class Player final : public ::google::protobuf::Message
   ::Coordiante* _internal_mutable_coord();
 
   public:
-  // required .Rotation rot = 3;
+  // required .Rotation rot = 5;
   bool has_rot() const;
   void clear_rot() ;
   const ::Rotation& rot() const;
@@ -2004,7 +2571,29 @@ class Player final : public ::google::protobuf::Message
   void _internal_set_id(::int32_t value);
 
   public:
-  // required .MoveState moveState = 4;
+  // required int32 hp = 2;
+  bool has_hp() const;
+  void clear_hp() ;
+  ::int32_t hp() const;
+  void set_hp(::int32_t value);
+
+  private:
+  ::int32_t _internal_hp() const;
+  void _internal_set_hp(::int32_t value);
+
+  public:
+  // required bool bAttack = 3;
+  bool has_battack() const;
+  void clear_battack() ;
+  bool battack() const;
+  void set_battack(bool value);
+
+  private:
+  bool _internal_battack() const;
+  void _internal_set_battack(bool value);
+
+  public:
+  // required .MoveState moveState = 6;
   bool has_movestate() const;
   void clear_movestate() ;
   ::MoveState movestate() const;
@@ -2020,7 +2609,7 @@ class Player final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 4, 3,
+      3, 6, 3,
       0, 2>
       _table_;
 
@@ -2046,6 +2635,246 @@ class Player final : public ::google::protobuf::Message
     ::Coordiante* coord_;
     ::Rotation* rot_;
     ::int32_t id_;
+    ::int32_t hp_;
+    bool battack_;
+    int movestate_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_test_2eproto;
+};
+// -------------------------------------------------------------------
+
+class Enemy final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:Enemy) */ {
+ public:
+  inline Enemy() : Enemy(nullptr) {}
+  ~Enemy() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR Enemy(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline Enemy(const Enemy& from) : Enemy(nullptr, from) {}
+  inline Enemy(Enemy&& from) noexcept
+      : Enemy(nullptr, std::move(from)) {}
+  inline Enemy& operator=(const Enemy& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Enemy& operator=(Enemy&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Enemy& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Enemy* internal_default_instance() {
+    return reinterpret_cast<const Enemy*>(
+        &_Enemy_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 3;
+  friend void swap(Enemy& a, Enemy& b) { a.Swap(&b); }
+  inline void Swap(Enemy* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Enemy* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  Enemy* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<Enemy>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const Enemy& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const Enemy& from) { Enemy::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return IsInitializedImpl(*this);
+  }
+
+  private:
+  static bool IsInitializedImpl(const MessageLite& msg);
+
+  public:
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(Enemy* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "Enemy"; }
+
+ protected:
+  explicit Enemy(::google::protobuf::Arena* arena);
+  Enemy(::google::protobuf::Arena* arena, const Enemy& from);
+  Enemy(::google::protobuf::Arena* arena, Enemy&& from) noexcept
+      : Enemy(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kCoordFieldNumber = 3,
+    kRotFieldNumber = 4,
+    kIdFieldNumber = 1,
+    kHpFieldNumber = 2,
+    kMoveStateFieldNumber = 5,
+  };
+  // required .Coordiante coord = 3;
+  bool has_coord() const;
+  void clear_coord() ;
+  const ::Coordiante& coord() const;
+  PROTOBUF_NODISCARD ::Coordiante* release_coord();
+  ::Coordiante* mutable_coord();
+  void set_allocated_coord(::Coordiante* value);
+  void unsafe_arena_set_allocated_coord(::Coordiante* value);
+  ::Coordiante* unsafe_arena_release_coord();
+
+  private:
+  const ::Coordiante& _internal_coord() const;
+  ::Coordiante* _internal_mutable_coord();
+
+  public:
+  // required .Rotation rot = 4;
+  bool has_rot() const;
+  void clear_rot() ;
+  const ::Rotation& rot() const;
+  PROTOBUF_NODISCARD ::Rotation* release_rot();
+  ::Rotation* mutable_rot();
+  void set_allocated_rot(::Rotation* value);
+  void unsafe_arena_set_allocated_rot(::Rotation* value);
+  ::Rotation* unsafe_arena_release_rot();
+
+  private:
+  const ::Rotation& _internal_rot() const;
+  ::Rotation* _internal_mutable_rot();
+
+  public:
+  // required int32 id = 1;
+  bool has_id() const;
+  void clear_id() ;
+  ::int32_t id() const;
+  void set_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_id() const;
+  void _internal_set_id(::int32_t value);
+
+  public:
+  // required int32 hp = 2;
+  bool has_hp() const;
+  void clear_hp() ;
+  ::int32_t hp() const;
+  void set_hp(::int32_t value);
+
+  private:
+  ::int32_t _internal_hp() const;
+  void _internal_set_hp(::int32_t value);
+
+  public:
+  // required .MoveState moveState = 5;
+  bool has_movestate() const;
+  void clear_movestate() ;
+  ::MoveState movestate() const;
+  void set_movestate(::MoveState value);
+
+  private:
+  ::MoveState _internal_movestate() const;
+  void _internal_set_movestate(::MoveState value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:Enemy)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      3, 5, 3,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_Enemy_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const Enemy& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::Coordiante* coord_;
+    ::Rotation* rot_;
+    ::int32_t id_;
+    ::int32_t hp_;
     int movestate_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -2109,7 +2938,7 @@ class S_Spawn final : public ::google::protobuf::Message
     return reinterpret_cast<const S_Spawn*>(
         &_S_Spawn_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 6;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(S_Spawn& a, S_Spawn& b) { a.Swap(&b); }
   inline void Swap(S_Spawn* other) {
     if (other == this) return;
@@ -2292,7 +3121,7 @@ class S_Move final : public ::google::protobuf::Message
     return reinterpret_cast<const S_Move*>(
         &_S_Move_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 10;
+  static constexpr int kIndexInFileMessages = 11;
   friend void swap(S_Move& a, S_Move& b) { a.Swap(&b); }
   inline void Swap(S_Move* other) {
     if (other == this) return;
@@ -2419,6 +3248,189 @@ class S_Move final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
+class S_EnemySpawn final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:S_EnemySpawn) */ {
+ public:
+  inline S_EnemySpawn() : S_EnemySpawn(nullptr) {}
+  ~S_EnemySpawn() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR S_EnemySpawn(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline S_EnemySpawn(const S_EnemySpawn& from) : S_EnemySpawn(nullptr, from) {}
+  inline S_EnemySpawn(S_EnemySpawn&& from) noexcept
+      : S_EnemySpawn(nullptr, std::move(from)) {}
+  inline S_EnemySpawn& operator=(const S_EnemySpawn& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline S_EnemySpawn& operator=(S_EnemySpawn&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const S_EnemySpawn& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const S_EnemySpawn* internal_default_instance() {
+    return reinterpret_cast<const S_EnemySpawn*>(
+        &_S_EnemySpawn_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 14;
+  friend void swap(S_EnemySpawn& a, S_EnemySpawn& b) { a.Swap(&b); }
+  inline void Swap(S_EnemySpawn* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(S_EnemySpawn* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  S_EnemySpawn* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<S_EnemySpawn>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const S_EnemySpawn& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const S_EnemySpawn& from) { S_EnemySpawn::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return IsInitializedImpl(*this);
+  }
+
+  private:
+  static bool IsInitializedImpl(const MessageLite& msg);
+
+  public:
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(S_EnemySpawn* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "S_EnemySpawn"; }
+
+ protected:
+  explicit S_EnemySpawn(::google::protobuf::Arena* arena);
+  S_EnemySpawn(::google::protobuf::Arena* arena, const S_EnemySpawn& from);
+  S_EnemySpawn(::google::protobuf::Arena* arena, S_EnemySpawn&& from) noexcept
+      : S_EnemySpawn(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kEnemyFieldNumber = 1,
+  };
+  // repeated .Enemy enemy = 1;
+  int enemy_size() const;
+  private:
+  int _internal_enemy_size() const;
+
+  public:
+  void clear_enemy() ;
+  ::Enemy* mutable_enemy(int index);
+  ::google::protobuf::RepeatedPtrField<::Enemy>* mutable_enemy();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::Enemy>& _internal_enemy() const;
+  ::google::protobuf::RepeatedPtrField<::Enemy>* _internal_mutable_enemy();
+  public:
+  const ::Enemy& enemy(int index) const;
+  ::Enemy* add_enemy();
+  const ::google::protobuf::RepeatedPtrField<::Enemy>& enemy() const;
+  // @@protoc_insertion_point(class_scope:S_EnemySpawn)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 1,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_S_EnemySpawn_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const S_EnemySpawn& from_msg);
+    ::google::protobuf::RepeatedPtrField< ::Enemy > enemy_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_test_2eproto;
+};
+// -------------------------------------------------------------------
+
 class C_Move final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:C_Move) */ {
  public:
@@ -2474,7 +3486,7 @@ class C_Move final : public ::google::protobuf::Message
     return reinterpret_cast<const C_Move*>(
         &_C_Move_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 9;
+  static constexpr int kIndexInFileMessages = 10;
   friend void swap(C_Move& a, C_Move& b) { a.Swap(&b); }
   inline void Swap(C_Move* other) {
     if (other == this) return;
@@ -2820,7 +3832,63 @@ inline void Player::_internal_set_id(::int32_t value) {
   _impl_.id_ = value;
 }
 
-// required .Coordiante coord = 2;
+// required int32 hp = 2;
+inline bool Player::has_hp() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline void Player::clear_hp() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hp_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000008u;
+}
+inline ::int32_t Player::hp() const {
+  // @@protoc_insertion_point(field_get:Player.hp)
+  return _internal_hp();
+}
+inline void Player::set_hp(::int32_t value) {
+  _internal_set_hp(value);
+  _impl_._has_bits_[0] |= 0x00000008u;
+  // @@protoc_insertion_point(field_set:Player.hp)
+}
+inline ::int32_t Player::_internal_hp() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.hp_;
+}
+inline void Player::_internal_set_hp(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hp_ = value;
+}
+
+// required bool bAttack = 3;
+inline bool Player::has_battack() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline void Player::clear_battack() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.battack_ = false;
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline bool Player::battack() const {
+  // @@protoc_insertion_point(field_get:Player.bAttack)
+  return _internal_battack();
+}
+inline void Player::set_battack(bool value) {
+  _internal_set_battack(value);
+  _impl_._has_bits_[0] |= 0x00000010u;
+  // @@protoc_insertion_point(field_set:Player.bAttack)
+}
+inline bool Player::_internal_battack() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.battack_;
+}
+inline void Player::_internal_set_battack(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.battack_ = value;
+}
+
+// required .Coordiante coord = 4;
 inline bool Player::has_coord() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.coord_ != nullptr);
@@ -2916,7 +3984,7 @@ inline void Player::set_allocated_coord(::Coordiante* value) {
   // @@protoc_insertion_point(field_set_allocated:Player.coord)
 }
 
-// required .Rotation rot = 3;
+// required .Rotation rot = 5;
 inline bool Player::has_rot() const {
   bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.rot_ != nullptr);
@@ -3012,15 +4080,15 @@ inline void Player::set_allocated_rot(::Rotation* value) {
   // @@protoc_insertion_point(field_set_allocated:Player.rot)
 }
 
-// required .MoveState moveState = 4;
+// required .MoveState moveState = 6;
 inline bool Player::has_movestate() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline void Player::clear_movestate() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.movestate_ = 1;
-  _impl_._has_bits_[0] &= ~0x00000008u;
+  _impl_._has_bits_[0] &= ~0x00000020u;
 }
 inline ::MoveState Player::movestate() const {
   // @@protoc_insertion_point(field_get:Player.moveState)
@@ -3028,7 +4096,7 @@ inline ::MoveState Player::movestate() const {
 }
 inline void Player::set_movestate(::MoveState value) {
   _internal_set_movestate(value);
-  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_._has_bits_[0] |= 0x00000020u;
   // @@protoc_insertion_point(field_set:Player.moveState)
 }
 inline ::MoveState Player::_internal_movestate() const {
@@ -3036,6 +4104,287 @@ inline ::MoveState Player::_internal_movestate() const {
   return static_cast<::MoveState>(_impl_.movestate_);
 }
 inline void Player::_internal_set_movestate(::MoveState value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  assert(::MoveState_IsValid(value));
+  _impl_.movestate_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// Enemy
+
+// required int32 id = 1;
+inline bool Enemy::has_id() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline void Enemy::clear_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000004u;
+}
+inline ::int32_t Enemy::id() const {
+  // @@protoc_insertion_point(field_get:Enemy.id)
+  return _internal_id();
+}
+inline void Enemy::set_id(::int32_t value) {
+  _internal_set_id(value);
+  _impl_._has_bits_[0] |= 0x00000004u;
+  // @@protoc_insertion_point(field_set:Enemy.id)
+}
+inline ::int32_t Enemy::_internal_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.id_;
+}
+inline void Enemy::_internal_set_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = value;
+}
+
+// required int32 hp = 2;
+inline bool Enemy::has_hp() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  return value;
+}
+inline void Enemy::clear_hp() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hp_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000008u;
+}
+inline ::int32_t Enemy::hp() const {
+  // @@protoc_insertion_point(field_get:Enemy.hp)
+  return _internal_hp();
+}
+inline void Enemy::set_hp(::int32_t value) {
+  _internal_set_hp(value);
+  _impl_._has_bits_[0] |= 0x00000008u;
+  // @@protoc_insertion_point(field_set:Enemy.hp)
+}
+inline ::int32_t Enemy::_internal_hp() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.hp_;
+}
+inline void Enemy::_internal_set_hp(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hp_ = value;
+}
+
+// required .Coordiante coord = 3;
+inline bool Enemy::has_coord() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.coord_ != nullptr);
+  return value;
+}
+inline void Enemy::clear_coord() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.coord_ != nullptr) _impl_.coord_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const ::Coordiante& Enemy::_internal_coord() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::Coordiante* p = _impl_.coord_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Coordiante&>(::_Coordiante_default_instance_);
+}
+inline const ::Coordiante& Enemy::coord() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:Enemy.coord)
+  return _internal_coord();
+}
+inline void Enemy::unsafe_arena_set_allocated_coord(::Coordiante* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.coord_);
+  }
+  _impl_.coord_ = reinterpret_cast<::Coordiante*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Enemy.coord)
+}
+inline ::Coordiante* Enemy::release_coord() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::Coordiante* released = _impl_.coord_;
+  _impl_.coord_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  if (GetArena() == nullptr) {
+    delete old;
+  }
+#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArena() != nullptr) {
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return released;
+}
+inline ::Coordiante* Enemy::unsafe_arena_release_coord() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:Enemy.coord)
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::Coordiante* temp = _impl_.coord_;
+  _impl_.coord_ = nullptr;
+  return temp;
+}
+inline ::Coordiante* Enemy::_internal_mutable_coord() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.coord_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::Coordiante>(GetArena());
+    _impl_.coord_ = reinterpret_cast<::Coordiante*>(p);
+  }
+  return _impl_.coord_;
+}
+inline ::Coordiante* Enemy::mutable_coord() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  ::Coordiante* _msg = _internal_mutable_coord();
+  // @@protoc_insertion_point(field_mutable:Enemy.coord)
+  return _msg;
+}
+inline void Enemy::set_allocated_coord(::Coordiante* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.coord_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+
+  _impl_.coord_ = reinterpret_cast<::Coordiante*>(value);
+  // @@protoc_insertion_point(field_set_allocated:Enemy.coord)
+}
+
+// required .Rotation rot = 4;
+inline bool Enemy::has_rot() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.rot_ != nullptr);
+  return value;
+}
+inline void Enemy::clear_rot() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.rot_ != nullptr) _impl_.rot_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline const ::Rotation& Enemy::_internal_rot() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::Rotation* p = _impl_.rot_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Rotation&>(::_Rotation_default_instance_);
+}
+inline const ::Rotation& Enemy::rot() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:Enemy.rot)
+  return _internal_rot();
+}
+inline void Enemy::unsafe_arena_set_allocated_rot(::Rotation* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.rot_);
+  }
+  _impl_.rot_ = reinterpret_cast<::Rotation*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Enemy.rot)
+}
+inline ::Rotation* Enemy::release_rot() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::Rotation* released = _impl_.rot_;
+  _impl_.rot_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  if (GetArena() == nullptr) {
+    delete old;
+  }
+#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArena() != nullptr) {
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return released;
+}
+inline ::Rotation* Enemy::unsafe_arena_release_rot() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:Enemy.rot)
+
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::Rotation* temp = _impl_.rot_;
+  _impl_.rot_ = nullptr;
+  return temp;
+}
+inline ::Rotation* Enemy::_internal_mutable_rot() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.rot_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::Rotation>(GetArena());
+    _impl_.rot_ = reinterpret_cast<::Rotation*>(p);
+  }
+  return _impl_.rot_;
+}
+inline ::Rotation* Enemy::mutable_rot() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  ::Rotation* _msg = _internal_mutable_rot();
+  // @@protoc_insertion_point(field_mutable:Enemy.rot)
+  return _msg;
+}
+inline void Enemy::set_allocated_rot(::Rotation* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.rot_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+
+  _impl_.rot_ = reinterpret_cast<::Rotation*>(value);
+  // @@protoc_insertion_point(field_set_allocated:Enemy.rot)
+}
+
+// required .MoveState moveState = 5;
+inline bool Enemy::has_movestate() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline void Enemy::clear_movestate() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.movestate_ = 1;
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline ::MoveState Enemy::movestate() const {
+  // @@protoc_insertion_point(field_get:Enemy.moveState)
+  return _internal_movestate();
+}
+inline void Enemy::set_movestate(::MoveState value) {
+  _internal_set_movestate(value);
+  _impl_._has_bits_[0] |= 0x00000010u;
+  // @@protoc_insertion_point(field_set:Enemy.moveState)
+}
+inline ::MoveState Enemy::_internal_movestate() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::MoveState>(_impl_.movestate_);
+}
+inline void Enemy::_internal_set_movestate(::MoveState value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   assert(::MoveState_IsValid(value));
   _impl_.movestate_ = value;
@@ -3602,6 +4951,183 @@ inline void S_Chat::set_allocated_msg(std::string* value) {
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:S_Chat.msg)
+}
+
+// -------------------------------------------------------------------
+
+// S_EnemySpawn
+
+// repeated .Enemy enemy = 1;
+inline int S_EnemySpawn::_internal_enemy_size() const {
+  return _internal_enemy().size();
+}
+inline int S_EnemySpawn::enemy_size() const {
+  return _internal_enemy_size();
+}
+inline void S_EnemySpawn::clear_enemy() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.enemy_.Clear();
+}
+inline ::Enemy* S_EnemySpawn::mutable_enemy(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:S_EnemySpawn.enemy)
+  return _internal_mutable_enemy()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::Enemy>* S_EnemySpawn::mutable_enemy()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:S_EnemySpawn.enemy)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_enemy();
+}
+inline const ::Enemy& S_EnemySpawn::enemy(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:S_EnemySpawn.enemy)
+  return _internal_enemy().Get(index);
+}
+inline ::Enemy* S_EnemySpawn::add_enemy() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::Enemy* _add = _internal_mutable_enemy()->Add();
+  // @@protoc_insertion_point(field_add:S_EnemySpawn.enemy)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::Enemy>& S_EnemySpawn::enemy() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:S_EnemySpawn.enemy)
+  return _internal_enemy();
+}
+inline const ::google::protobuf::RepeatedPtrField<::Enemy>&
+S_EnemySpawn::_internal_enemy() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.enemy_;
+}
+inline ::google::protobuf::RepeatedPtrField<::Enemy>*
+S_EnemySpawn::_internal_mutable_enemy() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.enemy_;
+}
+
+// -------------------------------------------------------------------
+
+// S_EnemyDespawn
+
+// required int32 id = 1;
+inline bool S_EnemyDespawn::has_id() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline void S_EnemyDespawn::clear_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline ::int32_t S_EnemyDespawn::id() const {
+  // @@protoc_insertion_point(field_get:S_EnemyDespawn.id)
+  return _internal_id();
+}
+inline void S_EnemyDespawn::set_id(::int32_t value) {
+  _internal_set_id(value);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  // @@protoc_insertion_point(field_set:S_EnemyDespawn.id)
+}
+inline ::int32_t S_EnemyDespawn::_internal_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.id_;
+}
+inline void S_EnemyDespawn::_internal_set_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// C_Attack
+
+// required int32 Attacker = 1;
+inline bool C_Attack::has_attacker() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline void C_Attack::clear_attacker() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.attacker_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline ::int32_t C_Attack::attacker() const {
+  // @@protoc_insertion_point(field_get:C_Attack.Attacker)
+  return _internal_attacker();
+}
+inline void C_Attack::set_attacker(::int32_t value) {
+  _internal_set_attacker(value);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  // @@protoc_insertion_point(field_set:C_Attack.Attacker)
+}
+inline ::int32_t C_Attack::_internal_attacker() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.attacker_;
+}
+inline void C_Attack::_internal_set_attacker(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.attacker_ = value;
+}
+
+// required int32 Target = 2;
+inline bool C_Attack::has_target() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline void C_Attack::clear_target() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline ::int32_t C_Attack::target() const {
+  // @@protoc_insertion_point(field_get:C_Attack.Target)
+  return _internal_target();
+}
+inline void C_Attack::set_target(::int32_t value) {
+  _internal_set_target(value);
+  _impl_._has_bits_[0] |= 0x00000002u;
+  // @@protoc_insertion_point(field_set:C_Attack.Target)
+}
+inline ::int32_t C_Attack::_internal_target() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.target_;
+}
+inline void C_Attack::_internal_set_target(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// S_Attack
+
+// required int32 Target = 1;
+inline bool S_Attack::has_target() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline void S_Attack::clear_target() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline ::int32_t S_Attack::target() const {
+  // @@protoc_insertion_point(field_get:S_Attack.Target)
+  return _internal_target();
+}
+inline void S_Attack::set_target(::int32_t value) {
+  _internal_set_target(value);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  // @@protoc_insertion_point(field_set:S_Attack.Target)
+}
+inline ::int32_t S_Attack::_internal_target() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.target_;
+}
+inline void S_Attack::_internal_set_target(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.target_ = value;
 }
 
 #ifdef __GNUC__

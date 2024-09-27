@@ -343,7 +343,7 @@ bool Session::RequestSend(shared_ptr<SendBuffer> pSbuffer)
 			return false;
 		}
 	}
-
+	m_bSending.store(false);
 
 	return true;
 }
@@ -355,5 +355,4 @@ void Session::ProcessSend(int sendLen)
 		return;
 	}
 
-	m_bSending.store(false);
 }

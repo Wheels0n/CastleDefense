@@ -1,3 +1,24 @@
+
+enum MoveState
+{
+	IDLE =1;
+	WALK =2;
+	SPRINT=3;
+	JUMP=4;
+}
+
+enum E_TYPE
+{
+	Login = 0;
+	Spawn = 1;
+	Despawn = 2;
+	Movement = 3;
+	Chat = 4;
+	EnemySpawn =5;
+	EnemyDespawn =6;
+	Attack = 7;
+}
+
 message Coordiante
 {
 	required float x=1;
@@ -12,22 +33,25 @@ message Rotation
 	required float z=3;
 }
 
-enum MoveState
-{
-	IDLE =1;
-	WALK =2;
-	SPRINT=3;
-	JUMP=4;
-}
 
 message Player
 {
 	required int32 id=1;
-	required Coordiante coord=2;
-	required Rotation rot=3;
-	required MoveState moveState=4;
+	required int32 hp=2;
+	required bool bAttack=3;
+	required Coordiante coord=4;
+	required Rotation rot=5;
+	required MoveState moveState=6;
 }
 
+message Enemy
+{
+	required int32 id=1;
+	required int32 hp=2;
+	required Coordiante coord=3;
+	required Rotation rot=4;
+	required MoveState moveState=5;
+}
 
 message C_Login
 {
@@ -79,11 +103,23 @@ message S_Chat
 	required string msg=1;
 }
 
-enum E_TYPE
+message S_EnemySpawn
 {
-	Login = 0;
-	Spawn = 1;
-	Despawn = 2;
-	Movement = 3;
-	Chat = 4;
+	repeated Enemy enemy=1;
+}
+
+message S_EnemyDespawn
+{
+	required int32 id=1;
+}
+
+message C_Attack
+{
+	required int32 Attacker=1;
+	required int32 Target=2;
+}
+
+message S_Attack
+{
+	required int32 Target=1;
 }

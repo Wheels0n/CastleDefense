@@ -2,7 +2,12 @@
 #include "PlayerManager.h"
 
 PlayerManager* g_pPlayerManager = nullptr;
-float g_x=0.0f;
+float playerSpawn_x = 0;
+float playerSpawn_y = 0;
+
+float playerSizeX = 230;
+float playerSizeY = 90;
+float playerSizeZ = 200;
 void PlayerManager::AddPlayerById(int id)
 {
 	WriteLockGuard wlock(m_playerLock);
@@ -38,13 +43,10 @@ void PlayerManager::UpdatePlayerCoordByPlayer(const Player& playerRef)
 	pCurPlayerRot->set_y(newRot.y());
 	pCurPlayerRot->set_z(newRot.z());
 
-	MoveState* pCurMoveState = pSharedCurPlayer->GetMoveState();
-	const MoveState& newMoveState = playerRef.movestate();
-	*pCurMoveState = newMoveState;
-	
-	Player* pCurPlayer = pSharedCurPlayer->GetPlayer();
-	pCurPlayer->set_movestate(newMoveState);
 
+	Player* pCurPlayer = pSharedCurPlayer->GetPlayer();
+	pCurPlayer->set_movestate(playerRef.movestate());
+	pCurPlayer->set_battack(playerRef.battack());
 }
 
 shared_ptr<PlayerInfo> PlayerManager::GetPlayerById(int id)
@@ -61,12 +63,14 @@ PlayerInfo::PlayerInfo(int id)
 	:m_bAlive(true), m_moveState(IDLE)
 {
 	m_player.set_id(id);
-	m_coord.set_x(g_x);
-	m_coord.set_y(0);
+	m_coord.set_x(playerSpawn_x);
+	m_coord.set_y(playerSpawn_y);
 	m_coord.set_z(90);
 	m_player.set_allocated_coord(&m_coord);
+	m_player.set_hp(100);
 
-	g_x+=250.0f;
+	playerSpawn_x += playerSizeX;
+	playerSpawn_y += playerSizeY;
 
 	m_rot.set_x(0);
 	m_rot.set_y(0);
@@ -74,4 +78,5 @@ PlayerInfo::PlayerInfo(int id)
 	m_player.set_allocated_rot(&m_rot);
 
 	m_player.set_movestate(m_moveState);
+	m_player.set_battack(false);
 }

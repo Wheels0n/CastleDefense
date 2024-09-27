@@ -10,21 +10,7 @@
 
 ACastleDefenseGameState::ACastleDefenseGameState()
 {
-	for (int i = 0; i < 5; ++i)
-	{
-		//.Add(nullptr);
-		//m_enemyIdx.Add(nullptr, i);
-	}
-}
 
-void ACastleDefenseGameState::SetDeleteEnemy(ASkeletonEnemy* pEnemy)
-{
-	int* pIdx = m_enemyIdx.Find(pEnemy);
-	if (pIdx != nullptr)
-	{
-		m_enemies[*pIdx] = nullptr;
-		m_enemyIdx.Remove(pEnemy);
-	}
 }
 
 void ACastleDefenseGameState::AddPlayer(Player* pPlayerInfo, int id)
@@ -53,6 +39,34 @@ void ACastleDefenseGameState::AddPlayer(Player* pPlayerInfo, int id)
 	
 }
 
+void ACastleDefenseGameState::AddEnemy(Enemy* pEnemyInfo)
+{
+	int32 idx = pEnemyInfo->id();
+	if (m_enemies.Num() == 0)
+	{
+		m_enemies.AddZeroed(5);
+	}
+	Coordiante coord = pEnemyInfo->coord();
+	FVector location = FVector(coord.x(), coord.y(), coord.z());
+	FRotator rotation = FRotator::ZeroRotator;
+
+	UWorld* pCurWorld = GetWorld();
+	m_enemies[idx] = pCurWorld->SpawnActor<ASkeletonEnemy>(location,rotation);
+	m_enemyPtrToIdx.Add(m_enemies[idx],idx);
+	m_enemyPtrToIdx[m_enemies[idx]] = idx;
+}
+
+int ACastleDefenseGameState::GetEnemyIndexByPtr(ASkeletonEnemy* pEnemy)
+{
+	return m_enemyPtrToIdx.Find(pEnemy) == nullptr ?
+		-1 : m_enemyPtrToIdx[pEnemy];
+}
+
+void ACastleDefenseGameState::UpdateEnemyHp(int idx)
+{
+	m_enemies[idx]->DecreaseHp();
+}
+
 AWizard* ACastleDefenseGameState::GetPlayerById(int id)
 {
 	return m_idToPlayer.Find(id)==nullptr?
@@ -74,6 +88,15 @@ void ACastleDefenseGameState::UpdatePlayerPos(Player* pPlayer)
 {
 	AWizard* pCurPlayer = m_idToPlayer[pPlayer->id()];
 	pCurPlayer->SetNewDest(pPlayer);
+	
+	if (pPlayer->battack())
+	{
+		pCurPlayer->StartAttack();
+	}
+	else
+	{
+		pCurPlayer->StopAttack();
+	}
 }
 
 void ACastleDefenseGameState::BeginPlay()
@@ -101,7 +124,7 @@ void ACastleDefenseGameState::CheckEnemyAlive()
 			check(m_enemies[i] != nullptr);
 			m_enemies[i]->SetActorLocation(location);
 
-			m_enemyIdx.Add(m_enemies[i], i);
+			m_enemyPtrToIdx.Add(m_enemies[i], i);
 		}
 	}
 }

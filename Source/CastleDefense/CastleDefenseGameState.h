@@ -12,6 +12,8 @@
 class ASkeletonEnemy;
 class AWizard;
 class Player;
+class Enemy;
+
 UCLASS()
 class CASTLEDEFENSE_API ACastleDefenseGameState : public AGameState
 {
@@ -19,9 +21,12 @@ class CASTLEDEFENSE_API ACastleDefenseGameState : public AGameState
 public:
 	ACastleDefenseGameState();
 
-	void SetDeleteEnemy(ASkeletonEnemy*);
-	void AddPlayer(Player*, int);
+	void AddEnemy(Enemy*);
+	int GetEnemyIndexByPtr(ASkeletonEnemy*);
+	void UpdateEnemyHp(int);
+
 	AWizard* GetPlayerById(int);
+	void AddPlayer(Player*, int);
 	void RemovePlayerById(int);
 	void UpdatePlayerPos(Player*);
 protected:
@@ -33,6 +38,6 @@ private:
 	FTimerHandle m_hTimer;
 	TArray<ASkeletonEnemy*> m_enemies;
 	TArray<AWizard*> m_players;
-	TMap<ASkeletonEnemy*,int> m_enemyIdx;
+	TMap<ASkeletonEnemy*,int> m_enemyPtrToIdx;
 	TMap<int, AWizard*>m_idToPlayer;
 };
