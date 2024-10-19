@@ -20,6 +20,8 @@ public :
 
 	UFUNCTION()
 	void SetGotHit(bool bGotHit);
+	UFUNCTION()
+	void SetNewDest(bool bNewDest);
 
 	UFUNCTION()
 	void StopBehaviorTree();

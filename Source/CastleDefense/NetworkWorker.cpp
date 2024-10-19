@@ -42,7 +42,7 @@ RecvWorker::~RecvWorker()
 void RecvWorker::RecvPacket()
 {
 	uint32 pendingBytes = 0;
-	if (!m_pSocket->HasPendingData(pendingBytes)||pendingBytes==0)
+	if (!m_pSocket||!m_pSocket->HasPendingData(pendingBytes)||pendingBytes==0)
 	{
 		return;
 	}

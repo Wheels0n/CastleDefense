@@ -17,6 +17,7 @@ enum E_TYPE
 	EnemySpawn =5;
 	EnemyDespawn =6;
 	Attack = 7;
+	EnemyMovement = 8;
 }
 
 message Coordiante
@@ -122,4 +123,9 @@ message C_Attack
 message S_Attack
 {
 	required int32 Target=1;
+}
+
+message S_EnemyMove
+{
+	repeated Enemy enemy=1;
 }

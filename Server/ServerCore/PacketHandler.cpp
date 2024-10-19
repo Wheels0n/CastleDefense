@@ -70,6 +70,16 @@ void PacketHandler::SerializeS_Attack(S_Attack& pkt, char* pBuf)
 	pkt.SerializeToArray(pHeader + 1, pkt.ByteSizeLong());
 }
 
+void PacketHandler::SerializeS_EnemyMovement(S_EnemyMove& pkt, char* pBuf)
+{
+	int packetSize = sizeof(PacketHeader) + pkt.ByteSizeLong();
+	PacketHeader* pHeader = reinterpret_cast<PacketHeader*>(pBuf);
+	pHeader->size = packetSize;
+	pHeader->id = E_TYPE::EnemyMovement;
+
+	pkt.SerializeToArray(pHeader + 1, pkt.ByteSizeLong());
+}
+
 C_Chat PacketHandler::ParseC_Chat(char* pBuf)
 {
 	PacketHeader* pHeader = reinterpret_cast<PacketHeader*>(pBuf);
@@ -123,6 +133,17 @@ C_Attack PacketHandler::ParseC_Attack(char* pBuf)
 	C_Attack pkt;
 	pkt.ParseFromArray(pHeader + 1, size);
 	return pkt;
+}
+
+void PacketHandler::BrodcastS_EnemyMove()
+{
+	S_EnemyMove pkt;
+	g_pEnemyManager->SetNextLocation();
+	g_pEnemyManager->AddEnemyToPacket(pkt);
+	int packetSize = sizeof(PacketHeader) + pkt.ByteSizeLong();
+	shared_ptr<SendBuffer> pSendBuffer = make_shared<SendBuffer>(packetSize);
+	PacketHandler::SerializeS_EnemyMovement(pkt, pSendBuffer->GetBuffer());
+	g_pSessionManager->Brodcast(pSendBuffer, nullptr);
 }
 
 void PacketHandler::ProcessPacket(PacketHeader* pHeader, shared_ptr<Session> pSession)
@@ -216,7 +237,7 @@ void PacketHandler::ProcessC_Spawn(PacketHeader* pHeader)
 	//적 스폰 패킷 
 	{
 		S_EnemySpawn pkt;
-		g_pEnemyManager->MakeEnemySpawnPacket(pkt);
+		g_pEnemyManager->AddEnemyToPacket(pkt);
 		int packetSize = sizeof(PacketHeader) + pkt.ByteSizeLong();
 		shared_ptr<SendBuffer> pSendBuffer = make_shared<SendBuffer>(packetSize);
 		PacketHandler::SerializeS_EnemySpawn(pkt, pSendBuffer->GetBuffer());

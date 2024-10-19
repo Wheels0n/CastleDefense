@@ -108,6 +108,7 @@ void Session::ProcessAccept()
 	{
 		//TODO :  크래시. 연결에 연결
 	}
+	g_pSessionManager->IncreaseConnectionCount();
 	
 	if (setsockopt(m_socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
 		reinterpret_cast<char*>(g_pIocpManager->GetListenSocket()), sizeof(SOCKET))

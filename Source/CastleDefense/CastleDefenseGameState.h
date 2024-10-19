@@ -24,11 +24,12 @@ public:
 	void AddEnemy(Enemy*);
 	int GetEnemyIndexByPtr(ASkeletonEnemy*);
 	void UpdateEnemyHp(int);
+	void UpdateEnemyPos(Enemy*, int);
 
 	AWizard* GetPlayerById(int);
 	void AddPlayer(Player*, int);
 	void RemovePlayerById(int);
-	void UpdatePlayerPos(Player*);
+	void UpdatePlayerMovement(Player*);
 protected:
 	virtual void BeginPlay() override;
 private:

@@ -38,6 +38,9 @@ ASkeletonEnemy::ASkeletonEnemy()
 	}
 	static ConstructorHelpers::FClassFinder<AEnemyAIController> enemyAIController(TEXT("/Script/CoreUObject.Class'/Script/CastleDefense.EnemyAIController'"));
 	AIControllerClass = enemyAIController.Class;
+
+	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
+	pCharacterMovement->MaxWalkSpeed = 500.0f;//달리기는 500.0f
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 
@@ -94,6 +97,7 @@ void ASkeletonEnemy::BeginPlay()
 		}
 		
 	}
+
 }
 
 void ASkeletonEnemy::Destroyed()
@@ -115,8 +119,6 @@ void ASkeletonEnemy::Destroyed()
 void ASkeletonEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FString bAttackignStr = FString::FromInt((int32)m_bAttacking);
-	UE_LOG(LogTemp, Display, TEXT("%s"), *bAttackignStr);
 
 }
 
@@ -202,4 +204,17 @@ void ASkeletonEnemy::DestroyTimer()
 void ASkeletonEnemy::DestroyEnemy()
 {
 	Destroy();
+}
+
+void ASkeletonEnemy::SetDest(Enemy* pEnemy)
+{
+	m_dstCoord = pEnemy->coord();
+	Rotation rot =  pEnemy->rot();
+
+	FRotator dstRot(rot.x(), rot.y(), rot.z());
+	SetActorRotation(dstRot);
+
+	AController* pController = GetController();
+	AEnemyAIController* pAIController = Cast<AEnemyAIController>(pController);
+	pAIController->SetNewDest(true);
 }

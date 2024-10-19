@@ -151,6 +151,19 @@ S_Attack CPacketHandler::ParseS_Attack(char* pBuf)
 	return pkt;
 }
 
+S_EnemyMove CPacketHandler::ParseS_EnemyMove(char* pBuf)
+{
+	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(pBuf);
+	int size = (pHeader->size) - sizeof(CPacketHeader);
+	S_EnemyMove pkt;
+	if (pkt.ParseFromArray(pHeader + 1, size) == false)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ParseFromArray() Failed"));
+	}
+
+	return pkt;
+}
+
 
 
 void CPacketHandler::ProcessPacket(CPacketHeader* pHeader)
@@ -178,6 +191,8 @@ void CPacketHandler::ProcessPacket(CPacketHeader* pHeader)
 		break;
 	case Attack:
 		ProcessS_Attack(pHeader);
+	case EnemyMovement:
+		ProcessS_EnemyMove(pHeader);
 		break;
 	default:
 		break;
@@ -237,7 +252,7 @@ void CPacketHandler::ProcessS_Move(CPacketHeader* pHeader)
 	//늦게 접속한 경우 대비
 	if (pGameState->GetPlayerById(player.id())!=nullptr)
 	{
-		pGameState->UpdatePlayerPos(&player);
+		pGameState->UpdatePlayerMovement(&player);
 	}
 	
 }
@@ -276,6 +291,20 @@ void CPacketHandler::ProcessS_Attack(CPacketHeader* pHeader)
 	ACastleDefenseGameState* pGameState = pCurWorld->GetGameState<ACastleDefenseGameState>();
 	pGameState->UpdateEnemyHp(pkt.target());
 
+}
+
+void CPacketHandler::ProcessS_EnemyMove(CPacketHeader* pHeader)
+{
+	S_EnemyMove pkt = ParseS_EnemyMove(reinterpret_cast<char*>(pHeader));
+	
+	for (int i = 0; i < pkt.enemy_size(); ++i)
+	{
+		Enemy curEnemy = pkt.enemy(i);
+		UWorld* pCurWorld = m_pGameInstance->GetWorld();
+		ACastleDefenseGameState* pGameState = pCurWorld->GetGameState<ACastleDefenseGameState>();
+		pGameState->UpdateEnemyPos(&curEnemy, i);
+		
+	}
 }
 
 CPacketHandler::CPacketHandler(UCastleDefenseGameInstance* pGameInstacne, int id)

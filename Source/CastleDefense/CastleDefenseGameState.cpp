@@ -7,7 +7,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h"
 
-
+const int32 NUM_ENEMY = 5;
 ACastleDefenseGameState::ACastleDefenseGameState()
 {
 
@@ -44,7 +44,7 @@ void ACastleDefenseGameState::AddEnemy(Enemy* pEnemyInfo)
 	int32 idx = pEnemyInfo->id();
 	if (m_enemies.Num() == 0)
 	{
-		m_enemies.AddZeroed(5);
+		m_enemies.AddZeroed(NUM_ENEMY);
 	}
 	Coordiante coord = pEnemyInfo->coord();
 	FVector location = FVector(coord.x(), coord.y(), coord.z());
@@ -67,6 +67,18 @@ void ACastleDefenseGameState::UpdateEnemyHp(int idx)
 	m_enemies[idx]->DecreaseHp();
 }
 
+void ACastleDefenseGameState::UpdateEnemyPos(Enemy* pEnemy, int idx)
+{
+
+	if (m_enemies.Num() == 0)
+	{
+		return;
+	}
+	ASkeletonEnemy* pCurEnemy = m_enemies[idx];
+	pCurEnemy->SetDest(pEnemy);
+}
+
+
 AWizard* ACastleDefenseGameState::GetPlayerById(int id)
 {
 	return m_idToPlayer.Find(id)==nullptr?
@@ -84,7 +96,7 @@ void ACastleDefenseGameState::RemovePlayerById(int id)
 	}
 }
 
-void ACastleDefenseGameState::UpdatePlayerPos(Player* pPlayer)
+void ACastleDefenseGameState::UpdatePlayerMovement(Player* pPlayer)
 {
 	AWizard* pCurPlayer = m_idToPlayer[pPlayer->id()];
 	pCurPlayer->SetNewDest(pPlayer);
@@ -110,7 +122,7 @@ void ACastleDefenseGameState::BeginPlay()
 void ACastleDefenseGameState::CheckEnemyAlive()
 {
 	FMath fmath;
-	for(int i=0;i<5;++i)
+	for(int i=0;i< NUM_ENEMY;++i)
 	{
 		if (m_enemies[i] == nullptr)
 		{

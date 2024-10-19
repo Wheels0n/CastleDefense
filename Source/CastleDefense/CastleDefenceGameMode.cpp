@@ -3,17 +3,24 @@
 
 #include "CastleDefenceGameMode.h"
 #include "Wizard.h"
-
+#include "Runtime/NavigationSystem/Public/NavigationSystem.h"
+#include "Runtime/NavigationSystem/Public/NavMesh/RecastNavMesh.h"
+#include "Runtime/NavigationSystem/Public/NavMesh/RecastNavMeshGenerator.h"
 ACastleDefenceGameMode::ACastleDefenceGameMode()
 {
-	//static ConstructorHelpers::FClassFinder<AWizard> wizardClass(TEXT("/Script/CoreUObject.Class'/Script/CastleDefense.Wizard'"));
-	//DefaultPawnClass = wizardClass.Class;
 }
 
 void ACastleDefenceGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	OnPlayerDied.AddDynamic(this, &ACastleDefenceGameMode::PlayerDied);
+
+	/*auto NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+	ANavigationData* pNavData =
+		NavSys->GetDefaultNavDataInstance(FNavigationSystem::ECreateIfEmpty::DontCreate);
+
+	ARecastNavMesh* pNavMesh = Cast<ARecastNavMesh>(pNavData);
+	pNavMesh->GetGenerator()->ExportNavigationData(FString(TEXT("TestNavMesh")));*/
 }
 
 void ACastleDefenceGameMode::RestartPlayer(AController* pController)

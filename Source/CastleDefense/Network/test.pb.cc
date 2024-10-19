@@ -365,6 +365,25 @@ struct S_EnemySpawnDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 S_EnemySpawnDefaultTypeInternal _S_EnemySpawn_default_instance_;
 
+inline constexpr S_EnemyMove::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : enemy_{},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR S_EnemyMove::S_EnemyMove(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct S_EnemyMoveDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR S_EnemyMoveDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~S_EnemyMoveDefaultTypeInternal() {}
+  union {
+    S_EnemyMove _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 S_EnemyMoveDefaultTypeInternal _S_EnemyMove_default_instance_;
+
 inline constexpr C_Move::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -595,6 +614,15 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::S_Attack, _impl_.target_),
         0,
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::S_EnemyMove, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::S_EnemyMove, _impl_.enemy_),
 };
 
 static const ::_pbi::MigrationSchema
@@ -617,6 +645,7 @@ static const ::_pbi::MigrationSchema
         {174, 183, -1, sizeof(::S_EnemyDespawn)},
         {184, 194, -1, sizeof(::C_Attack)},
         {196, 205, -1, sizeof(::S_Attack)},
+        {206, -1, -1, sizeof(::S_EnemyMove)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_Coordiante_default_instance_._instance,
@@ -637,6 +666,7 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::_S_EnemyDespawn_default_instance_._instance,
     &::_C_Attack_default_instance_._instance,
     &::_S_Attack_default_instance_._instance,
+    &::_S_EnemyMove_default_instance_._instance,
 };
 const char descriptor_table_protodef_test_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
@@ -659,23 +689,25 @@ const char descriptor_table_protodef_test_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIA
     "nemySpawn\022\025\n\005enemy\030\001 \003(\0132\006.Enemy\"\034\n\016S_En"
     "emyDespawn\022\n\n\002id\030\001 \002(\005\",\n\010C_Attack\022\020\n\010At"
     "tacker\030\001 \002(\005\022\016\n\006Target\030\002 \002(\005\"\032\n\010S_Attack"
-    "\022\016\n\006Target\030\001 \002(\005*5\n\tMoveState\022\010\n\004IDLE\020\001\022"
-    "\010\n\004WALK\020\002\022\n\n\006SPRINT\020\003\022\010\n\004JUMP\020\004*q\n\006E_TYP"
-    "E\022\t\n\005Login\020\000\022\t\n\005Spawn\020\001\022\013\n\007Despawn\020\002\022\014\n\010"
-    "Movement\020\003\022\010\n\004Chat\020\004\022\016\n\nEnemySpawn\020\005\022\020\n\014"
-    "EnemyDespawn\020\006\022\n\n\006Attack\020\007"
+    "\022\016\n\006Target\030\001 \002(\005\"$\n\013S_EnemyMove\022\025\n\005enemy"
+    "\030\001 \003(\0132\006.Enemy*5\n\tMoveState\022\010\n\004IDLE\020\001\022\010\n"
+    "\004WALK\020\002\022\n\n\006SPRINT\020\003\022\010\n\004JUMP\020\004*\204\001\n\006E_TYPE"
+    "\022\t\n\005Login\020\000\022\t\n\005Spawn\020\001\022\013\n\007Despawn\020\002\022\014\n\010M"
+    "ovement\020\003\022\010\n\004Chat\020\004\022\016\n\nEnemySpawn\020\005\022\020\n\014E"
+    "nemyDespawn\020\006\022\n\n\006Attack\020\007\022\021\n\rEnemyMoveme"
+    "nt\020\010"
 };
 static ::absl::once_flag descriptor_table_test_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_test_2eproto = {
     false,
     false,
-    946,
+    1004,
     descriptor_table_protodef_test_2eproto,
     "test.proto",
     &descriptor_table_test_2eproto_once,
     nullptr,
     0,
-    18,
+    19,
     schemas,
     file_default_instances,
     TableStruct_test_2eproto::offsets,
@@ -696,9 +728,9 @@ const ::google::protobuf::EnumDescriptor* E_TYPE_descriptor() {
   return file_level_enum_descriptors_test_2eproto[1];
 }
 PROTOBUF_CONSTINIT const uint32_t E_TYPE_internal_data_[] = {
-    524288u, 0u, };
+    589824u, 0u, };
 bool E_TYPE_IsValid(int value) {
-  return 0 <= value && value <= 7;
+  return 0 <= value && value <= 8;
 }
 // ===================================================================
 
@@ -4813,6 +4845,201 @@ void S_Attack::InternalSwap(S_Attack* PROTOBUF_RESTRICT other) {
 }
 
 ::google::protobuf::Metadata S_Attack::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class S_EnemyMove::_Internal {
+ public:
+};
+
+S_EnemyMove::S_EnemyMove(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:S_EnemyMove)
+}
+inline PROTOBUF_NDEBUG_INLINE S_EnemyMove::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::S_EnemyMove& from_msg)
+      : enemy_{visibility, arena, from.enemy_},
+        _cached_size_{0} {}
+
+S_EnemyMove::S_EnemyMove(
+    ::google::protobuf::Arena* arena,
+    const S_EnemyMove& from)
+    : ::google::protobuf::Message(arena) {
+  S_EnemyMove* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+
+  // @@protoc_insertion_point(copy_constructor:S_EnemyMove)
+}
+inline PROTOBUF_NDEBUG_INLINE S_EnemyMove::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : enemy_{visibility, arena},
+        _cached_size_{0} {}
+
+inline void S_EnemyMove::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+S_EnemyMove::~S_EnemyMove() {
+  // @@protoc_insertion_point(destructor:S_EnemyMove)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void S_EnemyMove::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+S_EnemyMove::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              S_EnemyMove::IsInitializedImpl,
+              PROTOBUF_FIELD_OFFSET(S_EnemyMove, _impl_._cached_size_),
+              false,
+          },
+          &S_EnemyMove::MergeImpl,
+          &S_EnemyMove::kDescriptorMethods,
+          &descriptor_table_test_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 1, 0, 2> S_EnemyMove::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_S_EnemyMove_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::S_EnemyMove>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // repeated .Enemy enemy = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(S_EnemyMove, _impl_.enemy_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .Enemy enemy = 1;
+    {PROTOBUF_FIELD_OFFSET(S_EnemyMove, _impl_.enemy_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::Enemy>()},
+  }}, {{
+  }},
+};
+
+PROTOBUF_NOINLINE void S_EnemyMove::Clear() {
+// @@protoc_insertion_point(message_clear_start:S_EnemyMove)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.enemy_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* S_EnemyMove::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:S_EnemyMove)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // repeated .Enemy enemy = 1;
+  for (unsigned i = 0, n = static_cast<unsigned>(
+                           this->_internal_enemy_size());
+       i < n; i++) {
+    const auto& repfield = this->_internal_enemy().Get(i);
+    target =
+        ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+            1, repfield, repfield.GetCachedSize(),
+            target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:S_EnemyMove)
+  return target;
+}
+
+::size_t S_EnemyMove::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:S_EnemyMove)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // repeated .Enemy enemy = 1;
+  total_size += 1UL * this->_internal_enemy_size();
+  for (const auto& msg : this->_internal_enemy()) {
+    total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void S_EnemyMove::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<S_EnemyMove*>(&to_msg);
+  auto& from = static_cast<const S_EnemyMove&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:S_EnemyMove)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_enemy()->MergeFrom(
+      from._internal_enemy());
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void S_EnemyMove::CopyFrom(const S_EnemyMove& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:S_EnemyMove)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+PROTOBUF_NOINLINE bool S_EnemyMove::IsInitializedImpl(
+    const MessageLite& msg) {
+  auto& this_ = static_cast<const S_EnemyMove&>(msg);
+  if (!::google::protobuf::internal::AllAreInitialized(this_._internal_enemy()))
+    return false;
+  return true;
+}
+
+void S_EnemyMove::InternalSwap(S_EnemyMove* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.enemy_.InternalSwap(&other->_impl_.enemy_);
+}
+
+::google::protobuf::Metadata S_EnemyMove::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

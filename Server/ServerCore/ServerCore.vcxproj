@@ -126,7 +126,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;L%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessToFile>false</PreprocessToFile>
@@ -143,7 +143,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PreprocessToFile>false</PreprocessToFile>
@@ -166,6 +166,7 @@
     <ClCompile Include="LockQueue.h" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="CircularBuffer.cpp" />
+    <ClCompile Include="NavigationManager.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="PlayerManager.cpp" />
     <ClCompile Include="SendBuffer.cpp" />
@@ -192,8 +193,33 @@
     <ClInclude Include="LockStack.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="CircularBuffer.h" />
+    <ClInclude Include="NavigationManager.h" />
     <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="PlayerManager.h" />
+    <ClInclude Include="Recastnavigation\DebugDraw.h" />
+    <ClInclude Include="Recastnavigation\DetourAlloc.h" />
+    <ClInclude Include="Recastnavigation\DetourAssert.h" />
+    <ClInclude Include="Recastnavigation\DetourCommon.h" />
+    <ClInclude Include="Recastnavigation\DetourCrowd.h" />
+    <ClInclude Include="Recastnavigation\DetourDebugDraw.h" />
+    <ClInclude Include="Recastnavigation\DetourLocalBoundary.h" />
+    <ClInclude Include="Recastnavigation\DetourMath.h" />
+    <ClInclude Include="Recastnavigation\DetourNavMesh.h" />
+    <ClInclude Include="Recastnavigation\DetourNavMeshBuilder.h" />
+    <ClInclude Include="Recastnavigation\DetourNavMeshQuery.h" />
+    <ClInclude Include="Recastnavigation\DetourNode.h" />
+    <ClInclude Include="Recastnavigation\DetourObstacleAvoidance.h" />
+    <ClInclude Include="Recastnavigation\DetourPathCorridor.h" />
+    <ClInclude Include="Recastnavigation\DetourPathQueue.h" />
+    <ClInclude Include="Recastnavigation\DetourProximityGrid.h" />
+    <ClInclude Include="Recastnavigation\DetourStatus.h" />
+    <ClInclude Include="Recastnavigation\DetourTileCache.h" />
+    <ClInclude Include="Recastnavigation\DetourTileCacheBuilder.h" />
+    <ClInclude Include="Recastnavigation\Recast.h" />
+    <ClInclude Include="Recastnavigation\RecastAlloc.h" />
+    <ClInclude Include="Recastnavigation\RecastAssert.h" />
+    <ClInclude Include="Recastnavigation\RecastDebugDraw.h" />
+    <ClInclude Include="Recastnavigation\RecastDump.h" />
     <ClInclude Include="SendBuffer.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionManager.h" />
@@ -204,6 +230,7 @@
     <ClInclude Include="XTL.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="all_tiles_navmesh.bin" />
     <None Include="test.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

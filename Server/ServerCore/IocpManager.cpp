@@ -3,6 +3,7 @@
 #include "IocpManager.h"
 #include "Session.h"
 #include "SessionManager.h"
+#include "PacketHandler.h"
 #include "ThreadPool.h"
 #include "ThreadLocal.h"
 #include "LockOrderChecker.h"
@@ -125,6 +126,7 @@ void IocpManager::StartAccept()
 {
 	LLockOrderChecker = new LockOrderChecker();
 	g_pSessionManager->PrepareSessions();
+
 	while (1)
 	{
 		g_pSessionManager->AcceptSessions();
@@ -149,10 +151,22 @@ void IocpManager::RunIOThreads()
 {
 	m_pThreadPool = new ThreadPool();
 	int nThreads = m_pThreadPool->GetNumOfThreads();
-	for (int i = 0; i < nThreads; ++i)
+	for (int i = 1; i < nThreads; ++i)
 	{
 		m_pThreadPool->EnqueueTask([=]() { IOThreadMain(m_hIocp); });
 	}
+
+	m_pThreadPool->EnqueueTask([=]() {
+			while (1)
+			{
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				if (g_pSessionManager->GetNumConnection())
+				{
+					PacketHandler::BrodcastS_EnemyMove();
+				}
+			}
+		}
+	);
 }
 
 void IocpManager::StopIOThreads()

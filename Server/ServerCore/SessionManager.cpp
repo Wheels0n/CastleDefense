@@ -18,11 +18,15 @@ void SessionManager::AcceptSessions()
 {	
 	WriteLockGuard wLockGuard(m_rwLock);
 
-	while (m_nCurSessions.load() < MAX_CONNECTION)
+	while (1)
 	{
+		if (m_sessionPool.empty())
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			continue;
+		}
 		shared_ptr<Session> pSession = m_sessionPool.back();
 		m_sessionPool.pop_back();
-		m_nCurSessions.fetch_add(1);
 		
 		if (pSession->RequestAccept()==false)
 		{

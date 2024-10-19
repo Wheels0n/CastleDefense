@@ -4,9 +4,21 @@
 #ifdef _DEBUG
 #pragma comment(lib, "Debug\\ServerCore.lib")
 #pragma comment(lib, "Debug\\libprotobufd.lib")
+#pragma comment(lib, "utf8_validity.lib")
+#pragma comment(lib, "Recast-d.lib")
+#pragma comment(lib, "DebugUtils-d.lib")
+#pragma comment(lib, "Detour-d.lib")
+#pragma comment(lib, "DetourCrowd-d.lib")
+#pragma comment(lib, "DetourTileCache-d.lib")
 #else
 #pragma comment(lib, "Release\\ServerCore.lib")
 #pragma comment(lib, "Release\\libprotobuf.lib")
+#pragma comment(lib, "utf8_validity.lib")
+#pragma comment(lib, "Recast.lib")
+#pragma comment(lib, "DebugUtils.lib")
+#pragma comment(lib, "Detour.lib")
+#pragma comment(lib, "DetourCrowd.lib")
+#pragma comment(lib, "DetourTileCache.lib")
 #endif // _DEBUG
 
 //#pragma comment(lib, "absl_bad_any_cast_impl.lib")
@@ -96,7 +108,6 @@
 //#pragma comment(lib, "absl_vlog_config_internal.lib")
 
 //#pragma comment(lib, "utf8_range.lib")
-#pragma comment(lib, "utf8_validity.lib")
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "Memory.h"
@@ -104,6 +115,7 @@
 #include "SessionManager.h"
 #include "PlayerManager.h"
 #include "EnemyManager.h"
+#include "NavigationManager.h"
 #include "IocpManager.h"
 
 int main()
@@ -112,6 +124,7 @@ int main()
 	g_pMemoryPoolManager = new MemoryPoolManager();
 	g_pSessionManager = new SessionManager();
 	g_pPlayerManager = new PlayerManager();
+	g_pNavManager = new NavigationManager();
 	g_pEnemyManager = new EnemyManager();
 	g_pIocpManager = new IocpManager();
 

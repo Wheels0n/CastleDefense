@@ -2,9 +2,10 @@
 
 
 #include "BTT_FindRandomPatrol.h"
-#include "AIController.h"
+#include "EnemyAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "SkeletonEnemy.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NavigationSystem.h"
@@ -16,48 +17,43 @@ UBTT_FindRandomPatrol::UBTT_FindRandomPatrol()
 
 EBTNodeResult::Type UBTT_FindRandomPatrol::ExecuteTask(UBehaviorTreeComponent& ownerComp, uint8* pNodeMemory)
 {
+
 	AAIController* pAIController = ownerComp.GetAIOwner();
+	AEnemyAIController* pEnemyAIController = Cast<AEnemyAIController>(pAIController);
 	if (pAIController == nullptr)
 	{
+		UE_LOG(LogTemp, Display, TEXT("AIController == nullptr"));
 		return EBTNodeResult::Failed;
 	}
 
-	ACharacter* pCharacter = pAIController->GetCharacter();
-	if (pCharacter == nullptr)
+
+	ASkeletonEnemy* pEnemy = Cast<ASkeletonEnemy> (pAIController->GetCharacter());
+	if (pEnemy == nullptr)
 	{
+		UE_LOG(LogTemp, Display, TEXT("pEnemy == nullptr"));
 		return EBTNodeResult::Failed;
 	}
 
-	UCharacterMovementComponent* pMoveComp = pCharacter->GetCharacterMovement();
+	UCharacterMovementComponent* pMoveComp = pEnemy->GetCharacterMovement();
 	if (pMoveComp == nullptr)
 	{
+		UE_LOG(LogTemp, Display, TEXT("pMoveComp == nullptr"));
 		return EBTNodeResult::Failed;
 	}
-	pMoveComp->MaxWalkSpeed = m_patrolSpeed;
+	//pMoveComp->MaxWalkSpeed = m_patrolSpeed;
 
-	UWorld* pWorld = pCharacter->GetWorld();
-	if (pWorld == nullptr)
-	{
-		return EBTNodeResult::Failed;
-	}
-	UNavigationSystemV1* pNavSys = UNavigationSystemV1::GetNavigationSystem(pWorld);
-	if (pNavSys == nullptr)
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	FVector location = pMoveComp->GetActorLocation();
-	FNavLocation dest;
+	Coordiante* pCoord = pEnemy->GetDest();
+	FVector location(pCoord->x(), pCoord->y(), pCoord->z());
 	
-	bool bFound = pNavSys->GetRandomReachablePointInRadius(location, m_patrolRadius, dest);
 	UBlackboardComponent* pBBComp = pAIController->GetBlackboardComponent();
 	if (pBBComp == nullptr)
 	{
+		UE_LOG(LogTemp, Display, TEXT("pBBComp == nullptr"));
 		return EBTNodeResult::Failed;
 	}
 
-	pBBComp->SetValueAsVector(FName(TEXT("PatrolLocation")), bFound?dest.Location:location);
+	pBBComp->SetValueAsVector(FName(TEXT("PatrolLocation")), location);
 	UE_LOG(LogTemp, Display, TEXT("SetNewPatrolLocation"));
-
+	//pEnemyAIController->SetNewDest(false);
 	return EBTNodeResult::Succeeded;
 }

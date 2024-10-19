@@ -9,7 +9,7 @@ public class CastleDefense : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] 
-        { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "NavigationSystem", "UMG",
+        { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "NavigationSystem", "Navmesh", "UMG",
             "Networking", "Sockets", "ProtobufCore"});
 
         // Uncomment if you are using Slate UI

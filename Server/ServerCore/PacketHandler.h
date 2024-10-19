@@ -20,6 +20,7 @@ public:
 	static void SerializeS_Chat(S_Chat& pkt, char* pBuf);
 	static void SerializeS_EnemySpawn(S_EnemySpawn& pkt, char* pBuf);
 	static void SerializeS_Attack(S_Attack& pkt, char* pBuf);
+	static void SerializeS_EnemyMovement(S_EnemyMove& pkt, char* pBuf);
 	
 	static void ProcessPacket(PacketHeader*, shared_ptr<Session>);
 
@@ -36,5 +37,7 @@ public:
 	static C_Despawn ParseC_Despawn(char* pBuf);
 	static C_Move ParseC_Move(char* pBuf);
 	static C_Attack ParseC_Attack(char* pBuf);
+
+	static void BrodcastS_EnemyMove();
 };
 

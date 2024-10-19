@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Network/test.pb.h"
 #include "SkeletonEnemy.generated.h"
 
 class UEnemyWidget;
@@ -35,6 +36,9 @@ public:
 	void DecreaseHp();
 	void DestroyTimer();
 	void DestroyEnemy();
+
+	void SetDest(Enemy*);
+	Coordiante* GetDest() { return &m_dstCoord; };
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -74,4 +78,5 @@ private:
 
 	int m_Hp;
 
+	Coordiante m_dstCoord;
 };

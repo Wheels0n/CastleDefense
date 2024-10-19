@@ -2,8 +2,8 @@
 #include "PlayerManager.h"
 
 PlayerManager* g_pPlayerManager = nullptr;
-float playerSpawn_x = 0;
-float playerSpawn_y = 0;
+float playerSpawn_x = -7320;
+float playerSpawn_y = 1290;
 
 float playerSizeX = 230;
 float playerSizeY = 90;
@@ -65,7 +65,7 @@ PlayerInfo::PlayerInfo(int id)
 	m_player.set_id(id);
 	m_coord.set_x(playerSpawn_x);
 	m_coord.set_y(playerSpawn_y);
-	m_coord.set_z(90);
+	m_coord.set_z(400);
 	m_player.set_allocated_coord(&m_coord);
 	m_player.set_hp(100);
 

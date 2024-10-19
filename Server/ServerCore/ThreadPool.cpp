@@ -44,7 +44,7 @@ void ThreadPool::Join()
 
 ThreadPool::ThreadPool() :m_bStop(false)
 {
-	int nThreads = thread::hardware_concurrency();
+	int nThreads = thread::hardware_concurrency()+1;
 	m_threads.reserve(nThreads);
 
 	for (int i = 0; i < nThreads; ++i)

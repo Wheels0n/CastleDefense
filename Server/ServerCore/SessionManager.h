@@ -15,6 +15,8 @@ public:
 	void AcceptSessions();
 	shared_ptr<Session> ConnectSession();
 	void DisconnectSession();
+	void IncreaseConnectionCount() { m_nCurSessions.fetch_add(1); };
+	int GetNumConnection() { return m_nCurSessions.load(); };
 	void ReturnSession(shared_ptr<Session>);
 	void Brodcast(shared_ptr<SendBuffer>, shared_ptr<Session>);
 

@@ -93,6 +93,11 @@ void AEnemyAIController::SetGotHit(bool bGotHit)
 	Blackboard->SetValueAsBool(FName(TEXT("bGotHit")), bGotHit);
 }
 
+void AEnemyAIController::SetNewDest(bool bNewDest)
+{
+	Blackboard->SetValueAsBool(FName(TEXT("bNewDest")), bNewDest);
+}
+
 void AEnemyAIController::StopBehaviorTree()
 {
 	FString reasonStr = FString("EnemyDead");

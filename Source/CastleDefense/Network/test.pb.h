@@ -92,6 +92,9 @@ extern S_DespawnDefaultTypeInternal _S_Despawn_default_instance_;
 class S_EnemyDespawn;
 struct S_EnemyDespawnDefaultTypeInternal;
 extern S_EnemyDespawnDefaultTypeInternal _S_EnemyDespawn_default_instance_;
+class S_EnemyMove;
+struct S_EnemyMoveDefaultTypeInternal;
+extern S_EnemyMoveDefaultTypeInternal _S_EnemyMove_default_instance_;
 class S_EnemySpawn;
 struct S_EnemySpawnDefaultTypeInternal;
 extern S_EnemySpawnDefaultTypeInternal _S_EnemySpawn_default_instance_;
@@ -149,13 +152,14 @@ enum E_TYPE : int {
   EnemySpawn = 5,
   EnemyDespawn = 6,
   Attack = 7,
+  EnemyMovement = 8,
 };
 
 bool E_TYPE_IsValid(int value);
 extern const uint32_t E_TYPE_internal_data_[];
 constexpr E_TYPE E_TYPE_MIN = static_cast<E_TYPE>(0);
-constexpr E_TYPE E_TYPE_MAX = static_cast<E_TYPE>(7);
-constexpr int E_TYPE_ARRAYSIZE = 7 + 1;
+constexpr E_TYPE E_TYPE_MAX = static_cast<E_TYPE>(8);
+constexpr int E_TYPE_ARRAYSIZE = 8 + 1;
 const ::google::protobuf::EnumDescriptor*
 E_TYPE_descriptor();
 template <typename T>
@@ -168,7 +172,7 @@ const std::string& E_TYPE_Name(T value) {
 template <>
 inline const std::string& E_TYPE_Name(E_TYPE value) {
   return ::google::protobuf::internal::NameOfDenseEnum<E_TYPE_descriptor,
-                                                 0, 7>(
+                                                 0, 8>(
       static_cast<int>(value));
 }
 inline bool E_TYPE_Parse(absl::string_view name, E_TYPE* value) {
@@ -3431,6 +3435,189 @@ class S_EnemySpawn final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
+class S_EnemyMove final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:S_EnemyMove) */ {
+ public:
+  inline S_EnemyMove() : S_EnemyMove(nullptr) {}
+  ~S_EnemyMove() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR S_EnemyMove(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline S_EnemyMove(const S_EnemyMove& from) : S_EnemyMove(nullptr, from) {}
+  inline S_EnemyMove(S_EnemyMove&& from) noexcept
+      : S_EnemyMove(nullptr, std::move(from)) {}
+  inline S_EnemyMove& operator=(const S_EnemyMove& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline S_EnemyMove& operator=(S_EnemyMove&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const S_EnemyMove& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const S_EnemyMove* internal_default_instance() {
+    return reinterpret_cast<const S_EnemyMove*>(
+        &_S_EnemyMove_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 18;
+  friend void swap(S_EnemyMove& a, S_EnemyMove& b) { a.Swap(&b); }
+  inline void Swap(S_EnemyMove* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(S_EnemyMove* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  S_EnemyMove* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<S_EnemyMove>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const S_EnemyMove& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const S_EnemyMove& from) { S_EnemyMove::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return IsInitializedImpl(*this);
+  }
+
+  private:
+  static bool IsInitializedImpl(const MessageLite& msg);
+
+  public:
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(S_EnemyMove* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "S_EnemyMove"; }
+
+ protected:
+  explicit S_EnemyMove(::google::protobuf::Arena* arena);
+  S_EnemyMove(::google::protobuf::Arena* arena, const S_EnemyMove& from);
+  S_EnemyMove(::google::protobuf::Arena* arena, S_EnemyMove&& from) noexcept
+      : S_EnemyMove(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kEnemyFieldNumber = 1,
+  };
+  // repeated .Enemy enemy = 1;
+  int enemy_size() const;
+  private:
+  int _internal_enemy_size() const;
+
+  public:
+  void clear_enemy() ;
+  ::Enemy* mutable_enemy(int index);
+  ::google::protobuf::RepeatedPtrField<::Enemy>* mutable_enemy();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::Enemy>& _internal_enemy() const;
+  ::google::protobuf::RepeatedPtrField<::Enemy>* _internal_mutable_enemy();
+  public:
+  const ::Enemy& enemy(int index) const;
+  ::Enemy* add_enemy();
+  const ::google::protobuf::RepeatedPtrField<::Enemy>& enemy() const;
+  // @@protoc_insertion_point(class_scope:S_EnemyMove)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 1,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_S_EnemyMove_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const S_EnemyMove& from_msg);
+    ::google::protobuf::RepeatedPtrField< ::Enemy > enemy_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_test_2eproto;
+};
+// -------------------------------------------------------------------
+
 class C_Move final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:C_Move) */ {
  public:
@@ -5128,6 +5315,59 @@ inline ::int32_t S_Attack::_internal_target() const {
 inline void S_Attack::_internal_set_target(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.target_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// S_EnemyMove
+
+// repeated .Enemy enemy = 1;
+inline int S_EnemyMove::_internal_enemy_size() const {
+  return _internal_enemy().size();
+}
+inline int S_EnemyMove::enemy_size() const {
+  return _internal_enemy_size();
+}
+inline void S_EnemyMove::clear_enemy() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.enemy_.Clear();
+}
+inline ::Enemy* S_EnemyMove::mutable_enemy(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:S_EnemyMove.enemy)
+  return _internal_mutable_enemy()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::Enemy>* S_EnemyMove::mutable_enemy()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:S_EnemyMove.enemy)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_enemy();
+}
+inline const ::Enemy& S_EnemyMove::enemy(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:S_EnemyMove.enemy)
+  return _internal_enemy().Get(index);
+}
+inline ::Enemy* S_EnemyMove::add_enemy() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::Enemy* _add = _internal_mutable_enemy()->Add();
+  // @@protoc_insertion_point(field_add:S_EnemyMove.enemy)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::Enemy>& S_EnemyMove::enemy() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:S_EnemyMove.enemy)
+  return _internal_enemy();
+}
+inline const ::google::protobuf::RepeatedPtrField<::Enemy>&
+S_EnemyMove::_internal_enemy() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.enemy_;
+}
+inline ::google::protobuf::RepeatedPtrField<::Enemy>*
+S_EnemyMove::_internal_mutable_enemy() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.enemy_;
 }
 
 #ifdef __GNUC__

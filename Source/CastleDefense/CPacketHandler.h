@@ -21,6 +21,7 @@ public:
 	S_Chat ParseS_Chat(char* pBuf);
 	S_EnemySpawn ParseS_EnemySpawn(char* pBuf);
 	S_Attack ParseS_Attack(char* pBuf);
+	S_EnemyMove ParseS_EnemyMove(char* pBuf);
 
 	void ProcessPacket(CPacketHeader*);
 
@@ -31,6 +32,7 @@ public:
 	void ProcessS_Chat(CPacketHeader*);
 	void ProcessS_EnemySpawn(CPacketHeader*);
 	void ProcessS_Attack(CPacketHeader*);
+	void ProcessS_EnemyMove(CPacketHeader*);
 
 	CPacketHandler(UCastleDefenseGameInstance*, int);
 
