@@ -503,3 +503,6 @@ FodyWeavers.xsd
 /Server/protobuf-27.3/protobuf-27.3
 /Source/ProtobufCore
 *.mp4
+/Content/Enemy_BT1.uasset
+/Server/ServerCore/Recastnavigation
+/Server/ServerCore/all_tiles_navmesh.bin
