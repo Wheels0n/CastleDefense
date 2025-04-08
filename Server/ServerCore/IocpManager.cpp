@@ -87,7 +87,7 @@ void IocpManager::Destroy()
 	}
 
 	//WSACleanup();
-	std::cout << "Closing..." << std::endl;
+	std::cout << "Closing..." << "\n";
 
 }
 
@@ -159,7 +159,7 @@ void IocpManager::RunIOThreads()
 	m_pThreadPool->EnqueueTask([=]() {
 			while (1)
 			{
-				std::this_thread::sleep_for(std::chrono::seconds(1));
+				std::this_thread::sleep_for(std::chrono::microseconds(200));
 				if (g_pSessionManager->GetNumConnection())
 				{
 					PacketHandler::BrodcastS_EnemyMove();
@@ -204,7 +204,7 @@ void IocpManager::IOThreadMain(HANDLE hIocp)
 
 			if (pOverlappedEx->m_ioType == eIO_TYPE::RECV|| pOverlappedEx->m_ioType == eIO_TYPE::SEND)
 			{
-				cout << "RequestDisconnect: "<<errono << endl;
+				cout << "RequestDisconnect: " << errono << "\n";
 				pSession->SetConnection(false);
 				//TODO:서버에서만 호출하도록
 				pSession->RequestDisconnect();
@@ -214,7 +214,8 @@ void IocpManager::IOThreadMain(HANDLE hIocp)
 		}
 
 		pSession = pOverlappedEx->m_owningSession;
-
+		LARGE_INTEGER fq, s, e;
+		double t;
 		switch (pOverlappedEx->m_ioType)
 		{
 		case ACCEPT:

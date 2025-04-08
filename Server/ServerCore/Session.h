@@ -23,7 +23,7 @@ struct OverlappedEx
 	xvector<shared_ptr<SendBuffer>> m_sendBuffers;
 };
 
-class CircularBuffer; 
+class Buffer; 
 class Session : public enable_shared_from_this<Session>
 {
 public:
@@ -66,7 +66,7 @@ private:
 	atomic<bool>m_bConnected;
 	atomic<bool>m_bSending;
 
-	shared_ptr<CircularBuffer> m_recvBuf;
+	shared_ptr<Buffer> m_recvBuf;
 	xqueue<shared_ptr<SendBuffer>> m_sendQueue;
 
 	RWLock m_recvLock;

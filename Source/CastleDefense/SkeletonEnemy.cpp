@@ -7,6 +7,7 @@
 #include "EnemyAIController.h"
 #include "CastleDefenseGameState.h"
 #include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "EnemyWidget.h" 
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -28,7 +29,7 @@ ASkeletonEnemy::ASkeletonEnemy()
 		m_pSkeletalMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -88.0f));
 		m_pSkeletalMeshComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> enemyAnimBP
-		(TEXT("/Script/Engine.AnimBlueprint'/Game/UndeadPack/SkeletonEnemy/Animations/Enemy_AnimBP.Enemy_AnimBP'"));
+		(TEXT("/Script/Engine.AnimBlueprint'/Game/UndeadPack/SkeletonEnemy/Animations/EnemyAnimBP.EnemyAnimBP'"));
 		m_pSkeletalMeshComponent->SetAnimInstanceClass(enemyAnimBP.Object->GeneratedClass);
 
 		m_pSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionSphere"));
@@ -78,7 +79,9 @@ void ASkeletonEnemy::StopAttack()
 void ASkeletonEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
 	m_pSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ASkeletonEnemy::OnHandOverlap);
+
 
 	if (WidgetClass != nullptr)
 	{
@@ -127,6 +130,7 @@ void ASkeletonEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
+
 
 void ASkeletonEnemy::OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

@@ -319,8 +319,7 @@ FWorldContext Context = GEngine->GetWorldContexts().Last();
 	NavSys->GetMainNavData(FNavigationSystem::ECreateIfEmpty::Create)->GetGenerator()->ExportNavigationData(FString(TEXT("Test.obj")));
 ```
 
-결국 NavigationSystem으로부터 메시를 직접 파싱 해야한다고 한다. 네비게이션시스템과 그 관련 클래스에 관한 내용은 다른 문서파일으로 작성했다.
-분석하고 나니 어차피 엔진에서도 Recast&Detour라는 라이브러리를 쓰는 데 나도 이걸 서버에 가져와서 쓰려고한다. 네비게이셔 메시 파싱
+결국 NavigationSystem으로부터 메시를 직접 파싱 해야한다고 한다. 네비게이션시스템과 그 관련 클래스에 관한 내용은 다른 문서파일으로 작성했다. 분석하고 나니 어차피 엔진에서도 Recast&Detour라는 라이브러리를 쓰는 데 나도 이걸 서버에 가져와서 쓰려고한다. 네비게이셔 메시 파싱
 
 ### RecastNavigation 추출
 
@@ -368,8 +367,48 @@ void ACastleDefenceGameMode::BeginPlay()
 		if (LevelGeom != NULL && LevelGeom->Num() > 0)
 ```
 
-혹시나 싶어서 3인칭 기본 프로젝트를 만들어서 dynamic으로 추출했다. 결과는 성공이었다.  
+혹시나 싶어서 3인칭 기본 프로젝트를 만들어서 dynamic으로 추출했다. 결과는 성공이었다. 네비게이션 볼륨안의 들어간  
+메시 부분 또는 전체가 하나의 obj파일로 나온다.
 ![정적 메시로 이로어진 맵](네비게이션%20메시%20추출%20성공.JPG)
+
+참고로 mesh의 getNavMeshBoundsMin/max() 해도 네비 메시 말고 대상 맵 매시의 AABB 반환하니 주의. 진짜 네비게이션 메쉬의 AABB를 구하려면 타일의 폴리곤내의 정점을 반복문으로 돌려봐야한다. 자세한건 duDebugDrawNavMeshWithClosedList함수를 따라가면 된다.
+아래의 코드는 데모의 디버깅용 네비게이션 메시의 색깔 타일 관련 코드이다.
+
+```c++
+dd->begin(DU_DRAW_TRIS);
+for (int i = 0; i < tile->header->polyCount; ++i)
+{
+	const dtPoly* p = &tile->polys[i];
+	if (p->getType() == DT_POLYTYPE_OFFMESH_CONNECTION)	// Skip off-mesh links.
+		continue;
+
+	const dtPolyDetail* pd = &tile->detailMeshes[i];
+
+	unsigned int col;
+	if (query && query->isInClosedList(base | (dtPolyRef)i))
+		col = duRGBA(255,196,0,64);
+	else
+	{
+		if (flags & DU_DRAWNAVMESH_COLOR_TILES)
+			col = tileColor;
+		else
+			col = duTransCol(dd->areaToCol(p->getArea()), 64);
+	}
+
+	for (int j = 0; j < pd->triCount; ++j)
+	{
+		const unsigned char* t = &tile->detailTris[(pd->triBase+j)*4];
+		for (int k = 0; k < 3; ++k)
+		{
+			if (t[k] < p->vertCount)
+				dd->vertex(&tile->verts[p->verts[t[k]]*3], col);
+			else
+				dd->vertex(&tile->detailVerts[(pd->vertBase+t[k]-p->vertCount)*3], col);
+		}
+	}
+}
+dd->end();
+```
 
 결국 랜드스케이프 환경이 문제라는 것이다. 그래서 Static 메시로 된 애셋으로 대체하여 메시
 추출에 성공했다. 근데 문제는 처리할 정보가 너무 많아서인지 정보가 추출이 안된다.
@@ -852,7 +891,7 @@ bool NavigationManager::GetPosByRef(float* pos, float* dst, unsigned int* pPath)
 
 ~~ 다음 목적지 패킷을 보내기 전에 서버에서 플레이어 배열에 대해 검사를 실시한다. 범위 내 가장 가까운 플레이어에 대해서 공격한다.~~
 ~~플레이어가 죽거나, 사라지면 그 다음으로 가까운 플레이어를 공격한다. 플레이어가 죽으면 죽는 순간에만 하면된다, 근데 사라졌다는 언제~~
-~~얼마나 탐지해야할까? 탐지가 되는 순간부터 일정 간격으로, thread로 처리.
+~~ 얼마나 탐지해야할까? 탐지가 되는 순간부터 일정 간격으로, thread로 처리.
 
 아무리해도 조금 오다가 말길래 혹시나해서 navMesh를 보았더니 타일이 너무 크게 만들어져있었다. 좀더 촘촘하게 재생성했다.
 

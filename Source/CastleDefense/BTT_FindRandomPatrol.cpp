@@ -53,7 +53,6 @@ EBTNodeResult::Type UBTT_FindRandomPatrol::ExecuteTask(UBehaviorTreeComponent& o
 	}
 
 	pBBComp->SetValueAsVector(FName(TEXT("PatrolLocation")), location);
-	UE_LOG(LogTemp, Display, TEXT("SetNewPatrolLocation"));
 	//pEnemyAIController->SetNewDest(false);
 	return EBTNodeResult::Succeeded;
 }

@@ -30,7 +30,6 @@ void ACastleDefenseGameState::AddPlayer(Player* pPlayerInfo, int id)
 		APlayerController* pController = UGameplayStatics::GetPlayerController(pCurWolrd, 0);
 		if (pController)
 		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 23.0f, FColor::Yellow, FString::Printf(TEXT("Possessed : %d"), pPlayerInfo->id()));
 			pController->UnPossess();
 			pController->Possess(pPlayer);
 			pPlayer->LazyCreateWidget();

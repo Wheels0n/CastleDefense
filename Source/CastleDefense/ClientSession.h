@@ -16,7 +16,7 @@ class UCastleDefenseGameInstance;
 class CASTLEDEFENSE_API ClientSession : public TSharedFromThis<ClientSession>
 {
 public:
-	void EnqueueRecvPacket(TArray<uint8>);
+	void EnqueueRecvPacket(TArray<uint8>&);
 	void DequeueRecvPacket();
 
 	void EnqueueSendPacket(TSharedPtr<SendBuffer>);
@@ -28,7 +28,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SendC_Spawn();
 	void SendC_Despawn();
-	void SendC_Move(Coordiante*, Rotation*, MoveState, bool);
+	void SendC_Move(Coordiante*, Rotation*, Velocity* newVel, Coordiante* newDir, MoveState, bool);
 	void SendC_Chat(char* pBuf);
 	void SendC_Attack(int);
 	ClientSession(FSocket*, UCastleDefenseGameInstance*);
@@ -36,11 +36,11 @@ public:
 
 public:
 	Player m_player;
-	TSharedPtr<CPacketHandler> m_pPacketHandler;
+	TSharedPtr<CPacketHandler>		m_pPacketHandler;
 
-	TSharedPtr<RecvWorker> m_pRecvWorker;
-	TSharedPtr<SendWorker> m_pSendWorker;
-	FSocket* m_pSocket;
-	TQueue<TArray<uint8>> m_recvQueue;
-	TQueue<TSharedPtr<SendBuffer>> m_sendQueue;
+	TSharedPtr<RecvWorker>			m_pRecvWorker;
+	TSharedPtr<SendWorker>			m_pSendWorker;
+	FSocket*						m_pSocket;
+	TQueue<TArray<uint8>>m_recvQueue;
+	TQueue<TSharedPtr<SendBuffer>>	m_sendQueue;
 };

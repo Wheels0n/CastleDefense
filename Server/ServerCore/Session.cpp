@@ -34,8 +34,8 @@ Session::Session()
 	memset(&m_sockaddr, 0, sizeof(sockaddr_in));
 	m_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	//TODO : 소켓 생성 실패 시?
-
-	m_recvBuf = MakeShared<CircularBuffer>();
+	
+	m_recvBuf = MakeShared<Buffer>();
 }
 
 Session::~Session()
@@ -84,7 +84,7 @@ bool Session::RequestAccept()
 
 	AddRef();
 
-	if (IocpManager::AcceptEx(*g_pIocpManager->GetListenSocket(), m_socket, m_recvBuf->GetBuf(), 0,
+	if (IocpManager::AcceptEx(*g_pIocpManager->GetListenSocket(), m_socket, m_recvBuf->GetBufEnd(), 0,
 		sizeof(sockaddr_in)+16, sizeof(sockaddr_in)+16,
 		nullptr, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx)) == FALSE)
 	{
@@ -133,7 +133,7 @@ void Session::ProcessAccept()
 	InetNtopA(AF_INET, &m_sockaddr.sin_addr, OUT addrArr, sizeof(addrArr));
 
 	cout << "Client Connected: IP = " << addrArr << ", PORT = "
-		<< ntohs(m_sockaddr.sin_port) << endl;
+		<< ntohs(m_sockaddr.sin_port) << "\n";
 
 	RequestRecv();
 }
@@ -238,7 +238,7 @@ void Session::ProcessDisconnect()
 	InetNtopA(AF_INET, &m_sockaddr.sin_addr, OUT addrArr, sizeof(addrArr));
 
 	cout << "Client Disconnected: IP = " << addrArr << ", PORT = "
-		<< ntohs(m_sockaddr.sin_port) << endl;
+		<< ntohs(m_sockaddr.sin_port) << "\n";
 
 	ResetSession();
 }
@@ -254,10 +254,18 @@ bool Session::RequestRecv()
 	pOverlappedEx->m_ioType = eIO_TYPE::RECV;
 	pOverlappedEx->m_owningSession =  shared_from_this();
 
+	//끊겨서 온게 있다면 앞으로 당김
+	if (m_recvBuf->CalSize())
+	{
+		m_recvBuf->ShiftBufferForward();
+	}
+	m_recvBuf->Reset();
 	WSABUF wsabuf;
-	wsabuf.buf = m_recvBuf->GetBuf();
+	//쓰는 위치로
+	wsabuf.buf = m_recvBuf->GetBufEnd();
 	wsabuf.len = m_recvBuf->CalFreeSpace();
-
+	
+	assert(wsabuf.len !=0);
 	if (WSARecv(m_socket, &wsabuf, 1, &bytes, &flags, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx), NULL) == SOCKET_ERROR)
 	{
 		int errorno = WSAGetLastError();
@@ -266,11 +274,11 @@ bool Session::RequestRecv()
 			ReleaseRef();
 			s_pOverlappedExPool->Push(pOverlappedEx);
 			int errorno = WSAGetLastError();
-			PrintError("WSARecv()",errorno);
+			PrintError("WSARecv()", errorno);
 			return false;
 		}
 	}
-
+	
 	return true;
 }
 
@@ -281,16 +289,27 @@ void Session::ProcessRecv(int recvlen)
 		return;
 
 	}
-
-	xvector<char> tmp(recvlen);
+	//방금 수신한 바이트 크기만큼 write 
+	m_recvBuf->MoveWritePos(recvlen);
+	if (m_recvBuf->CalSize() >= (sizeof(PacketHeader)))
 	{
-		WriteLockGuard writelockGuard(m_recvLock);
-		m_recvBuf->MoveWritePos(recvlen);
-		memcpy(&tmp[0], m_recvBuf->GetBuf(), recvlen);
-		m_recvBuf->MoveReadPos(recvlen);
+		{
+			//recv는 최대한 많이 받아서 딱딱 안받아짐에 유의
+
+			PacketHeader* ptr = reinterpret_cast<PacketHeader*>(m_recvBuf->GetBufBegin());
+			int payloadSize = ptr->size;
+			assert(payloadSize <= BUF_SIZE);
+				
+			//페이로드가 완성되었으면 처리.
+			if (m_recvBuf->CalSize() >= payloadSize)
+			{
+				PacketHandler::ProcessPacket(ptr, shared_from_this());
+				//완전한 패킷을 읽음
+				m_recvBuf->MoveReadPos(payloadSize);
+			}
+		}
+
 	}
-	
-	PacketHandler::ProcessPacket((PacketHeader*)&tmp[0], shared_from_this());
 	
 	RequestRecv();
 }
@@ -320,31 +339,30 @@ bool Session::RequestSend(shared_ptr<SendBuffer> pSbuffer)
 
 			wsabufs.push_back(wsabuf);
 		}
-
 	}
-	//몰아서 처리하니까 한번만 Ref하도록 함
-	AddRef();
-	
-	DWORD bytes = 0;
-	DWORD flags = 0;
-	pOverlappedEx->m_ioType = eIO_TYPE::SEND;
-	pOverlappedEx->m_owningSession = shared_from_this();
+		//몰아서 처리하니까 한번만 Ref하도록 함
+		AddRef();
+		
+		DWORD bytes = 0;
+		DWORD flags = 0;
+		pOverlappedEx->m_ioType = eIO_TYPE::SEND;
+		pOverlappedEx->m_owningSession = shared_from_this();
 	
 
-	if (WSASend(m_socket, &wsabufs[0], wsabufs.size(), &bytes, flags, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx), NULL) == SOCKET_ERROR)
-	{
-		int errorno = WSAGetLastError();
-		if (errorno != WSA_IO_PENDING)
+		if (WSASend(m_socket, &wsabufs[0], wsabufs.size(), &bytes, flags, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx), NULL) == SOCKET_ERROR)
 		{
-			ReleaseRef();
-			s_pOverlappedExPool->Push(pOverlappedEx);
-			m_bSending.store(false);
 			int errorno = WSAGetLastError();
-			PrintError("WSASend()", errorno);
-			return false;
+			if (errorno != WSA_IO_PENDING)
+			{
+				ReleaseRef();
+				s_pOverlappedExPool->Push(pOverlappedEx);
+				m_bSending.store(false);
+				int errorno = WSAGetLastError();
+				PrintError("WSASend()", errorno);
+				return false;
+			}
 		}
-	}
-	m_bSending.store(false);
+		m_bSending.store(false);
 
 	return true;
 }

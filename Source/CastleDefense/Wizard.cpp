@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Animation/Animinstance.h"
 #include "CastleDefenceGameMode.h"
 #include "CastleDefenseGameState.h"
@@ -17,7 +18,7 @@
 #include "SkeletonEnemy.h"
 // Sets default values
 AWizard::AWizard()
-	:m_Hp(100), m_bDead(false), m_bAttacking(false), m_bGotHit(false), m_bDestroySet(false), m_bMoveStateChanged(false), m_broadCastTime(0.2f)
+	:m_Hp(_PLAYER_HP), m_bDead(false), m_bAttacking(false), m_bGotHit(false), m_bDestroySet(false), m_bMoveStateChanged(false), m_broadCastTime(_BRODCATE_TIME)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -43,7 +44,7 @@ AWizard::AWizard()
 	m_pCamComponent->bUsePawnControlRotation = true;
 
 	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
-	pCharacterMovement->MaxWalkSpeed = 150.0f;
+	pCharacterMovement->MaxWalkSpeed = _PLAYER_WALK_SPEED;
 	pCharacterMovement->bRunPhysicsWithNoController = true;
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> playerWidgetAsset(TEXT("UserWidget'/Game/WizardUI.WizardUI_C'"));
@@ -76,6 +77,10 @@ void AWizard::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UCapsuleComponent* pCampsuleComp = GetCapsuleComponent();
+	pCampsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AWizard::OnBeginOverlap);
+	pCampsuleComp->OnComponentEndOverlap.AddDynamic(this, &AWizard::OnEndOverlap);
+
 	UWorld* pWorld = GetWorld();
 	m_pWeapon = pWorld->SpawnActor(AWeapon::StaticClass());
 	m_pWeapon->AttachToComponent(m_pSkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, FName(TEXT("WeaponSocket")));
@@ -85,7 +90,6 @@ void AWizard::BeginPlay()
 	m_curCoord.set_y(curPos.Y);
 	m_curCoord.set_z(curPos.Z);
 
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 23.0f, FColor::Yellow, FString::Printf(TEXT("Client Spawn: %f %f %f"), curPos.X, curPos.Y, curPos.Z));
 
 	m_dstCoord.set_x(curPos.X);
 	m_dstCoord.set_y(curPos.Y);
@@ -99,6 +103,10 @@ void AWizard::BeginPlay()
 	m_dstRot.set_x(curRot.Roll);
 	m_dstRot.set_y(curRot.Yaw);
 	m_dstRot.set_z(curRot.Pitch);
+
+	m_curDir.set_x(0);
+	m_curDir.set_y(0);
+	m_curDir.set_z(0);
 
 	m_curMoveState = IDLE;
 
@@ -131,6 +139,7 @@ void AWizard::Destroyed()
 // Called every frame
 void AWizard::Tick(float DeltaTime)
 {
+	//0.013
 	Super::Tick(DeltaTime);
 
 	AController* pController = GetController();
@@ -140,28 +149,19 @@ void AWizard::Tick(float DeltaTime)
 		FRotator dstRot(m_dstRot.x(), m_dstRot.y(), m_dstRot.z());
 		SetActorRotation(dstRot);
 
-		if(m_curMoveState != IDLE)
-		{	
-			FVector dstLoc(m_dstCoord.x(), m_dstCoord.y(), m_dstCoord.z());
-			FVector srcLoc(m_curCoord.x(), m_curCoord.y(), m_curCoord.z());
+		{
 
-			FVector distVec = dstLoc - srcLoc;
-			//distVec.Normalize();
-
-			float walkSpeed = m_curMoveState == SPRINT ? 500.0f : 150.f;
+			float speed = m_curMoveState == SPRINT ? _PLAYER_SPRINT_SPEED : _PLAYER_WALK_SPEED;
 			UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
-			pCharacterMovement->MaxWalkSpeed = walkSpeed;
+			pCharacterMovement->MaxWalkSpeed = speed;
+		
+			FVector V(m_vel.x(), m_vel.y(), m_vel.z());
+			//pCharacterMovement->Velocity = V;
 
-			FVector newLoc = srcLoc + distVec*DeltaTime;
-			newLoc.X = dstLoc.X < srcLoc.X ? fmax(newLoc.X, dstLoc.X) : fmin(newLoc.X, dstLoc.X);
-			newLoc.Y = dstLoc.Y < srcLoc.Y ? fmax(newLoc.Y, dstLoc.Y) : fmin(newLoc.Y, dstLoc.Y);
-			newLoc.Z = dstLoc.Z < srcLoc.Z ? fmax(newLoc.Z, dstLoc.Z) : fmin(newLoc.Z, dstLoc.Z);
-
-			m_curCoord.set_x(newLoc.X);
-			m_curCoord.set_y(newLoc.Y);
-			m_curCoord.set_z(newLoc.Z);
-
-			AddMovementInput(newLoc - srcLoc);
+			m_dir = FVector(m_curDir.x(), m_curDir.y(), m_curDir.z());
+			AddMovementInput(m_dir);
+			
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10.0f, FColor::Yellow, FString::Printf(TEXT("P2_Velocity %f %f %f"), V.X, V.Y, V.Z));
 			if (m_curMoveState == JUMP)
 			{
 				StartJump();
@@ -171,19 +171,17 @@ void AWizard::Tick(float DeltaTime)
 				StopJump();
 			}
 		}
-		else
-		{
-			//자꾸 예전 방향으로 가서 처리
-			m_curCoord = m_dstCoord;
-			FVector dstLoc(m_dstCoord.x(), m_dstCoord.y(), m_dstCoord.z());
-			SetActorLocation(dstLoc);
-		}
+		
 
 	}
 	else
 	{	
-
 		APlayerController* pPlayerController = Cast<APlayerController>(pController);
+		UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
+		
+		FVector V = pCharacterMovement->Velocity;
+
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10.0f, FColor::Yellow, FString::Printf(TEXT("P1_Velocity %f %f %f"), V.X, V.Y, V.Z));
 		FRotator curRot = GetActorRotation();
 		if ((int)curRot.Yaw != (int)m_curRot.y())
 		{	
@@ -216,17 +214,16 @@ void AWizard::Tick(float DeltaTime)
 
 		if (m_bMoveStateChanged)
 		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 3.0f, FColor::Red,
-				FString::Printf(TEXT("MoveStateChanged %d"), m_curMoveState));
+			BrodcastPos();
+			m_bMoveStateChanged = false;
 		}
 
 		m_broadCastTime -= DeltaTime;
 		if (m_broadCastTime<=0.0f|| m_bMoveStateChanged)
 		{
-			m_broadCastTime = 0.2f;
+			m_broadCastTime = _BRODCATE_TIME;
 			BrodcastPos();
 		}
-				
 	}
 }
 
@@ -254,14 +251,28 @@ void AWizard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AWizard::MoveForward(float value)
 {
 	FVector dir = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
+	dir.Z = 0.0f;
+	dir.Normalize();
 	AddMovementInput(dir, value);
-	
+	//value 0라도 호출됨
+	if (value)
+	{
+		m_dir += dir * value;
+	}
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10.0f, FColor::Yellow, FString::Printf(TEXT("P1_Dir %f %f %f"), m_dir.X, m_dir.Y, m_dir.Z));
 }
 
 void AWizard::MoveRight(float value)
 {
 	FVector dir = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
+	dir.Z = 0.0f;
+	dir.Normalize();
+
 	AddMovementInput(dir, value);
+	if (value)
+	{
+		m_dir += dir*value;
+	}
 }
 
 void AWizard::StartAttack()
@@ -280,14 +291,14 @@ void AWizard::StopAttack()
 void AWizard::StartSprint()
 {
 	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
-	pCharacterMovement->MaxWalkSpeed = 500.0f;
+	pCharacterMovement->MaxWalkSpeed = _PLAYER_SPRINT_SPEED;
 
 }
 
 void AWizard::StopSprint()
 {
 	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
-	pCharacterMovement->MaxWalkSpeed = 150.0f;
+	pCharacterMovement->MaxWalkSpeed = _PLAYER_WALK_SPEED;
 }
 
 void AWizard::OpenPauseMenu()
@@ -308,6 +319,25 @@ void AWizard::StartJump()
 void AWizard::StopJump()
 {
 	bPressedJump = false;
+}
+
+void AWizard::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	CheckDynamicObjectCollsion(OtherActor);
+}
+
+void AWizard::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	CheckDynamicObjectCollsion(OtherActor);
+}
+
+void AWizard::CheckDynamicObjectCollsion(AActor* OtherActor)
+{
+	//막힌 방향으로 움직여도 애니메이션은 재생되는 걸 보여 주기 위햄 긴급 패킷만 요청한다.  
+	if (OtherActor->IsA(AWizard::StaticClass()) || OtherActor->IsA(ASkeletonEnemy::StaticClass()))
+	{
+		m_bMoveStateChanged = true;
+	}
 }
 
 void AWizard::AddChat(std::string& msg)
@@ -440,24 +470,42 @@ void AWizard::BrodcastPos()
 	UCastleDefenseGameInstance* pGameInstance = pCurWorld->GetGameInstance<UCastleDefenseGameInstance>();
 	TSharedPtr<ClientSession> pSession = pGameInstance->GetSession();
 
+	
+	//부동소수점 오차고려
 	FVector curPos = GetActorLocation();
 	m_dstCoord.set_x(curPos.X);
 	m_dstCoord.set_y(curPos.Y);
 	m_dstCoord.set_z(curPos.Z);
+	
+	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
+	FVector V = pCharacterMovement->Velocity;
+	m_vel.set_x(V.X);
+	m_vel.set_y(V.Y);
+	m_vel.set_z(V.Z);
 
 	FRotator curRot = GetActorRotation();
 	m_curRot.set_x(0);
 	m_curRot.set_y(curRot.Yaw);
 	m_curRot.set_z(0);
 	
+	m_curDir.set_x(m_dir.X);
+	m_curDir.set_y(m_dir.Y);
+	m_dir = FVector::ZeroVector;
+
 	m_bMoveStateChanged = false;
-	pSession->SendC_Move(&m_dstCoord, &m_curRot, m_curMoveState, m_bAttacking);
+
+
+	pSession->SendC_Move(&m_dstCoord, &m_curRot, &m_vel, & m_curDir, m_curMoveState, m_bAttacking);
 }
 
 void AWizard::SetNewDest(Player* pPlayer)
 {
-	m_dstCoord = pPlayer->coord();
-	m_dstRot = pPlayer->rot();
 	m_curMoveState = pPlayer->movestate();
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 23.0f, FColor::Yellow, FString::Printf(TEXT("CurState: %d"), m_curMoveState));
+	m_vel = pPlayer->vel();
+	m_dstRot = pPlayer->rot();
+	m_dstCoord = pPlayer->coord();
+	m_curDir = pPlayer->dir();
+	//TODO : 갱신시 오차를 부드럽게 해소할 방법이 필요
+	FVector point = FVector(m_dstCoord.x(), m_dstCoord.y(), m_dstCoord.z());
+	SetActorLocation(point, false, nullptr, ETeleportType::TeleportPhysics);
 }

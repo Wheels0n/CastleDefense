@@ -12,6 +12,10 @@ public class CastleDefense : ModuleRules
         { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "NavigationSystem", "Navmesh", "UMG",
             "Networking", "Sockets", "ProtobufCore"});
 
+        PublicIncludePaths.AddRange(new string[]
+        {
+           "D:\\UE_5.4\\Engine\\Source\\Runtime\\Sockets\\Private\\"
+        });
         // Uncomment if you are using Slate UI
         PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 

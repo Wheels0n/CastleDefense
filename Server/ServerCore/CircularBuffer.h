@@ -1,19 +1,31 @@
 #pragma once
 const int BUF_SIZE = 256;
-class CircularBuffer
+class Buffer
 {
 public:
+	char* GetBufEnd() { return &m_pBuf[m_writePos]; };
+	char* GetBufBegin() { return &m_pBuf[m_readPos]; };
+
 	bool Write(string& data);
 	void MoveWritePos(int len);
-	void Read(int len);
 	void MoveReadPos(int len);
-	
-	char* GetBuf() { return &m_pBuf[m_readPos]; };
-	int CalFreeSpace() { return m_readPos>m_writePos? m_readPos-m_writePos:
-		m_capacity - m_writePos + m_readPos; };
 
-	CircularBuffer();
-	~CircularBuffer();
+	void Reset() 
+	{ 
+		if (m_writePos == m_readPos) 
+		{	
+			m_writePos = 0; 
+			m_readPos = 0; 
+		}
+	};
+	void ShiftBufferForward();
+
+	int CalFreeSpace() { return m_capacity - m_writePos; };
+	int CalSize() { return m_writePos - m_readPos; };
+	
+
+	Buffer();
+	~Buffer();
 private:
 	xvector<char> m_pBuf;
 

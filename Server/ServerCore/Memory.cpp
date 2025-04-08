@@ -1,6 +1,13 @@
 #include "stdafx.h"
 #include "Memory.h"
 
+const int _POOL_SIZE_32 = 32;
+const int _POOL_SIZE_128 = 128;
+const int _POOL_SIZE_256 = 256;
+const int _POOL_MEMORY_1024 = 1024;
+const int _POOL_MEMORY_2048 = 2048;
+const int _POOL_TOTAL_MEMORY = 4096;
+
 
 MemoryPoolManager* g_pMemoryPoolManager = nullptr;
 
@@ -46,7 +53,7 @@ MemoryPoolManager::MemoryPoolManager()
 
 	int last = 0;
 
-	for (int i = 32; i < 1024; i += 32)
+	for (int i = _POOL_SIZE_32; i < _POOL_MEMORY_1024; i += _POOL_SIZE_32)
 	{
 		MemoryPool* pMemoryPool = new MemoryPool(i);
 		for (int j = last + 1; j <= i; ++j)
@@ -57,7 +64,7 @@ MemoryPoolManager::MemoryPoolManager()
 		last = i;
 	}
 
-	for (int i =1024; i < 2048; i += 128)
+	for (int i = _POOL_MEMORY_1024; i < _POOL_MEMORY_2048; i += _POOL_SIZE_128)
 	{
 		MemoryPool* pMemoryPool = new MemoryPool(i);
 		for (int j = last + 1; j <= i; ++j)
@@ -68,7 +75,7 @@ MemoryPoolManager::MemoryPoolManager()
 		last = i;
 	}
 
-	for (int i = 2048; i < 4096; i += 256)
+	for (int i = _POOL_MEMORY_2048; i < _POOL_TOTAL_MEMORY; i += _POOL_SIZE_256)
 	{
 		MemoryPool* pMemoryPool = new MemoryPool(i);
 		for (int j = last + 1; j <= i; ++j)

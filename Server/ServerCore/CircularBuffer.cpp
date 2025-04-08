@@ -2,7 +2,7 @@
 #include "CircularBuffer.h"
 #include "Allocator.h"
 
-bool CircularBuffer::Write(string& data)
+bool Buffer::Write(string& data)
 {		
 	if (data.size() > CalFreeSpace())
 	{
@@ -14,27 +14,44 @@ bool CircularBuffer::Write(string& data)
 	return true;
 }
 
-void CircularBuffer::MoveWritePos(int len)
+void Buffer::MoveWritePos(int len)
 {	
 	m_writePos +=len;
-	m_writePos %= m_capacity;
+	assert(m_writePos <= BUF_SIZE);
 	return;
 }
 
-void CircularBuffer::MoveReadPos(int len)
+void Buffer::MoveReadPos(int len)
 {
 	m_readPos += len;
-	m_readPos %= m_capacity;
 	return;
 }
 
+void Buffer::ShiftBufferForward()
+{
 
-CircularBuffer::CircularBuffer()
+	xvector<char> temp(BUF_SIZE);
+	for (int i = m_readPos, j=0; i < m_writePos; ++i,++j)
+	{
+		temp[j] = m_pBuf[i];
+	}
+
+	int size = CalSize();
+	for (int i = 0;i<size;++i)
+	{
+		m_pBuf[i] = temp[i];
+	}
+	m_writePos -= m_readPos;
+	m_readPos = 0;
+}
+
+
+Buffer::Buffer()
 	:m_readPos(0), m_writePos(0), m_capacity(BUF_SIZE), m_curSize(0)
 {
 	m_pBuf.resize(BUF_SIZE);
 }
 
-CircularBuffer::~CircularBuffer()
+Buffer::~Buffer()
 {
 }

@@ -39,6 +39,7 @@ void CPacketHandler::SerializeC_Move(C_Move& pkt, char* pBuf)
 	pHeader->id = E_TYPE::Movement;
 
 	pkt.SerializeToArray(pHeader + 1, pkt.ByteSizeLong());
+
 }
 void CPacketHandler::SerializeC_Chat(C_Chat& pkt, char* pBuf)
 {
@@ -121,7 +122,6 @@ S_Chat CPacketHandler::ParseS_Chat(char* pBuf)
 	{
 		std::string msg = pkt.msg();
 		FString fstr(msg.c_str());
-		GEngine->AddOnScreenDebugMessage(17, 10.0f, FColor::Red, fstr);
 	}
 	
 	return pkt;
@@ -169,6 +169,7 @@ S_EnemyMove CPacketHandler::ParseS_EnemyMove(char* pBuf)
 void CPacketHandler::ProcessPacket(CPacketHeader* pHeader)
 {
 	E_TYPE id = (E_TYPE)pHeader->id;
+	//uint64 s,e;
 	switch (id)
 	{
 	case Login:
@@ -218,7 +219,6 @@ void CPacketHandler::ProcessS_Spawn(CPacketHeader* pHeader)
 {
 	S_Spawn pkt = ParseS_Spawn(reinterpret_cast<char*>(pHeader));
 
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 13.0f, FColor::Yellow, FString::Printf(TEXT("new players : %d"), pkt.player_size()));
 	UWorld* pCurWorld = m_pGameInstance->GetWorld();
 	ACastleDefenseGameState* pGameState = pCurWorld->GetGameState<ACastleDefenseGameState>();
 	for (int i = 0; i < pkt.player_size(); ++i)
@@ -227,7 +227,7 @@ void CPacketHandler::ProcessS_Spawn(CPacketHeader* pHeader)
 		if (pGameState->GetPlayerById(player.id()) 
 			== nullptr)
 		{
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 23.0f, FColor::Yellow, FString::Printf(TEXT("new player ID : %d"), player.id()));
+			UE_LOG(LogTemp, Log, TEXT("ADD Player %d"), player.id());
 			pGameState->AddPlayer(&player, m_id);
 		}
 

@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "NetworkWorker.h"
 #include "ClientSession.h"
 #include "HAL/Runnable.h"
 #include "Sockets.h"
 #include "SendBuffer.h"
 #include "CPacketHandler.h"
+
 bool RecvWorker::Init()
 {
 	return true;
@@ -15,8 +15,11 @@ bool RecvWorker::Init()
 uint32 RecvWorker::Run()
 {
 	while (m_bRunning)
-	{
+	{;
+		//uint64 s = FPlatformTime::Cycles64();
 		RecvPacket();
+		//uint64 e = FPlatformTime::Cycles64();
+		//UE_LOG(LogTemp, Log, TEXT("Recv Time : %f ms"), FPlatformTime::ToMilliseconds(e - s));
 	}
 	return 0;
 }
@@ -26,7 +29,7 @@ void RecvWorker::Exit()
 
 }
 
-RecvWorker::RecvWorker(FSocket* pSocket, TSharedPtr<ClientSession> session)
+RecvWorker::RecvWorker(FSocket* pSocket, TWeakPtr<ClientSession> session)
 	:m_pThread(nullptr), m_bRunning(true), m_pSocket(pSocket), m_session(session)
 {
 	m_pThread = FRunnableThread::Create(this, TEXT("RecvWorker"));
@@ -42,7 +45,14 @@ RecvWorker::~RecvWorker()
 void RecvWorker::RecvPacket()
 {
 	uint32 pendingBytes = 0;
-	if (!m_pSocket||!m_pSocket->HasPendingData(pendingBytes)||pendingBytes==0)
+	//TODO: 소멸자 호출전에 소켓이 해제 됨  
+	TSharedPtr<ClientSession> pSession = m_session.Pin();
+	if (pSession == nullptr)
+	{
+		return;
+	}
+
+	if (!m_pSocket->HasPendingData(pendingBytes)||pendingBytes==0)
 	{
 		return;
 	}
@@ -62,15 +72,13 @@ void RecvWorker::RecvPacket()
 			UE_LOG(LogTemp, Error, TEXT("RecvPacket() Failed"));
 			return;
 		}
-		UE_LOG(LogTemp, Error, TEXT("RecvBytes : %d"), recvBytes);
 		pos += recvBytes;
 		headerSize -= recvBytes;
 		recvBytes = 0;
 	}
 	
 	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(&buffer[0]);
-	UE_LOG(LogTemp, Error, TEXT("PacketSize : %d"), pHeader->size);
-	UE_LOG(LogTemp, Error, TEXT("PacketType : %d"), pHeader->id);
+
 	headerSize = sizeof(CPacketHeader);
 	int payloadSize = pHeader->size - headerSize;
 	if (payloadSize)
@@ -87,16 +95,14 @@ void RecvWorker::RecvPacket()
 				UE_LOG(LogTemp, Error, TEXT("RecvPacket() Failed"));
 				return;
 			}
-			UE_LOG(LogTemp, Error, TEXT("RecvBytes : %d"), recvBytes);
 			pos += recvBytes;
 			payloadSize -= recvBytes;
 			recvBytes = 0;
 		}
 	}
 	
-	UE_LOG(LogTemp, Error, TEXT("RecvPacket() Succeded"));
-	TSharedPtr<ClientSession> pSession = m_session.Pin();
 	pSession->EnqueueRecvPacket(buffer);
+	
 }
 
 bool SendWorker::Init()
@@ -108,15 +114,18 @@ uint32 SendWorker::Run()
 {
 	while (m_bRunning)
 	{
-		
-		if (m_session != nullptr)
+		TSharedPtr<ClientSession> pSession = m_session.Pin();
+		if (pSession != nullptr)
 		{
-			TSharedPtr<ClientSession> pSession = m_session.Pin();
 			TSharedPtr<SendBuffer> pkt;
+
 			if (pSession->DequeueSendPacket(pkt))
 			{
-				UE_LOG(LogTemp, Display, TEXT("SendQueue Dequeue"));
+				uint64 s = FPlatformTime::Cycles64();
 				SendPacket(pkt);
+				uint64 e = FPlatformTime::Cycles64();
+				UE_LOG(LogTemp, Log, TEXT("Send Time : %f ms"), FPlatformTime::ToMilliseconds(e - s));
+				
 			}
 		}
 		
@@ -130,7 +139,7 @@ void SendWorker::Exit()
 	
 }
 
-SendWorker::SendWorker(FSocket* pSocket, TSharedPtr<ClientSession> session)
+SendWorker::SendWorker(FSocket* pSocket, TWeakPtr<ClientSession> session)
 	:m_pThread(nullptr), m_bRunning(true), m_pSocket(pSocket), m_session(session)
 {
 	m_pThread = FRunnableThread::Create(this, TEXT("SendWorker"));
@@ -148,12 +157,19 @@ void SendWorker::SendPacket(TSharedPtr<SendBuffer> pkt)
 {
 
 	uint8* pos = (uint8*)pkt->GetBuffer();
+	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(pos);
+	//모아 두었다 한꺼번에? 
 	int toSend = pkt->GetSize();
 	int sentBytes = 0;
+	int i = 0;
 	while (toSend)
 	{
+		uint64 s = FPlatformTime::Cycles64();
 		bool bSucceded =
 			m_pSocket->Send(pos, toSend, sentBytes);
+		uint64 e = FPlatformTime::Cycles64();
+		UE_LOG(LogTemp, Log, TEXT("Send Time : %f ms, %d th"), FPlatformTime::ToMilliseconds(e - s),i++);
+		
 		if (!bSucceded)
 		{
 			UE_LOG(LogTemp, Error, TEXT("SendPacket() Failed"));
@@ -162,12 +178,6 @@ void SendWorker::SendPacket(TSharedPtr<SendBuffer> pkt)
 		pos += sentBytes;
 		toSend -= sentBytes;
 		sentBytes = 0;
-	}
-	UE_LOG(LogTemp, Log, TEXT("SendPacket() Succeded"));
-	CPacketHeader* pHeader = reinterpret_cast<CPacketHeader*>(pkt->GetBuffer());
-	if (pHeader->id == Despawn)
-	{
-		FGenericPlatformMisc::RequestExit(false);
 	}
 
 }

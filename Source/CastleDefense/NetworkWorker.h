@@ -24,7 +24,8 @@ public:
 	virtual uint32 Run() override;
 	virtual void Exit() override;
 
-	RecvWorker(FSocket*, TSharedPtr<ClientSession> session);
+	void Shutdown() { m_bRunning = false; m_pThread->WaitForCompletion(); };
+	RecvWorker(FSocket*, TWeakPtr<ClientSession> session);
 	~RecvWorker();
 private:
 	void RecvPacket();
@@ -42,14 +43,15 @@ public:
 	virtual uint32 Run() override;
 	virtual void Exit() override;
 
-	SendWorker(FSocket*, TSharedPtr<ClientSession> session);
+	void Shutdown() { m_bRunning = false; m_pThread->WaitForCompletion();};
+	SendWorker(FSocket*, TWeakPtr<ClientSession> session);
 	~SendWorker();
 private:
 	void SendPacket(TSharedPtr<SendBuffer>);
 
 protected:
 	TWeakPtr<ClientSession> m_session;
-	FSocket* m_pSocket;
-	FRunnableThread* m_pThread;
+	FSocket*			m_pSocket;
+	FRunnableThread*	m_pThread;
 	bool m_bRunning;
 };

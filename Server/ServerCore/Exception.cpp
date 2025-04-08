@@ -3,5 +3,5 @@
 
 void PrintError(const char* pFunctionName, int errorno)
 {
-	std::cout << pFunctionName << "Failed :" << errorno << std::endl;
+	std::cout << pFunctionName << "Failed :" << errorno <<"\n";
 }

@@ -83,9 +83,8 @@ void SessionManager::Brodcast(shared_ptr<SendBuffer> pSendBuffer, shared_ptr<Ses
 
 	for (int i = 0; i < m_sessionVec.size(); ++i)
 	{
-		if (m_sessionVec[i]!=pSession&&m_sessionVec[i]->GetConnection())
+		if (m_sessionVec[i] != pSession && m_sessionVec[i]->GetConnection())
 		{
-			//TODO: ¿©±â ³¢¾îµé±â ¾îÂ¼Áö?
 			m_sessionVec[i]->RequestSend(pSendBuffer);
 		}
 	}

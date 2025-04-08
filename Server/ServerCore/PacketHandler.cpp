@@ -86,7 +86,7 @@ C_Chat PacketHandler::ParseC_Chat(char* pBuf)
 	int size = (pHeader->size) - sizeof(PacketHeader);
 	C_Chat pkt;
 	pkt.ParseFromArray(pHeader+1, size);
-	cout << pkt.msg() << endl;
+	cout << pkt.msg() << "\n";
 	return pkt;
 }
 
@@ -140,6 +140,7 @@ void PacketHandler::BrodcastS_EnemyMove()
 	S_EnemyMove pkt;
 	g_pEnemyManager->SetNextLocation();
 	g_pEnemyManager->AddEnemyToPacket(pkt);
+
 	int packetSize = sizeof(PacketHeader) + pkt.ByteSizeLong();
 	shared_ptr<SendBuffer> pSendBuffer = make_shared<SendBuffer>(packetSize);
 	PacketHandler::SerializeS_EnemyMovement(pkt, pSendBuffer->GetBuffer());
@@ -170,7 +171,7 @@ void PacketHandler::ProcessPacket(PacketHeader* pHeader, shared_ptr<Session> pSe
 		ProcessC_Attack(pHeader);
 		break;
 	default:
-		cout << "Packet Header Error!" << endl;
+		cout << "Packet Header Error!" << "\n";
 		break;
 	}
 
@@ -202,8 +203,6 @@ void PacketHandler::ProcessC_Spawn(PacketHeader* pHeader)
 	Player* pCurPlayer = pkt.add_player();
 	*pCurPlayer = *pPlayer->GetPlayer();
 
-	cout << "Spawn: "<< pCurPlayer->id() << " " << pCurPlayer->coord().x() << " " 
-		<< pCurPlayer->coord().y() << " " << pCurPlayer->coord().z() << endl;
 	shared_ptr<Session> pCurSession = g_pSessionManager->GetSessionById(c_spawn.id());
 
 
@@ -223,8 +222,7 @@ void PacketHandler::ProcessC_Spawn(PacketHeader* pHeader)
 				Player* pCurPlayer = pkt.add_player();
 				shared_ptr<PlayerInfo> pSharedPlayer = it->second;
 				*pCurPlayer = *pSharedPlayer->GetPlayer();
-				cout << "Spawn: " << pCurPlayer->id() << " " << pCurPlayer->coord().x() << " "
-					<< pCurPlayer->coord().y() << " " << pCurPlayer->coord().z() << endl;
+				
 			}
 		}
 		int packetSize = sizeof(PacketHeader) + pkt.ByteSizeLong();
@@ -258,7 +256,7 @@ void PacketHandler::ProcessC_Despawn(PacketHeader* pHeader)
 	SerializeS_Despawn(pkt, pSendBuffer->GetBuffer());
 
 	shared_ptr<Session> pCurSession = g_pSessionManager->GetSessionById(c_despawn.id());
-	g_pSessionManager->Brodcast(pSendBuffer,pCurSession);
+	g_pSessionManager->Brodcast(pSendBuffer, pCurSession);
 }
 
 void PacketHandler::ProcessC_Move(PacketHeader* pHeader)
@@ -266,6 +264,7 @@ void PacketHandler::ProcessC_Move(PacketHeader* pHeader)
 	C_Move c_move = ParseC_Move(reinterpret_cast<char*>(pHeader));
 	
 	const Player& playerRef = c_move.player();
+	
 	g_pPlayerManager->UpdatePlayerCoordByPlayer(playerRef);
 
 	S_Move pkt;
@@ -276,7 +275,6 @@ void PacketHandler::ProcessC_Move(PacketHeader* pHeader)
 	shared_ptr<SendBuffer> pSendBuffer = make_shared<SendBuffer>(packetSize);
 	SerializeS_Move(pkt, pSendBuffer->GetBuffer());
 	shared_ptr<Session> pCurSession = g_pSessionManager->GetSessionById(playerRef.id());
-	//cout << playerRef.id() << " " <<playerRef.coord().x()<<" "<< playerRef.coord().y() << " "<<playerRef.coord().z() <<endl;
 	g_pSessionManager->Brodcast(pSendBuffer, pCurSession);
 	pkt.release_player();
 }
@@ -309,7 +307,7 @@ void PacketHandler::ProcessC_Attack(PacketHeader* pHeader)
 	if (bInRange)
 	{
 		g_pEnemyManager->DecreaseHp(pkt.target());
-		cout << pkt.attacker() << " attack " << pkt.target() << endl;
+		cout << pkt.attacker() << " attack " << pkt.target() << "\n";
 		S_Attack response;
 		response.set_target(pkt.target());
 

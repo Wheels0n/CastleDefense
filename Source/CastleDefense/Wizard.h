@@ -7,6 +7,10 @@
 #include "Network/test.pb.h"
 #include "Wizard.generated.h"
 
+#define _PLAYER_HP				100
+#define _BRODCATE_TIME			0.3f
+#define _PLAYER_WALK_SPEED		150
+#define _PLAYER_SPRINT_SPEED	500
 
 class UWizardWidget;
 class UChatWidget;
@@ -79,6 +83,12 @@ private:
 	UFUNCTION()
 	void StopJump();
 
+	UFUNCTION()
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	void CheckDynamicObjectCollsion(AActor* OtherActor);
 private: 
 	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
 	TSubclassOf<UWizardWidget> PlayerWidgetClass;
@@ -108,11 +118,14 @@ private:
 	UCameraComponent* m_pCamComponent;
 
 	FTimerHandle m_hTimer;
-	
+	FVector		 m_dir;
+
 	Coordiante m_curCoord;
 	Coordiante m_dstCoord;
+	Coordiante m_curDir;
 	Rotation m_curRot;
 	Rotation m_dstRot;
+	Velocity m_vel;
 	MoveState m_curMoveState;
 
 	bool m_bMoveStateChanged;

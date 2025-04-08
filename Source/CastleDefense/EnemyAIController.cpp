@@ -67,7 +67,6 @@ void AEnemyAIController::OnTargetInSight(AActor* pActor, FAIStimulus const Stimu
 	AWizard* pWizard = Cast<AWizard>(pActor);
 	if (bWizard &&!(pWizard->IsDead()) &&bSensed )
 	{
-		UE_LOG(LogTemp, Display, TEXT("TargetFound"));
 		m_hTimer.Invalidate();
 		Blackboard->SetValueAsBool(FName(TEXT("bInSight")), true);
 		Blackboard->SetValueAsObject(FName(TEXT("Wizard")), pActor);
@@ -76,7 +75,6 @@ void AEnemyAIController::OnTargetInSight(AActor* pActor, FAIStimulus const Stimu
 	{
 		
 		Blackboard->SetValueAsBool(FName(TEXT("bInMeleeRange")), false);
-		UE_LOG(LogTemp, Display, TEXT("TargetMissing"));
 		UWorld* pWorld = pActor->GetWorld();
 		if (pWorld)
 		{
@@ -106,7 +104,6 @@ void AEnemyAIController::StopBehaviorTree()
 
 void AEnemyAIController::StartEnemyTimer()
 {
-	UE_LOG(LogTemp, Display, TEXT("SetTimer"));
 	Blackboard->SetValueAsBool(FName(TEXT("bInSight")), false);
 	Blackboard->SetValueAsObject(FName(TEXT("Wizard")), nullptr);
 }

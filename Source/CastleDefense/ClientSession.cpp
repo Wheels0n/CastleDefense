@@ -6,7 +6,7 @@
 #include "CPacketHandler.h"
 #include "Sockets.h"
 #include "SendBuffer.h"
-void ClientSession::EnqueueRecvPacket(TArray<uint8> packet)
+void ClientSession::EnqueueRecvPacket(TArray<uint8>& packet)
 {
 	m_recvQueue.Enqueue(packet);
 }
@@ -14,10 +14,9 @@ void ClientSession::DequeueRecvPacket()
 {
 	if (!m_recvQueue.IsEmpty())
 	{
-		UE_LOG(LogTemp, Display, TEXT("DequeueRecvPacket()"));
 		TArray<uint8> arr;
 		m_recvQueue.Dequeue(arr);
-		m_pPacketHandler->ProcessPacket((CPacketHeader*)arr.GetData());
+		m_pPacketHandler->ProcessPacket((CPacketHeader*)&arr[0]);
 		
 	}
 }
@@ -62,21 +61,24 @@ void ClientSession::SendC_Despawn()
 	TSharedPtr<SendBuffer> sendbuf = MakeShared<SendBuffer>(sizeof(CPacketHeader) + pkt.ByteSizeLong());
 	m_pPacketHandler->SerializeC_Despawn(pkt, sendbuf->GetBuffer());
 	EnqueueSendPacket(sendbuf);
+	
 }
-void ClientSession::SendC_Move(Coordiante* newPos, Rotation* newRot, MoveState moveState, bool bAttack)
+void ClientSession::SendC_Move(Coordiante* newPos, Rotation* newRot, Velocity* newVel, Coordiante* newDir, MoveState moveState, bool bAttack)
 {
 	C_Move pkt;
 	if (m_player.has_coord() == false)
 	{
 		m_player.set_allocated_coord(newPos);
 		m_player.set_allocated_rot(newRot);
+		m_player.set_allocated_vel(newVel);
+		m_player.set_allocated_dir(newDir);
 		m_player.set_id(m_pSocket->GetPortNo());
 		m_player.set_hp(0);
 	}
 	m_player.set_battack(bAttack);
 	m_player.set_movestate(moveState);
 	pkt.set_allocated_player(&m_player);
-	
+
 	TSharedPtr<SendBuffer> sendbuf = MakeShared<SendBuffer>(sizeof(CPacketHeader) + pkt.ByteSizeLong());
 
 	m_pPacketHandler->SerializeC_Move(pkt, sendbuf->GetBuffer());
@@ -109,6 +111,8 @@ ClientSession::ClientSession(FSocket* pSocket, UCastleDefenseGameInstance* pGame
 
 ClientSession::~ClientSession()
 {
+	m_pSendWorker->Shutdown();
+	m_pRecvWorker->Shutdown();
 	m_pSendWorker = nullptr;
 	m_pRecvWorker = nullptr;
 	m_pPacketHandler = nullptr;

@@ -1,10 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CastleDefenseGameInstance.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "ClientSession.h"
 #include "Networking.h"
 #include "CPacketHandler.h"
 #include "SendBuffer.h"
+
 void UCastleDefenseGameInstance::Init()
 {
 	UGameInstance::Init();
@@ -44,7 +46,14 @@ bool UCastleDefenseGameInstance::ConnectToServer()
 		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
 	m_pSocket = pSocketSubsystem->
 		CreateSocket(TEXT("Stream"), TEXT("Client Socket"));
-
+	int32 sndSize = 0;
+	int32 rcvSize = 0;
+	m_pSocket->SetSendBufferSize(1024 * 1024, sndSize);
+	m_pSocket->SetReceiveBufferSize(1024 * 1024, rcvSize);
+	UE_LOG(LogInit, Display, TEXT("SND BUF : %d"), sndSize);
+	UE_LOG(LogInit, Display, TEXT("RCV BUF : %d"), rcvSize);
+	check(m_pSocket->SetNoDelay());
+	check(m_pSocket->SetNonBlocking());
 	FIPv4Address ip;
 	FIPv4Address::Parse(m_ipAddress, ip);
 
@@ -59,13 +68,11 @@ bool UCastleDefenseGameInstance::ConnectToServer()
 	m_pSession->CreateWorkers();
 	if (bConnected)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Yellow, "Connected");
 		UE_LOG(LogInit, Display, TEXT("ConnectSucceded"));
 		m_pSession->SendC_Login();
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(1, 3.0f, FColor::Yellow, "NotConnected");
 		UE_LOG(LogInit, Display, TEXT("FailedToConnect"));
 	}
 	return bConnected;
@@ -76,6 +83,7 @@ void UCastleDefenseGameInstance::DisconnectFromServer()
 	if (m_pSession != nullptr)
 	{
 		m_pSession->SendC_Despawn();
+		UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, false);
 	}
 }
 

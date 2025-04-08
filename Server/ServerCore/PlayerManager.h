@@ -8,13 +8,17 @@ class PlayerInfo : public enable_shared_from_this<PlayerInfo>
 public:
 	Player* GetPlayer() {return &m_player;};
 	Coordiante* GetCoord() { return &m_coord; };
+	Coordiante* GetDir() { return &m_dir; };
+	Velocity* GetVelocity() { return &m_vel; };
 	Rotation* GetRot() { return &m_rot; };
 	MoveState* GetMoveState() { return &m_moveState; };
 	PlayerInfo(int id);
 private:
 	Player m_player;
 	Coordiante m_coord;
+	Velocity m_vel;
 	Rotation m_rot;
+	Coordiante m_dir;
 	MoveState m_moveState;
 	bool m_bAlive;
 };
