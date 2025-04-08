@@ -498,6 +498,8 @@ FodyWeavers.xsd
 /Content/AnimStarterPack
 /Content/NewBlueprint.uasset
 /Content/Realistic_Starter_VFX_Pack_Vol2
+/Content/Characters
+/Content/__ExternalObjects__/MainMap
 *.i
 /Server/ProtoBuf
 /Server/protobuf-27.3/protobuf-27.3
@@ -506,3 +508,6 @@ FodyWeavers.xsd
 /Content/Enemy_BT1.uasset
 /Server/ServerCore/Recastnavigation
 /Server/ServerCore/all_tiles_navmesh.bin
+
+/Content/__ExternalActors__
+/Content/LevelPrototyping
