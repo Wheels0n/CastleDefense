@@ -3021,9 +3021,11 @@ class Enemy final : public ::google::protobuf::Message
   enum : int {
     kCoordFieldNumber = 3,
     kRotFieldNumber = 4,
+    kDirFieldNumber = 5,
     kIdFieldNumber = 1,
     kHpFieldNumber = 2,
-    kMoveStateFieldNumber = 5,
+    kBNewDestFieldNumber = 7,
+    kMoveStateFieldNumber = 6,
   };
   // required .Coordiante coord = 3;
   bool has_coord() const;
@@ -3055,6 +3057,21 @@ class Enemy final : public ::google::protobuf::Message
   ::Rotation* _internal_mutable_rot();
 
   public:
+  // required .Coordiante dir = 5;
+  bool has_dir() const;
+  void clear_dir() ;
+  const ::Coordiante& dir() const;
+  PROTOBUF_NODISCARD ::Coordiante* release_dir();
+  ::Coordiante* mutable_dir();
+  void set_allocated_dir(::Coordiante* value);
+  void unsafe_arena_set_allocated_dir(::Coordiante* value);
+  ::Coordiante* unsafe_arena_release_dir();
+
+  private:
+  const ::Coordiante& _internal_dir() const;
+  ::Coordiante* _internal_mutable_dir();
+
+  public:
   // required int32 id = 1;
   bool has_id() const;
   void clear_id() ;
@@ -3077,7 +3094,18 @@ class Enemy final : public ::google::protobuf::Message
   void _internal_set_hp(::int32_t value);
 
   public:
-  // required .MoveState moveState = 5;
+  // required bool bNewDest = 7;
+  bool has_bnewdest() const;
+  void clear_bnewdest() ;
+  bool bnewdest() const;
+  void set_bnewdest(bool value);
+
+  private:
+  bool _internal_bnewdest() const;
+  void _internal_set_bnewdest(bool value);
+
+  public:
+  // required .MoveState moveState = 6;
   bool has_movestate() const;
   void clear_movestate() ;
   ::MoveState movestate() const;
@@ -3093,7 +3121,7 @@ class Enemy final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 5, 3,
+      3, 7, 4,
       0, 2>
       _table_;
 
@@ -3118,8 +3146,10 @@ class Enemy final : public ::google::protobuf::Message
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::Coordiante* coord_;
     ::Rotation* rot_;
+    ::Coordiante* dir_;
     ::int32_t id_;
     ::int32_t hp_;
+    bool bnewdest_;
     int movestate_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -3442,21 +3472,23 @@ class S_Move final : public ::google::protobuf::Message
   enum : int {
     kPlayerFieldNumber = 1,
   };
-  // required .Player player = 1;
-  bool has_player() const;
-  void clear_player() ;
-  const ::Player& player() const;
-  PROTOBUF_NODISCARD ::Player* release_player();
-  ::Player* mutable_player();
-  void set_allocated_player(::Player* value);
-  void unsafe_arena_set_allocated_player(::Player* value);
-  ::Player* unsafe_arena_release_player();
-
+  // repeated .Player player = 1;
+  int player_size() const;
   private:
-  const ::Player& _internal_player() const;
-  ::Player* _internal_mutable_player();
+  int _internal_player_size() const;
 
   public:
+  void clear_player() ;
+  ::Player* mutable_player(int index);
+  ::google::protobuf::RepeatedPtrField<::Player>* mutable_player();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::Player>& _internal_player() const;
+  ::google::protobuf::RepeatedPtrField<::Player>* _internal_mutable_player();
+  public:
+  const ::Player& player(int index) const;
+  ::Player* add_player();
+  const ::google::protobuf::RepeatedPtrField<::Player>& player() const;
   // @@protoc_insertion_point(class_scope:S_Move)
  private:
   class _Internal;
@@ -3483,9 +3515,8 @@ class S_Move final : public ::google::protobuf::Message
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const S_Move& from_msg);
-    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::RepeatedPtrField< ::Player > player_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    ::Player* player_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -4823,13 +4854,13 @@ inline void Player::_internal_set_movestate(::MoveState value) {
 
 // required int32 id = 1;
 inline bool Enemy::has_id() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
   return value;
 }
 inline void Enemy::clear_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.id_ = 0;
-  _impl_._has_bits_[0] &= ~0x00000004u;
+  _impl_._has_bits_[0] &= ~0x00000008u;
 }
 inline ::int32_t Enemy::id() const {
   // @@protoc_insertion_point(field_get:Enemy.id)
@@ -4837,7 +4868,7 @@ inline ::int32_t Enemy::id() const {
 }
 inline void Enemy::set_id(::int32_t value) {
   _internal_set_id(value);
-  _impl_._has_bits_[0] |= 0x00000004u;
+  _impl_._has_bits_[0] |= 0x00000008u;
   // @@protoc_insertion_point(field_set:Enemy.id)
 }
 inline ::int32_t Enemy::_internal_id() const {
@@ -4851,13 +4882,13 @@ inline void Enemy::_internal_set_id(::int32_t value) {
 
 // required int32 hp = 2;
 inline bool Enemy::has_hp() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline void Enemy::clear_hp() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.hp_ = 0;
-  _impl_._has_bits_[0] &= ~0x00000008u;
+  _impl_._has_bits_[0] &= ~0x00000010u;
 }
 inline ::int32_t Enemy::hp() const {
   // @@protoc_insertion_point(field_get:Enemy.hp)
@@ -4865,7 +4896,7 @@ inline ::int32_t Enemy::hp() const {
 }
 inline void Enemy::set_hp(::int32_t value) {
   _internal_set_hp(value);
-  _impl_._has_bits_[0] |= 0x00000008u;
+  _impl_._has_bits_[0] |= 0x00000010u;
   // @@protoc_insertion_point(field_set:Enemy.hp)
 }
 inline ::int32_t Enemy::_internal_hp() const {
@@ -5069,15 +5100,111 @@ inline void Enemy::set_allocated_rot(::Rotation* value) {
   // @@protoc_insertion_point(field_set_allocated:Enemy.rot)
 }
 
-// required .MoveState moveState = 5;
+// required .Coordiante dir = 5;
+inline bool Enemy::has_dir() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.dir_ != nullptr);
+  return value;
+}
+inline void Enemy::clear_dir() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.dir_ != nullptr) _impl_.dir_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000004u;
+}
+inline const ::Coordiante& Enemy::_internal_dir() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::Coordiante* p = _impl_.dir_;
+  return p != nullptr ? *p : reinterpret_cast<const ::Coordiante&>(::_Coordiante_default_instance_);
+}
+inline const ::Coordiante& Enemy::dir() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:Enemy.dir)
+  return _internal_dir();
+}
+inline void Enemy::unsafe_arena_set_allocated_dir(::Coordiante* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.dir_);
+  }
+  _impl_.dir_ = reinterpret_cast<::Coordiante*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000004u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000004u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:Enemy.dir)
+}
+inline ::Coordiante* Enemy::release_dir() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000004u;
+  ::Coordiante* released = _impl_.dir_;
+  _impl_.dir_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  if (GetArena() == nullptr) {
+    delete old;
+  }
+#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArena() != nullptr) {
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return released;
+}
+inline ::Coordiante* Enemy::unsafe_arena_release_dir() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:Enemy.dir)
+
+  _impl_._has_bits_[0] &= ~0x00000004u;
+  ::Coordiante* temp = _impl_.dir_;
+  _impl_.dir_ = nullptr;
+  return temp;
+}
+inline ::Coordiante* Enemy::_internal_mutable_dir() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.dir_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::Coordiante>(GetArena());
+    _impl_.dir_ = reinterpret_cast<::Coordiante*>(p);
+  }
+  return _impl_.dir_;
+}
+inline ::Coordiante* Enemy::mutable_dir() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000004u;
+  ::Coordiante* _msg = _internal_mutable_dir();
+  // @@protoc_insertion_point(field_mutable:Enemy.dir)
+  return _msg;
+}
+inline void Enemy::set_allocated_dir(::Coordiante* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.dir_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000004u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000004u;
+  }
+
+  _impl_.dir_ = reinterpret_cast<::Coordiante*>(value);
+  // @@protoc_insertion_point(field_set_allocated:Enemy.dir)
+}
+
+// required .MoveState moveState = 6;
 inline bool Enemy::has_movestate() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_impl_._has_bits_[0] & 0x00000040u) != 0;
   return value;
 }
 inline void Enemy::clear_movestate() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.movestate_ = 1;
-  _impl_._has_bits_[0] &= ~0x00000010u;
+  _impl_._has_bits_[0] &= ~0x00000040u;
 }
 inline ::MoveState Enemy::movestate() const {
   // @@protoc_insertion_point(field_get:Enemy.moveState)
@@ -5085,7 +5212,7 @@ inline ::MoveState Enemy::movestate() const {
 }
 inline void Enemy::set_movestate(::MoveState value) {
   _internal_set_movestate(value);
-  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_._has_bits_[0] |= 0x00000040u;
   // @@protoc_insertion_point(field_set:Enemy.moveState)
 }
 inline ::MoveState Enemy::_internal_movestate() const {
@@ -5096,6 +5223,34 @@ inline void Enemy::_internal_set_movestate(::MoveState value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   assert(::MoveState_IsValid(value));
   _impl_.movestate_ = value;
+}
+
+// required bool bNewDest = 7;
+inline bool Enemy::has_bnewdest() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline void Enemy::clear_bnewdest() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.bnewdest_ = false;
+  _impl_._has_bits_[0] &= ~0x00000020u;
+}
+inline bool Enemy::bnewdest() const {
+  // @@protoc_insertion_point(field_get:Enemy.bNewDest)
+  return _internal_bnewdest();
+}
+inline void Enemy::set_bnewdest(bool value) {
+  _internal_set_bnewdest(value);
+  _impl_._has_bits_[0] |= 0x00000020u;
+  // @@protoc_insertion_point(field_set:Enemy.bNewDest)
+}
+inline bool Enemy::_internal_bnewdest() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.bnewdest_;
+}
+inline void Enemy::_internal_set_bnewdest(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.bnewdest_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -5415,100 +5570,53 @@ inline void C_Move::set_allocated_player(::Player* value) {
 
 // S_Move
 
-// required .Player player = 1;
-inline bool S_Move::has_player() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
-  PROTOBUF_ASSUME(!value || _impl_.player_ != nullptr);
-  return value;
+// repeated .Player player = 1;
+inline int S_Move::_internal_player_size() const {
+  return _internal_player().size();
+}
+inline int S_Move::player_size() const {
+  return _internal_player_size();
 }
 inline void S_Move::clear_player() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (_impl_.player_ != nullptr) _impl_.player_->Clear();
-  _impl_._has_bits_[0] &= ~0x00000001u;
+  _impl_.player_.Clear();
 }
-inline const ::Player& S_Move::_internal_player() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  const ::Player* p = _impl_.player_;
-  return p != nullptr ? *p : reinterpret_cast<const ::Player&>(::_Player_default_instance_);
+inline ::Player* S_Move::mutable_player(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:S_Move.player)
+  return _internal_mutable_player()->Mutable(index);
 }
-inline const ::Player& S_Move::player() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline ::google::protobuf::RepeatedPtrField<::Player>* S_Move::mutable_player()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:S_Move.player)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_player();
+}
+inline const ::Player& S_Move::player(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
   // @@protoc_insertion_point(field_get:S_Move.player)
+  return _internal_player().Get(index);
+}
+inline ::Player* S_Move::add_player() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::Player* _add = _internal_mutable_player()->Add();
+  // @@protoc_insertion_point(field_add:S_Move.player)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::Player>& S_Move::player() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:S_Move.player)
   return _internal_player();
 }
-inline void S_Move::unsafe_arena_set_allocated_player(::Player* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.player_);
-  }
-  _impl_.player_ = reinterpret_cast<::Player*>(value);
-  if (value != nullptr) {
-    _impl_._has_bits_[0] |= 0x00000001u;
-  } else {
-    _impl_._has_bits_[0] &= ~0x00000001u;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:S_Move.player)
-}
-inline ::Player* S_Move::release_player() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-
-  _impl_._has_bits_[0] &= ~0x00000001u;
-  ::Player* released = _impl_.player_;
-  _impl_.player_ = nullptr;
-#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
-  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
-  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
-  if (GetArena() == nullptr) {
-    delete old;
-  }
-#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
-  if (GetArena() != nullptr) {
-    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
-  }
-#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
-  return released;
-}
-inline ::Player* S_Move::unsafe_arena_release_player() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:S_Move.player)
-
-  _impl_._has_bits_[0] &= ~0x00000001u;
-  ::Player* temp = _impl_.player_;
-  _impl_.player_ = nullptr;
-  return temp;
-}
-inline ::Player* S_Move::_internal_mutable_player() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (_impl_.player_ == nullptr) {
-    auto* p = ::google::protobuf::Message::DefaultConstruct<::Player>(GetArena());
-    _impl_.player_ = reinterpret_cast<::Player*>(p);
-  }
+inline const ::google::protobuf::RepeatedPtrField<::Player>&
+S_Move::_internal_player() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
   return _impl_.player_;
 }
-inline ::Player* S_Move::mutable_player() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  _impl_._has_bits_[0] |= 0x00000001u;
-  ::Player* _msg = _internal_mutable_player();
-  // @@protoc_insertion_point(field_mutable:S_Move.player)
-  return _msg;
-}
-inline void S_Move::set_allocated_player(::Player* value) {
-  ::google::protobuf::Arena* message_arena = GetArena();
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (message_arena == nullptr) {
-    delete (_impl_.player_);
-  }
-
-  if (value != nullptr) {
-    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
-    if (message_arena != submessage_arena) {
-      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
-    }
-    _impl_._has_bits_[0] |= 0x00000001u;
-  } else {
-    _impl_._has_bits_[0] &= ~0x00000001u;
-  }
-
-  _impl_.player_ = reinterpret_cast<::Player*>(value);
-  // @@protoc_insertion_point(field_set_allocated:S_Move.player)
+inline ::google::protobuf::RepeatedPtrField<::Player>*
+S_Move::_internal_mutable_player() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.player_;
 }
 
 // -------------------------------------------------------------------

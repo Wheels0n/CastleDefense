@@ -60,7 +60,9 @@ message Enemy
 	required int32 hp=2;
 	required Coordiante coord=3;
 	required Rotation rot=4;
-	required MoveState moveState=5;
+	required Coordiante dir=5;
+	required MoveState moveState=6;
+	required bool bNewDest=7;
 }
 
 message C_Login
@@ -100,7 +102,7 @@ message C_Move
 
 message S_Move
 {
-	required Player player=1;
+	repeated Player player=1;
 }
 
 message C_Chat

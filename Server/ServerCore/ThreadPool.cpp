@@ -2,6 +2,16 @@
 #include "ThreadPool.h"
 #include "ThreadLocal.h"
 #include "LockOrderChecker.h"
+
+void ThreadPool::EnqueueTask(function<void()> task)
+{
+	{
+		unique_lock<mutex> lock(m_mutex);
+		m_tasks.emplace(move(task));
+	}
+
+	m_cv.notify_one();
+}
 void ThreadPool::DoTask()
 {
 	while (true)
@@ -20,9 +30,8 @@ void ThreadPool::DoTask()
 		}
 		task();
 	}
-	
-}
 
+}
 void ThreadPool::Join()
 {
 	{
@@ -35,8 +44,6 @@ void ThreadPool::Join()
 	{
 		if (m_threads[i].joinable())
 		{
-			//TODO:
-			//delete LLockOrderChecker;
 			m_threads[i].join();
 		}
 	}
@@ -52,25 +59,14 @@ ThreadPool::ThreadPool() :m_bStop(false)
 		auto startFunction = [this](int id)
 			{
 				LThreadId = id;
-				LLockOrderChecker = new LockOrderChecker();
 				this->DoTask();
 			};
 
 		m_threads.emplace_back(startFunction,i);
 	}
 }
-
 ThreadPool::~ThreadPool()
 {
 	Join();
 }
 
-void ThreadPool::EnqueueTask(function<void()> task)
-{
-	{
-		unique_lock<mutex> lock(m_mutex);
-		m_tasks.emplace(move(task));
-	}
-
-	m_cv.notify_one();
-}

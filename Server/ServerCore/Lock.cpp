@@ -5,7 +5,7 @@
 void RWLock::WriteLock()
 {
 	// r/w 둘 다 없어야 함
-	LLockOrderChecker->Push(this);
+	LockOrderChecker::GetInstance().Push(this);
 	uint32_t expected = eLockFlag::EMPTY;
 	uint32_t desired = eLockFlag::ON_WRITE;
 	while (m_lockFlag.compare_exchange_strong(expected, desired)==false)
@@ -14,17 +14,16 @@ void RWLock::WriteLock()
 	}
 
 }
-
 void RWLock::WriteUnlock()
 {
-	LLockOrderChecker->Pop(this);
+	LockOrderChecker::GetInstance().Pop(this);
 	m_lockFlag.store(eLockFlag::EMPTY);
 }
 
 void RWLock::ReadLock()
 {
 	//겹친다 지금 r/w랑 
-	LLockOrderChecker->Push(this);
+	LockOrderChecker::GetInstance().Push(this);
 	uint32_t expected = m_lockFlag.load()&eLockFlag::ON_READ;
 	uint32_t desired = expected+1;
 	while (m_lockFlag.compare_exchange_strong(expected, desired)==false)
@@ -33,10 +32,9 @@ void RWLock::ReadLock()
 		desired = expected + 1;
 	}
 }
-
 void RWLock::ReadUnlock()
 {
-	LLockOrderChecker->Pop(this);
+	LockOrderChecker::GetInstance().Pop(this);
 	m_lockFlag.fetch_sub(1);
 }
 

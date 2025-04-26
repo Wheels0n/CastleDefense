@@ -16,31 +16,13 @@ void Session::AddRef()
 {
 	m_nRef.fetch_add(1);
 }
-
 void Session::ReleaseRef()
 {
 	m_nRef.fetch_sub(1);
 	if (m_bConnected.load()==false&& m_nRef.load()==0)
 	{
-		g_pSessionManager->ReturnSession(shared_from_this());
+		SessionManager::GetInstance().ReturnSession(shared_from_this());
 	}
-}
-
-
-Session::Session()
-	:m_socket(INVALID_SOCKET), m_nRef(0), m_bConnected(false), m_recvBuf(nullptr),  
-	m_recvLock(1), m_sendLock(1)
-{
-	memset(&m_sockaddr, 0, sizeof(sockaddr_in));
-	m_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	//TODO : 소켓 생성 실패 시?
-	
-	m_recvBuf = MakeShared<Buffer>();
-}
-
-Session::~Session()
-{
-	
 }
 
 void Session::ResetSession()
@@ -61,7 +43,6 @@ void Session::ResetSession()
 	}
 
 }
-
 void Session::ShutdownSocket()
 {
 	
@@ -84,7 +65,7 @@ bool Session::RequestAccept()
 
 	AddRef();
 
-	if (IocpManager::AcceptEx(*g_pIocpManager->GetListenSocket(), m_socket, m_recvBuf->GetBufEnd(), 0,
+	if (IocpManager::AcceptEx(*(IocpManager::GetInstance().GetListenSocket()), m_socket, m_recvBuf->GetBufEnd(), 0,
 		sizeof(sockaddr_in)+16, sizeof(sockaddr_in)+16,
 		nullptr, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx)) == FALSE)
 	{
@@ -101,17 +82,16 @@ bool Session::RequestAccept()
 
 	return true;
 }
-
 void Session::ProcessAccept()
 {
 	if (m_bConnected.exchange(true)==true)
 	{
 		//TODO :  크래시. 연결에 연결
 	}
-	g_pSessionManager->IncreaseConnectionCount();
+	SessionManager::GetInstance().IncreaseConnectionCount();
 	
 	if (setsockopt(m_socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
-		reinterpret_cast<char*>(g_pIocpManager->GetListenSocket()), sizeof(SOCKET))
+		reinterpret_cast<char*>(IocpManager::GetInstance().GetListenSocket()), sizeof(SOCKET))
 		== SOCKET_ERROR)
 	{
 		int errorno = WSAGetLastError();
@@ -127,7 +107,7 @@ void Session::ProcessAccept()
 		PrintError("getpeername()",errorno);
 	}
 
-	g_pIocpManager->RegisterSocket(m_socket);
+	IocpManager::GetInstance().RegisterSocket(m_socket);
 
 	char addrArr[100] = { 0, };
 	InetNtopA(AF_INET, &m_sockaddr.sin_addr, OUT addrArr, sizeof(addrArr));
@@ -152,11 +132,10 @@ bool Session::PrepareConnect()
 		return false;
 	}
 
-	g_pIocpManager->RegisterSocket(m_socket);
+	IocpManager::GetInstance().RegisterSocket(m_socket);
 
 	return true;
 }
-
 bool Session::RequestConnect()
 {
 	// TODO: 실패시 오버랲드EX 누수와,  소켓 재등록 문제를 해결 할 것
@@ -169,7 +148,7 @@ bool Session::RequestConnect()
 
 	AddRef();
 	//TODO : 매개변수 에러
-	if (IocpManager::ConnectEx(m_socket, reinterpret_cast<sockaddr*>(g_pIocpManager->GetServerSockaddr()),
+	if (IocpManager::ConnectEx(m_socket, reinterpret_cast<sockaddr*>(IocpManager::GetInstance().GetServerSockaddr()),
 		sizeof(sockaddr), nullptr, 0, &bytes, reinterpret_cast<LPOVERLAPPED>(pOverlappedEx)) == FALSE)
 	{
 		int errorno = WSAGetLastError();
@@ -184,7 +163,6 @@ bool Session::RequestConnect()
 	}
 	return true;
 }
-
 void Session::ProcessConnect()
 {	
 	if (m_bConnected.exchange(true) == true)
@@ -226,7 +204,6 @@ bool Session::RequestDisconnect()
 
 	return false;
 }
-
 void Session::ProcessDisconnect()
 {
 	if (m_bConnected.exchange(false)==false)
@@ -281,7 +258,6 @@ bool Session::RequestRecv()
 	
 	return true;
 }
-
 void Session::ProcessRecv(int recvlen)
 {
 	if (m_bConnected.load() == false)
@@ -366,12 +342,26 @@ bool Session::RequestSend(shared_ptr<SendBuffer> pSbuffer)
 
 	return true;
 }
-
 void Session::ProcessSend(int sendLen)
 {
 	if (m_bConnected.load() == false)
 	{
 		return;
 	}
+
+}
+
+Session::Session()
+	:m_socket(INVALID_SOCKET), m_nRef(0), m_bConnected(false), m_recvBuf(nullptr),
+	m_recvLock(1), m_sendLock(1)
+{
+	memset(&m_sockaddr, 0, sizeof(sockaddr_in));
+	m_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	//TODO : 소켓 생성 실패 시?
+
+	m_recvBuf = MakeShared<Buffer>();
+}
+Session::~Session()
+{
 
 }

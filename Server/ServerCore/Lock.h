@@ -15,9 +15,12 @@ public:
 	void WriteUnlock();
 	void ReadLock();
 	void ReadUnlock();
+	
+	inline void		SetOrder(uint32_t order) { m_order = order; };
 	inline uint32_t GetOrder() { return m_order; };
 
 	RWLock(uint32_t order);
+	RWLock() :m_lockFlag(0) {};
 	~RWLock()=default;
 
 private:

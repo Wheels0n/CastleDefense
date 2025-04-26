@@ -8,7 +8,7 @@
 #include "Wizard.generated.h"
 
 #define _PLAYER_HP				100
-#define _BRODCATE_TIME			0.3f
+#define _BRODCATE_TIME			0.2f
 #define _PLAYER_WALK_SPEED		150
 #define _PLAYER_SPRINT_SPEED	500
 
@@ -32,17 +32,21 @@ protected:
 
 public:	
 	bool IsAttacking() { return m_bAttacking; };
+	void CheckPlayerAttack();
+
 	bool IsDead() { return m_bDead; };
 	bool IsDestroying() { return m_bDestroySet; };
 	bool IsHit() { return m_bGotHit; };
+	void ResetHit() { m_bGotHit = false; };
+	void DecreaseHp();
 
 	void AddChat(std::string&);
-	void CheckPlayerAttack();
+	
 	void LazyCreateWidget();
-	void DecreaseHp();
-	void ResetHit() { m_bGotHit = false; };
+	
 	void DestroyTimer();
 	void DestroyPlayer();
+
 	void BrodcastPos();
 	void SetNewDest(Player*);
 
@@ -72,16 +76,17 @@ private:
 	void StopSprint();
 
 	UFUNCTION()
+	void StartJump();
+
+	UFUNCTION()
+	void StopJump();
+
+	UFUNCTION()
 	void OpenPauseMenu();
 
 	UFUNCTION()
 	void FocusOnChat();
 
-	UFUNCTION()
-	void StartJump();
-
-	UFUNCTION()
-	void StopJump();
 
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -91,49 +96,51 @@ private:
 	void CheckDynamicObjectCollsion(AActor* OtherActor);
 private: 
 	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
-	TSubclassOf<UWizardWidget> PlayerWidgetClass;
+	TSubclassOf<UWizardWidget>	PlayerWidgetClass;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
-	TSubclassOf<UUserWidget> pauseWidgetClass;
+	TSubclassOf<UUserWidget>	pauseWidgetClass;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
-	TSubclassOf<UChatWidget> chatWidgetClass;
+	TSubclassOf<UChatWidget>	chatWidgetClass;
+
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
-	UWizardWidget* m_pPlayerWidget;
+	UWizardWidget*				m_pPlayerWidget;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
-	UUserWidget* m_pPauseWidget;
+	UUserWidget*				m_pPauseWidget;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Widget)
-	UChatWidget* m_pChatWidget;
+	UChatWidget*				m_pChatWidget;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Item)
-	AActor* m_pWeapon;
+	AActor*						m_pWeapon;
+
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	USkeletalMeshComponent* m_pSkeletalMeshComponent;
+	USkeletalMeshComponent*		m_pSkeletalMeshComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Camera)
-	UCameraComponent* m_pCamComponent;
+	UCameraComponent*			m_pCamComponent;
 
-	FTimerHandle m_hTimer;
-	FVector		 m_dir;
+	FTimerHandle				m_hTimer;
+	FVector						m_dir;
 
-	Coordiante m_curCoord;
-	Coordiante m_dstCoord;
-	Coordiante m_curDir;
-	Rotation m_curRot;
-	Rotation m_dstRot;
-	Velocity m_vel;
-	MoveState m_curMoveState;
+	Coordiante					m_curCoord;
+	Coordiante					m_dstCoord;
+	Coordiante					m_curDir;
+	Rotation					m_curRot;
+	Rotation					m_dstRot;
+	Velocity					m_vel;
+	MoveState					m_curMoveState;
 
-	bool m_bMoveStateChanged;
-	bool m_bAttacking;
-	bool m_bGotHit;
-	bool m_bDead;
-	bool m_bDestroySet;
-	int m_Hp;
+	bool						m_bMoveStateChanged;
+	bool						m_bAttacking;
+	bool						m_bGotHit;
+	bool						m_bDead;
+	bool						m_bDestroySet;
+	int							m_Hp;
 
-	float m_broadCastTime;
+	float						m_broadCastTime;
 };

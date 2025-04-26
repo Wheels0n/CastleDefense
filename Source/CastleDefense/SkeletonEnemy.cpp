@@ -13,7 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
 ASkeletonEnemy::ASkeletonEnemy()
-	: m_Hp(100), m_bAttacking(false), m_bAttackSucceded(false), m_bGotHit(false), m_bDead(false), m_bDestroySet(false),
+	: m_Hp(_ENEMY_HP), m_broadCastTime(_BRODCATE_TIME), m_bAttacking(false), m_bAttackSucceded(false), m_bGotHit(false), m_bDead(false), m_bDestroySet(false),
 	m_pWidget(nullptr), m_pWidgetComponent(nullptr)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -31,7 +31,7 @@ ASkeletonEnemy::ASkeletonEnemy()
 		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> enemyAnimBP
 		(TEXT("/Script/Engine.AnimBlueprint'/Game/UndeadPack/SkeletonEnemy/Animations/EnemyAnimBP.EnemyAnimBP'"));
 		m_pSkeletalMeshComponent->SetAnimInstanceClass(enemyAnimBP.Object->GeneratedClass);
-
+		
 		m_pSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionSphere"));
 		m_pSphereComponent->SetupAttachment(m_pSkeletalMeshComponent, FName(TEXT("SKT_Sword")));
 		m_pSphereComponent->SetCollisionProfileName(TEXT("NoCollision"));
@@ -41,7 +41,7 @@ ASkeletonEnemy::ASkeletonEnemy()
 	AIControllerClass = enemyAIController.Class;
 
 	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
-	pCharacterMovement->MaxWalkSpeed = 500.0f;//달리기는 500.0f
+	pCharacterMovement->MaxWalkSpeed = _ENEMY_WALK_SPEED;//달리기는 500.0f
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 
@@ -121,8 +121,11 @@ void ASkeletonEnemy::Destroyed()
 // Called every frame
 void ASkeletonEnemy::Tick(float DeltaTime)
 {
+	//1/60fps -> 16ms, 0.0166667s
 	Super::Tick(DeltaTime);
-
+	FVector dir = FVector(m_curDir.x(), m_curDir.y(), m_curDir.z());
+	
+	AddMovementInput(dir);
 }
 
 // Called to bind functionality to input
@@ -172,7 +175,7 @@ void ASkeletonEnemy::DecreaseHp()
 	{
 		FString HPStr = FString::FromInt(m_Hp);
 		UE_LOG(LogTemp, Display, TEXT("%s"), *HPStr);
-		m_Hp -= 50;
+		m_Hp -= _ENEMY_DAMAGE;
 		if (m_pWidget != nullptr)
 		{
 			m_pWidget->SetHp(m_Hp);
@@ -212,13 +215,20 @@ void ASkeletonEnemy::DestroyEnemy()
 
 void ASkeletonEnemy::SetDest(Enemy* pEnemy)
 {
-	m_dstCoord = pEnemy->coord();
-	Rotation rot =  pEnemy->rot();
+	
+	if (pEnemy->bnewdest())
+	{
+		m_dstCoord = pEnemy->coord();
+		FVector point = FVector(m_dstCoord.x(), m_dstCoord.y(), m_dstCoord.z());
+		SetActorLocation(point, false, nullptr);
+		//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10.0f, FColor::Yellow, FString::Printf(TEXT("Enemy %f newDest"), pEnemy->id()));
+	}
 
+	m_curDir = pEnemy->dir();
+
+	Rotation rot =  pEnemy->rot();
 	FRotator dstRot(rot.x(), rot.y(), rot.z());
 	SetActorRotation(dstRot);
 
-	AController* pController = GetController();
-	AEnemyAIController* pAIController = Cast<AEnemyAIController>(pController);
-	pAIController->SetNewDest(true);
+	m_broadCastTime = _BRODCATE_TIME;
 }

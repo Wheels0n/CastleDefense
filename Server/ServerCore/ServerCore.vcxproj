@@ -166,11 +166,12 @@
     <ClCompile Include="LockQueue.h" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="CircularBuffer.cpp" />
+    <ClCompile Include="Misc.cpp" />
     <ClCompile Include="NavigationManager.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
+    <ClCompile Include="Partitioning.cpp" />
     <ClCompile Include="PlayerManager.cpp" />
     <ClCompile Include="SendBuffer.cpp" />
-    <ClCompile Include="ServerCore.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SessionManager.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -193,8 +194,10 @@
     <ClInclude Include="LockStack.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="CircularBuffer.h" />
+    <ClInclude Include="Misc.h" />
     <ClInclude Include="NavigationManager.h" />
     <ClInclude Include="PacketHandler.h" />
+    <ClInclude Include="Partitioning.h" />
     <ClInclude Include="PlayerManager.h" />
     <ClInclude Include="Recastnavigation\DebugDraw.h" />
     <ClInclude Include="Recastnavigation\DetourAlloc.h" />

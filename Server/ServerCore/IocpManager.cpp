@@ -4,20 +4,29 @@
 #include "Session.h"
 #include "SessionManager.h"
 #include "PacketHandler.h"
+#include "LockOrderChecker.h"
 #include "ThreadPool.h"
 #include "ThreadLocal.h"
-#include "LockOrderChecker.h"
+#include "EnemyManager.h"
+#include "PlayerManager.h"
 
-const int SERVER_PORT = 777;
-const char* SERVER_ADDR = "127.0.0.1";
+const int			SERVER_PORT = 777;
+const char*			SERVER_ADDR = "127.0.0.1";
 
-IocpManager* g_pIocpManager = nullptr;
+LPFN_CONNECTEX		IocpManager::ConnectEx = nullptr;
+LPFN_DISCONNECTEX	IocpManager::DisconnectEx = nullptr;
+LPFN_ACCEPTEX		IocpManager::AcceptEx = nullptr;
 
-LPFN_CONNECTEX IocpManager::ConnectEx = nullptr;
-LPFN_DISCONNECTEX IocpManager::DisconnectEx = nullptr;
-LPFN_ACCEPTEX IocpManager::AcceptEx = nullptr;
 
-bool IocpManager::Init()
+bool	IocpManager::GetWindowFunction(SOCKET dummySock, GUID guid, LPVOID* pFn)
+{
+	DWORD bytes = 0;
+
+	return WSAIoctl(dummySock, SIO_GET_EXTENSION_FUNCTION_POINTER,
+		&guid, sizeof(guid), pFn, sizeof(*pFn), OUT & bytes, NULL, NULL) != SOCKET_ERROR;
+}
+
+bool	IocpManager::Init()
 {	
 	using namespace std;
 	WSADATA wsaData;
@@ -78,8 +87,7 @@ bool IocpManager::Init()
 
 	return true;
 }
-
-void IocpManager::Destroy()
+void	IocpManager::Destroy()
 {
 	if (m_hListenSock != INVALID_SOCKET)
 	{
@@ -92,7 +100,7 @@ void IocpManager::Destroy()
 }
 
 
-bool IocpManager::StartListen()
+bool	IocpManager::StartListen()
 {
 	m_hListenSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (m_hListenSock == INVALID_SOCKET)
@@ -121,33 +129,29 @@ bool IocpManager::StartListen()
 
 	return true;
 }
-
-void IocpManager::StartAccept()
+void	IocpManager::StartConnect()
 {
-	LLockOrderChecker = new LockOrderChecker();
-	g_pSessionManager->PrepareSessions();
+	SessionManager::GetInstance().ConnectSession();
+}
+void	IocpManager::StartDisconnect()
+{
+	SessionManager::GetInstance().DisconnectSession();
+}
+
+void	IocpManager::RunIOMain()
+{
+	SessionManager::GetInstance().PrepareSessions();
 
 	while (1)
 	{
-		g_pSessionManager->AcceptSessions();
-		Sleep(100);
+		SessionManager::GetInstance().AcceptSessions();
+		//TODO : IOCP 매니저 코드로부터 적 코드 분리 
+		EnemyManager::GetInstance().SetNextLocation();
+		PlayerManager::GetInstance().SetNextLocation();
 	}
-	
+
 }
-
-void IocpManager::StartConnect()
-{
-	LLockOrderChecker = new LockOrderChecker();
-
-	g_pSessionManager->ConnectSession();
-}
-
-void IocpManager::StartDisconnect()
-{
-	g_pSessionManager->DisconnectSession();
-}
-
-void IocpManager::RunIOThreads()
+void	IocpManager::RunIOThreads()
 {
 	m_pThreadPool = new ThreadPool();
 	int nThreads = m_pThreadPool->GetNumOfThreads();
@@ -155,21 +159,8 @@ void IocpManager::RunIOThreads()
 	{
 		m_pThreadPool->EnqueueTask([=]() { IOThreadMain(m_hIocp); });
 	}
-
-	m_pThreadPool->EnqueueTask([=]() {
-			while (1)
-			{
-				std::this_thread::sleep_for(std::chrono::microseconds(200));
-				if (g_pSessionManager->GetNumConnection())
-				{
-					PacketHandler::BrodcastS_EnemyMove();
-				}
-			}
-		}
-	);
 }
-
-void IocpManager::StopIOThreads()
+void	IocpManager::StopIOThreads()
 {
 	int nThreads = m_pThreadPool->GetNumOfThreads();
 	for (int i = 0; i < nThreads; ++i)
@@ -179,8 +170,7 @@ void IocpManager::StopIOThreads()
 
 	m_pThreadPool->Join();
 }
-
-void IocpManager::IOThreadMain(HANDLE hIocp)
+void	IocpManager::IOThreadMain(HANDLE hIocp)
 {
 	while (true)
 	{
@@ -192,7 +182,6 @@ void IocpManager::IOThreadMain(HANDLE hIocp)
 			(PULONG_PTR)&key, (LPOVERLAPPED*)&pOverlappedEx, INFINITE);
 		if (key == NULL)
 		{
-			delete LLockOrderChecker;
 			break;
 		}
 
@@ -243,7 +232,7 @@ void IocpManager::IOThreadMain(HANDLE hIocp)
 	}
 }
 
-void IocpManager::RegisterSocket(SOCKET hSock)
+void	IocpManager::RegisterSocket(SOCKET hSock)
 {
 	CreateIoCompletionPort((HANDLE)hSock, m_hIocp, (ULONG_PTR)&hSock, 0);
 }
@@ -252,17 +241,7 @@ IocpManager::IocpManager()
 	:m_hIocp(INVALID_HANDLE_VALUE), m_hListenSock(INVALID_SOCKET), m_pThreadPool(nullptr)
 {
 }
-
 IocpManager::~IocpManager()
 {
-	delete LLockOrderChecker;
 	Destroy();
-}
-
-bool IocpManager::GetWindowFunction(SOCKET dummySock, GUID guid, LPVOID* pFn)
-{	
-	DWORD bytes = 0;
-
-	return WSAIoctl(dummySock, SIO_GET_EXTENSION_FUNCTION_POINTER,
-		&guid, sizeof(guid), pFn, sizeof(*pFn), OUT &bytes, NULL, NULL) != SOCKET_ERROR;
 }

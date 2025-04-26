@@ -7,6 +7,10 @@
 #include "Network/test.pb.h"
 #include "SkeletonEnemy.generated.h"
 
+#define _ENEMY_HP				100
+#define _ENEMY_DAMAGE			50
+#define _ENEMY_WALK_SPEED		150
+#define _ENEMY_SPRINT_SPEED		500
 class UEnemyWidget;
 class UWidgetComponent;
 class USphereComponent;
@@ -78,6 +82,8 @@ private:
 	bool m_bDestroySet;
 
 	int m_Hp;
+	float m_broadCastTime;
 
 	Coordiante m_dstCoord;
+	Coordiante m_curDir;
 };

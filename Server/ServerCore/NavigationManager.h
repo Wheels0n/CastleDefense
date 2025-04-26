@@ -9,20 +9,30 @@ class dtNavMeshQuery;
 class NavigationManager
 {
 private:
-	dtNavMesh* LoadAll(const char*);
-public:
-	bool FindRandomPos(Coordiante*, float[3], unsigned int*);
-	bool FindRandomPosWithinRange(Coordiante*, float[3], unsigned int, unsigned int*);
-	bool FindPath(unsigned int sRef, unsigned int eRef, float* s, float* e, unsigned int* path, int* nPath);
-	bool GetNearestPoly(Coordiante* pCoord, float*, unsigned int*);
-	bool GetPosByRef(float*, float*, unsigned int*);
+	dtNavMesh*	LoadAll(const char*);
 
-	NavigationManager();
-	~NavigationManager();
+private :
+				NavigationManager();
+				NavigationManager(const NavigationManager& obj) = delete;
+public:
+	void		BuildNodes(UINT n, unsigned int* pPath,float* pDst, float* src, OUT unsigned int* nsmoothPath, OUT float* smoothPath);
+	bool		FindPath(unsigned int sRef, unsigned int eRef, float* s, float* e, OUT unsigned int* path, OUT int* nPath);
+
+	bool		FindRandomPos(Coordiante*, float[3], unsigned int*);
+	bool		FindRandomPosWithinRange(Coordiante*, float[3], unsigned int, unsigned int*);
+
+	bool		GetNearestPoly(Coordiante* pCoord, OUT float* pos, OUT unsigned int* pRef);
+	bool		GetPosByRef(OUT float* pCoord, float* pDst, unsigned int* pPath);
+
+	static NavigationManager& GetInstance()
+	{
+		static NavigationManager instance;
+		return instance;
+	}
+				~NavigationManager();
 
 private:
-	dtNavMesh* m_navMesh;
+	dtNavMesh*		m_navMesh;
 	dtNavMeshQuery* m_navQuery;
 };
 
-extern NavigationManager* g_pNavManager;

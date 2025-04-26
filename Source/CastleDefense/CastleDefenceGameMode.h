@@ -18,17 +18,7 @@ class CASTLEDEFENSE_API ACastleDefenceGameMode : public AGameMode
 	GENERATED_BODY()
 public:
 	ACastleDefenceGameMode();
-	const FOnPlayerDiedSignature& GetOnPlayerDied() const { return OnPlayerDied; };
-
-	virtual void RestartPlayer(AController* pPlayer) override;
-protected:
-	virtual void BeginPlay() override;
-
-	UFUNCTION()
-	virtual void PlayerDied(AController* pPlayer);
 
 protected:
-	UPROPERTY()
-	FOnPlayerDiedSignature OnPlayerDied;
-	
+
 };

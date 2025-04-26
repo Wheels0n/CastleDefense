@@ -1,25 +1,30 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "PlayerManager.h"
+#include "Partitioning.h"
+#include "NavigationManager.h"
+#include "PacketHandler.h"
 
-PlayerManager* g_pPlayerManager = nullptr;
-float g_playerSpawn_x = 1940;
-float g_playerSpawn_y = 1140;
-float g_playerSpawn_z = 0;
+static  float g_playerSpawn_x = 1940;
+static  int g_playerSpawn_y = 1140;
+static  int g_playerSpawn_z = 90.21;
 
-const int	_PLAYER_MAX_HP = 100;
-const float _PLAYER_SIZE_X = 230;
-const float _PLAYER_SIZE_Y = 90;
-const float _PLAYER_SIZE_Z = 200;
-const float _PLAYER_SIZE_YAW = 90;
+static const int	_PLAYER_MAX_HP = 100;
+static const float _PLAYER_SIZE_X = 230/2;
+static const float _PLAYER_SIZE_Y = 90/2;
+static const float _PLAYER_SIZE_Z = 200/2;
+static const float _PLAYER_SIZE_YAW = 90;
+static const float _PLAYER_EXTENT[3] = { _PLAYER_SIZE_X, _PLAYER_SIZE_Z, _PLAYER_SIZE_Y };
+static const float _PLAYER_OFFSET[3] = {0, 0, g_playerSpawn_z};
 
-void PlayerManager::AddPlayerById(int id)
+static const float _JUMP_VEL = 420.0f;
+static const float _G_ACCEL = 980.0f;
+void					PlayerManager::AddPlayerById(int id)
 {
 	WriteLockGuard wlock(m_playerLock);
 	shared_ptr<PlayerInfo> pPlayer = MakeShared<PlayerInfo>(id);
 	m_idToPlayer[id] = pPlayer;
 }
-
-void PlayerManager::RemovePlayerById(int id)
+void					PlayerManager::RemovePlayerById(int id)
 {
 	WriteLockGuard wlock(m_playerLock);
 	shared_ptr<PlayerInfo> pSharedCurPlayer = m_idToPlayer[id]; 
@@ -30,17 +35,91 @@ void PlayerManager::RemovePlayerById(int id)
 	pPlayer->release_dir();
 	m_idToPlayer.erase(id);
 }
+shared_ptr<PlayerInfo>	PlayerManager::GetPlayerById(int id)
+{
+	return m_idToPlayer[id];
+}
 
-void PlayerManager::UpdatePlayerCoordByPlayer(const Player& playerRef)
+void					PlayerManager::SetNextLocation()
+{
+
+	_STD_TIME cur = std::chrono::high_resolution_clock::now();
+	const std::chrono::duration<double> diff = cur - m_lastTime;
+	m_lastTime = cur;
+
+	m_brodcastTime -= diff.count();
+	m_simTime -= diff.count();
+	if (m_simTime > 0.0f)
+	{
+		return;
+	}
+	m_simTime = _SIMULATION_TIME;
+
+	for (auto it = m_idToPlayer.begin();it!=m_idToPlayer.end();it++)
+	{
+		shared_ptr<PlayerInfo> pSharedCurPlayer = it->second;
+		Coordiante* pCurPlayercoord = pSharedCurPlayer->GetCoord();
+
+		const float noOffset[3] = { 0, 0, };
+		Coordiante* pCurPlayerDir = pSharedCurPlayer->GetDir();
+		float dir[3] = { 0, };
+		MiscHelper::ConvertUE2Nav(pCurPlayerDir, dir, noOffset);
+		//0.01s(client), 0.2s(server)
+		
+		Velocity* pCurPlayerVel = pSharedCurPlayer->GetVelocity();
+		float vel[3] = { 0, };
+		vel[ENUM_TO_INT(_NAV_COMP::forward)]	= abs(pCurPlayerVel->x());
+		vel[ENUM_TO_INT(_NAV_COMP::right)]		 = abs(pCurPlayerVel->y());
+		// vo sinθ − gt
+		Player * pCurPlayer = pSharedCurPlayer->GetPlayer();
+		vel[ENUM_TO_INT(_NAV_COMP::up)] =
+			pCurPlayer->movestate() == JUMP ? _JUMP_VEL
+			: pCurPlayerVel->z() - _G_ACCEL * _SIMULATION_TIME;
+		pCurPlayerVel->set_z(vel[ENUM_TO_INT(_NAV_COMP::up)]);
+
+		dir[ENUM_TO_INT(_NAV_COMP::right)]		*= vel[ENUM_TO_INT(_NAV_COMP::right)]* _SIMULATION_TIME;
+		dir[ENUM_TO_INT(_NAV_COMP::forward)]	*= vel[ENUM_TO_INT(_NAV_COMP::forward)]* _SIMULATION_TIME;
+		dir[ENUM_TO_INT(_NAV_COMP::up)]			= vel[ENUM_TO_INT(_NAV_COMP::up)] * _SIMULATION_TIME;
+
+		//cout << vel[1] << endl;
+		//점프시 높이 값
+		float result[3] = { 0, };
+		{
+			float dst[3] = { 0, };
+			unsigned int ref = -1;
+			NavigationManager::GetInstance().GetNearestPoly(pCurPlayercoord, dst, &ref);
+			NavigationManager::GetInstance().GetPosByRef(result, dst, &ref);
+		}
+
+		//Collision Test Via Octree
+		AABB* pAABB = pSharedCurPlayer->GetAABB();
+		Octree::GetInstance().RemoveFromNode(pAABB);
+
+		pAABB->center[ENUM_TO_INT(_NAV_COMP::right)] += dir[ENUM_TO_INT(_NAV_COMP::right)];
+		pAABB->center[ENUM_TO_INT(_NAV_COMP::forward)] += dir[ENUM_TO_INT(_NAV_COMP::forward)];
+		pAABB->center[ENUM_TO_INT(_NAV_COMP::up)] += dir[ENUM_TO_INT(_NAV_COMP::up)];
+		pAABB->center[ENUM_TO_INT(_NAV_COMP::up)] 
+			= max(result[1] + 87-0.725008, pAABB->center[ENUM_TO_INT(_NAV_COMP::up)]);
+		pAABB->SetExtent(_PLAYER_EXTENT);
+
+		Octree::GetInstance().PlaceInNode(pAABB);
+
+		MiscHelper::ConvertNav2UE(pCurPlayercoord, pAABB->center, noOffset);
+		
+	}
+	
+	if (m_brodcastTime > 0.0f)
+	{
+		return;
+	}
+	m_brodcastTime = _BRODCATE_TIME;
+	m_lastTime = std::chrono::high_resolution_clock::now();
+	PacketHandler::BrodcastS_Move();
+}
+void					PlayerManager::UpdatePlayer(const Player& playerRef)
 {
 	int id =playerRef.id();
 	shared_ptr<PlayerInfo> pSharedCurPlayer = GetPlayerById(id);
-	Coordiante* pCurPlayercoord = pSharedCurPlayer->GetCoord();
-	const Coordiante& newCoord = playerRef.coord();
-
-	pCurPlayercoord->set_x(newCoord.x());
-	pCurPlayercoord->set_y(newCoord.y());
-	pCurPlayercoord->set_z(newCoord.z());
 
 	Rotation* pCurPlayerRot = pSharedCurPlayer->GetRot();
 	const Rotation& newRot = playerRef.rot();
@@ -52,7 +131,7 @@ void PlayerManager::UpdatePlayerCoordByPlayer(const Player& playerRef)
 	const Velocity& newVel = playerRef.vel();
 	pCurPlayerVel->set_x(newVel.x());
 	pCurPlayerVel->set_y(newVel.y());
-	pCurPlayerVel->set_z(newVel.z());
+	//pCurPlayerVel->set_z(newVel.z());
 
 	Coordiante* pCurPlayerDir = pSharedCurPlayer->GetDir();
 	const Coordiante& newDir = playerRef.dir();
@@ -65,18 +144,26 @@ void PlayerManager::UpdatePlayerCoordByPlayer(const Player& playerRef)
 	Player* pCurPlayer = pSharedCurPlayer->GetPlayer();
 	pCurPlayer->set_movestate(playerRef.movestate());
 	pCurPlayer->set_battack(playerRef.battack());
+
+	m_brodcastTime = 0;
+	m_simTime = 0;
 }
 
-shared_ptr<PlayerInfo> PlayerManager::GetPlayerById(int id)
+void PlayerManager::AddPlayerToMovePacket(S_Move& pkt)
 {
-	return m_idToPlayer[id];
+	for (auto it = m_idToPlayer.begin(); it != m_idToPlayer.end(); it++)
+	{
+		shared_ptr<PlayerInfo> pSharedCurPlayer = it->second;
+
+		Player* pCurPlayer = pkt.add_player();
+		*pCurPlayer = *pSharedCurPlayer->GetPlayer();
+	}
 }
 
 PlayerManager::PlayerManager()
-	:m_playerLock(4)
+	:m_playerLock(4), m_brodcastTime(_BRODCATE_TIME), m_simTime(_SIMULATION_TIME)
 {
 }
-
 PlayerInfo::PlayerInfo(int id)
 	:m_bAlive(true), m_moveState(IDLE)
 {
@@ -86,6 +173,9 @@ PlayerInfo::PlayerInfo(int id)
 	m_coord.set_z(g_playerSpawn_z);
 	m_player.set_allocated_coord(&m_coord);
 	m_player.set_hp(_PLAYER_MAX_HP);
+
+	const float noOffset[3] = { 0, 0, };
+	MiscHelper::ConvertUE2Nav(&m_coord, m_aabb.center, noOffset);
 
 	g_playerSpawn_x += _PLAYER_SIZE_X;
 	g_playerSpawn_y += _PLAYER_SIZE_Y;

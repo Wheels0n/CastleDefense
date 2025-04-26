@@ -4,25 +4,21 @@ using namespace std;
 
 class ThreadPool
 {
-
 public:
-	inline int GetNumOfThreads() {
-		return m_threads.size();
-	};
+	inline int	GetNumOfThreads() {return m_threads.size();};
 
-	void DoTask();
-	void Join();
+	void		EnqueueTask(function<void()>task);
+	void		DoTask();
+	void		Join();
 
-	ThreadPool();
-	~ThreadPool();
-
-	void EnqueueTask(function<void()>task);
+				ThreadPool();
+				~ThreadPool();
 
 private:
-	mutex m_mutex;
-	condition_variable m_cv;
-	vector<thread> m_threads;
-	queue<function<void()>> m_tasks;
+	mutex					m_mutex;
+	condition_variable		m_cv;
 
-	bool m_bStop;
+	vector<thread>			m_threads;
+	queue<function<void()>> m_tasks;
+	bool					m_bStop;
 };

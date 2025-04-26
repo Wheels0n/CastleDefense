@@ -37,6 +37,9 @@ AWizard::AWizard()
 		m_pSkeletalMeshComponent->SetAnimInstanceClass(wizardAnimBP.Object->GeneratedClass);
 	}
 	
+	UCapsuleComponent* pCapsuleCmp = ACharacter::GetCapsuleComponent();
+	pCapsuleCmp->SetCollisionProfileName(TEXT("NoCollisionPawn"));
+
 	m_pCamComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCamera"));
 	check(m_pCamComponent != nullptr);
 	m_pCamComponent->SetupAttachment(RootComponent);
@@ -70,8 +73,6 @@ AWizard::AWizard()
 	Tags.Add(FName(TEXT("Wizard")));
 
 }
-
-
 // Called when the game starts or when spawned
 void AWizard::BeginPlay()
 {
@@ -111,7 +112,6 @@ void AWizard::BeginPlay()
 	m_curMoveState = IDLE;
 
 }
-
 void AWizard::Destroyed()
 {
 
@@ -122,10 +122,6 @@ void AWizard::Destroyed()
 	UWorld* pWorld = GetWorld();
 	if (pController&&pWorld)
 	{
-		AGameModeBase* pGameMode = pWorld->GetAuthGameMode();
-		ACastleDefenceGameMode* pCastleDefenceGameMode = Cast<ACastleDefenceGameMode>(pGameMode);
-		const FOnPlayerDiedSignature& delegateRef = pCastleDefenceGameMode->GetOnPlayerDied();
-		delegateRef.Broadcast(pController);
 		UE_LOG(LogTemp, Display, TEXT("Destroyed"));
 	}
 	
@@ -135,7 +131,6 @@ void AWizard::Destroyed()
 	}
 
 }
-
 // Called every frame
 void AWizard::Tick(float DeltaTime)
 {
@@ -155,13 +150,9 @@ void AWizard::Tick(float DeltaTime)
 			UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
 			pCharacterMovement->MaxWalkSpeed = speed;
 		
-			FVector V(m_vel.x(), m_vel.y(), m_vel.z());
-			//pCharacterMovement->Velocity = V;
-
-			m_dir = FVector(m_curDir.x(), m_curDir.y(), m_curDir.z());
+			m_dir = FVector(m_vel.x(), m_vel.y(), m_vel.z());
 			AddMovementInput(m_dir);
 			
-			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10.0f, FColor::Yellow, FString::Printf(TEXT("P2_Velocity %f %f %f"), V.X, V.Y, V.Z));
 			if (m_curMoveState == JUMP)
 			{
 				StartJump();
@@ -179,9 +170,7 @@ void AWizard::Tick(float DeltaTime)
 		APlayerController* pPlayerController = Cast<APlayerController>(pController);
 		UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
 		
-		FVector V = pCharacterMovement->Velocity;
-
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10.0f, FColor::Yellow, FString::Printf(TEXT("P1_Velocity %f %f %f"), V.X, V.Y, V.Z));
+		m_dir = FVector::ZeroVector;
 		FRotator curRot = GetActorRotation();
 		if ((int)curRot.Yaw != (int)m_curRot.y())
 		{	
@@ -219,14 +208,16 @@ void AWizard::Tick(float DeltaTime)
 		}
 
 		m_broadCastTime -= DeltaTime;
+
 		if (m_broadCastTime<=0.0f|| m_bMoveStateChanged)
 		{
 			m_broadCastTime = _BRODCATE_TIME;
 			BrodcastPos();
 		}
+
+
 	}
 }
-
 // Called to bind functionality to input
 void AWizard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -253,13 +244,18 @@ void AWizard::MoveForward(float value)
 	FVector dir = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
 	dir.Z = 0.0f;
 	dir.Normalize();
-	AddMovementInput(dir, value);
+	
 	//value 0라도 호출됨
+	AddMovementInput(dir, value);
 	if (value)
 	{
 		m_dir += dir * value;
 	}
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10.0f, FColor::Yellow, FString::Printf(TEXT("P1_Dir %f %f %f"), m_dir.X, m_dir.Y, m_dir.Z));
+	m_curDir.set_x(m_dir.X);
+	m_curDir.set_y(m_dir.Y);
+
+
+	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10.0f, FColor::Yellow, FString::Printf(TEXT("P1_Dir %f %f %f"), m_dir.X, m_dir.Y, m_dir.Z));
 }
 
 void AWizard::MoveRight(float value)
@@ -273,6 +269,9 @@ void AWizard::MoveRight(float value)
 	{
 		m_dir += dir*value;
 	}
+	m_curDir.set_x(m_dir.X);
+	m_curDir.set_y(m_dir.Y);
+
 }
 
 void AWizard::StartAttack()
@@ -472,11 +471,6 @@ void AWizard::BrodcastPos()
 
 	
 	//부동소수점 오차고려
-	FVector curPos = GetActorLocation();
-	m_dstCoord.set_x(curPos.X);
-	m_dstCoord.set_y(curPos.Y);
-	m_dstCoord.set_z(curPos.Z);
-	
 	UCharacterMovementComponent* pCharacterMovement = GetCharacterMovement();
 	FVector V = pCharacterMovement->Velocity;
 	m_vel.set_x(V.X);
@@ -488,24 +482,22 @@ void AWizard::BrodcastPos()
 	m_curRot.set_y(curRot.Yaw);
 	m_curRot.set_z(0);
 	
-	m_curDir.set_x(m_dir.X);
-	m_curDir.set_y(m_dir.Y);
-	m_dir = FVector::ZeroVector;
-
 	m_bMoveStateChanged = false;
-
 
 	pSession->SendC_Move(&m_dstCoord, &m_curRot, &m_vel, & m_curDir, m_curMoveState, m_bAttacking);
 }
 
 void AWizard::SetNewDest(Player* pPlayer)
 {
-	m_curMoveState = pPlayer->movestate();
-	m_vel = pPlayer->vel();
-	m_dstRot = pPlayer->rot();
-	m_dstCoord = pPlayer->coord();
-	m_curDir = pPlayer->dir();
+	m_curMoveState	= pPlayer->movestate();
+	m_vel			= pPlayer->vel();
+	m_dstRot		= pPlayer->rot();
+	m_dstCoord		= pPlayer->coord();
+	m_curDir		= pPlayer->dir();
 	//TODO : 갱신시 오차를 부드럽게 해소할 방법이 필요
+	FVector cur = GetActorLocation();
 	FVector point = FVector(m_dstCoord.x(), m_dstCoord.y(), m_dstCoord.z());
-	SetActorLocation(point, false, nullptr, ETeleportType::TeleportPhysics);
+	SetActorLocation(point, false, nullptr);
+	//FVector dif = point - cur;
+	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 10.0f, FColor::Red, FString::Printf(TEXT("error %f, %f, %f"), dif.X, dif.Y, dif.Z));
 }

@@ -248,12 +248,17 @@ void CPacketHandler::ProcessS_Move(CPacketHeader* pHeader)
 	S_Move pkt = ParseS_Move(reinterpret_cast<char*>(pHeader));
 	UWorld* pCurWorld = m_pGameInstance->GetWorld();
 	ACastleDefenseGameState* pGameState = pCurWorld->GetGameState<ACastleDefenseGameState>();
-	Player player = pkt.player();
-	//늦게 접속한 경우 대비
-	if (pGameState->GetPlayerById(player.id())!=nullptr)
+
+	for (int i = 0; i < pkt.player_size(); ++i)
 	{
-		pGameState->UpdatePlayerMovement(&player);
+		Player player = pkt.player(i);
+		//늦게 접속한 경우 대비
+		if (pGameState->GetPlayerById(player.id()) != nullptr)
+		{
+			pGameState->UpdatePlayerMovement(&player);
+		}
 	}
+	
 	
 }
 

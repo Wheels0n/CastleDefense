@@ -20,7 +20,6 @@ void Buffer::MoveWritePos(int len)
 	assert(m_writePos <= BUF_SIZE);
 	return;
 }
-
 void Buffer::MoveReadPos(int len)
 {
 	m_readPos += len;
@@ -45,13 +44,11 @@ void Buffer::ShiftBufferForward()
 	m_readPos = 0;
 }
 
-
 Buffer::Buffer()
 	:m_readPos(0), m_writePos(0), m_capacity(BUF_SIZE), m_curSize(0)
 {
 	m_pBuf.resize(BUF_SIZE);
 }
-
 Buffer::~Buffer()
 {
 }

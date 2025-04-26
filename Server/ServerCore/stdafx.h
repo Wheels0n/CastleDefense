@@ -28,3 +28,4 @@
 #include "XTL.h"
 
 #define OUT
+#define _STD_TIME std::chrono::time_point<std::chrono::high_resolution_clock>
