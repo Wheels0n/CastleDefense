@@ -1,7 +1,7 @@
 # CastleDefense
 UE5 + IOCP를 이용한 간단한 3인칭 멀티플레이어 게임.
-제작 기간 : 2024/6/15 ~
-![시연영상](https://www.youtube.com/watch?v=E3CgVydhaWI)
+제작 기간 : 2024/6/15 ~  
+[시연영상](https://www.youtube.com/watch?v=E3CgVydhaWI)
 ## TODO
 - [x] 플레이어 이동 동기화
 - [x] 스폰/디스폰
